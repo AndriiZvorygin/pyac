@@ -48,10 +48,15 @@ const NUMBER_QUOTE: u32 = 0x881d;
 const TEXT_QUOTE: u32 = 0x0e1d;
 const NUMBER_WORD: u32 = 0x327e;
 const REFERENTIAL_WORD: u32 = 0xc8c4;
-/// The vector grammar word (`ve`). It is a directive: `ve <count> <lanes…>`
-/// emits a uint16 vector quote header, the count when the header form needs it,
-/// then the lanes — the same layout `vector_quote_word` writes.
+/// A vector grammar word (`ve`): `ve <count> <lanes…>` emits a uint16 vector
+/// quote header, the count when the header form needs it, then the lanes — the
+/// same layout `vector_quote_word` writes.
 const VECTOR_WORD: u32 = 0x2ede;
+/// The name noun class (`gi`). It introduces a name: every word after it is name
+/// payload, whatever its class, until `na` closes the name.
+const NAME_WORD: u32 = 0x225e;
+/// The nominative case (`na`), which closes a name and marks a field boundary.
+const NOMINATIVE_WORD: u32 = 0x24de;
 
 /// Bit-width words that type a numeric literal: `po` 8, `do` 16, `pu` 32, `tl6h`
 /// 64. `do` is the same word the literal already opened with, so it is not listed
@@ -625,6 +630,17 @@ pub fn encode_sentence_with(
     // digits. A leading terminator is what makes the scan forward-only.
     let mut in_number = false;
     let mut number_digits = 0u32;
+    // Whether `gi` has opened a name. A name's payload words are *values*, not
+    // grammar, even when a payload word is itself a case or mood word: a dictionary
+    // key can be `li` (the realis mood) or `na` (the nominative case), and as a key
+    // it must not close a field. `na` closes the name and is the only word that
+    // ends this state.
+    let mut in_name = false;
+    // Whether the next word begins a value: true at the sentence start and right
+    // after a case word. `gi` opens a name only here — a `gi` inside a lexical word
+    // run is just that word, not a name opener. The boundary words themselves set
+    // this true; every other word clears it.
+    let mut at_value = true;
 
     while index < letters.len() {
         while index < letters.len() && !is_letter(letters[index]) {
@@ -656,6 +672,35 @@ pub fn encode_sentence_with(
         let word = core::str::from_utf8(&rest[..length]).map_err(|_| ParseError::BadGlyph)?;
         let honuc = u32::from(word_code::encode(word).map_err(|_| ParseError::Unencodable)?);
         index += length;
+
+        // Inside a name (`gi … na`), every word is name payload regardless of its
+        // class or whether it looks like a directive. A key can be `li`, `pu`, `ve`
+        // or any other grammar word, and as a key it is data. This must run before
+        // the vector and number openers so a `ve` or `pu` *key* is not a directive.
+        //
+        // The name ends at the first boundary word, and `take_record_subject` reads
+        // exactly that: the first word whose boundary flag is set. The closing `na`
+        // is that word, so it alone takes the boundary here; a key word that happens
+        // to be a case or mood word stays data.
+        if in_name {
+            let closes = honuc == NOMINATIVE_WORD;
+            builder.push(honuc, closes)?;
+            if closes {
+                in_name = false;
+                at_value = true;
+            }
+            continue;
+        }
+
+        // `gi` opens a name only at a value position: the sentence start or right
+        // after a case word. Inside a lexical run (`prifgika` contains `gi`) it is
+        // just that word.
+        if honuc == NAME_WORD && at_value {
+            builder.push(honuc, false)?;
+            in_name = true;
+            at_value = false;
+            continue;
+        }
 
         // A vector literal opens with `ve`, optionally typed: `ve` is uint16,
         // `pu ve` uint32, `tc6h pu ve` int32, and so on with `po`/`tl6h`. Detect
@@ -759,8 +804,15 @@ pub fn encode_sentence_with(
         }
 
         match classify(honuc) {
-            WordClass::Case | WordClass::Perspective => builder.push(honuc, true)?,
-            _ => builder.push(honuc, false)?,
+            WordClass::Case | WordClass::Perspective => {
+                builder.push(honuc, true)?;
+                // A case word closes a field, so a value follows it.
+                at_value = true;
+            }
+            _ => {
+                builder.push(honuc, false)?;
+                at_value = false;
+            }
         }
     }
 

@@ -43,7 +43,12 @@ fn lines(entry: &DictionaryVolumeEntry) -> Vec<String> {
     let head = format!(
         "{} {} {}",
         spell(0x225e),
-        entry.key.iter().map(|w| spell(*w)).collect::<Vec<_>>().join(" "),
+        entry
+            .key
+            .iter()
+            .map(|w| spell(*w))
+            .collect::<Vec<_>>()
+            .join(" "),
         spell(0x24de)
     );
     let tail = format!("{} {}", spell(0x8a28), spell(0x217e));
@@ -51,35 +56,58 @@ fn lines(entry: &DictionaryVolumeEntry) -> Vec<String> {
     for form in &entry.lexical_forms {
         out.push(format!(
             "{head} {} {} {} {} {} {} {tail}",
-            frame(&form.language), spell(0x414f), frame(&form.surface),
-            spell(0x313e), frame(&form.normalized), spell(0x243e)
+            frame(&form.language),
+            spell(0x414f),
+            frame(&form.surface),
+            spell(0x313e),
+            frame(&form.normalized),
+            spell(0x243e)
         ));
     }
     for link in &entry.source_links {
         out.push(format!(
             "{head} {} {} {} {} {} {} {} {} {tail}",
-            frame(&link.dataset), spell(0x414f), frame(&link.release),
-            spell(0x313e), frame(&link.identifier), spell(0x243e),
-            frame(&link.relation), spell(0x287e)
+            frame(&link.dataset),
+            spell(0x414f),
+            frame(&link.release),
+            spell(0x313e),
+            frame(&link.identifier),
+            spell(0x243e),
+            frame(&link.relation),
+            spell(0x287e)
         ));
     }
     for gloss in &entry.source_glosses {
         out.push(format!(
             "{head} {} {} {} {} {} {} {} {} {} {} {tail}",
-            frame(&gloss.language), spell(0x414f), frame(&gloss.dataset),
-            spell(0x313e), frame(&gloss.release), spell(0x243e),
-            frame(&gloss.identifier), spell(0x287e), frame(&gloss.text),
+            frame(&gloss.language),
+            spell(0x414f),
+            frame(&gloss.dataset),
+            spell(0x313e),
+            frame(&gloss.release),
+            spell(0x243e),
+            frame(&gloss.identifier),
+            spell(0x287e),
+            frame(&gloss.text),
             spell(0x490f)
         ));
     }
     for component in &entry.component_keys {
-        out.push(format!("{head} {} {} {tail}", vector(component), spell(0x313e)));
+        out.push(format!(
+            "{head} {} {} {tail}",
+            vector(component),
+            spell(0x313e)
+        ));
     }
     for task in &entry.task_keys {
         out.push(format!("{head} {} {} {tail}", vector(task), spell(0x490f)));
     }
     for reference in &entry.references {
-        out.push(format!("{head} {} {} {tail}", vector(reference), spell(0x243e)));
+        out.push(format!(
+            "{head} {} {} {tail}",
+            vector(reference),
+            spell(0x243e)
+        ));
     }
     out
 }
@@ -127,8 +155,15 @@ fn the_pyac_record_surface_reproduces_the_published_codelets() {
         }
     }
 
+    // 64,500 of 64,502 measured. The two that remain are entries whose key is `na`
+    // or a long 17-form entry with a boundary diff mid-record; the gate holds the
+    // measured floor so a regression below it fails loudly.
     assert!(
         reproduced * 1000 >= total * 999,
         "Pyac record surface reproduced {reproduced} of {total} entries; expected at least 99.9%"
+    );
+    assert!(
+        reproduced >= 64_490,
+        "reproduced {reproduced} entries, below the measured floor of 64,490"
     );
 }
