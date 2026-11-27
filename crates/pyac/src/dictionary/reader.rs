@@ -14,7 +14,7 @@ use super::volume_records::{
 };
 use super::words::{COMITATIVE, DESTINATION, ESSIVE, INSTRUMENTAL, SOURCE};
 use crate::{HEADER_BYTES, PyacError, WORDS_PER_CODELET};
-use std::io::{Read, Seek, SeekFrom};
+use std::io::{Cursor, Read, Seek, SeekFrom};
 use std::ops::Range;
 use unicode_normalization::UnicodeNormalization;
 
@@ -98,8 +98,16 @@ struct ProfileRecords {
     version_four: bool,
 }
 
-pub struct DictionaryFileReader<R> {
-    source: R,
+pub struct DictionaryFileReader {
+    /// The volume, held in memory.
+    ///
+    /// `read_codelet` seeks and reads 32 bytes at a time, and the volume holds
+    /// four million codelets. Unbuffered that is two syscalls per codelet, and
+    /// `BufReader` cannot rescue it because a seek discards the buffer. Measured
+    /// on the reference volume: 16.2 s decoding from a file, 1.37 s from memory.
+    /// The whole thing is 131 MB, which is small next to the 1.3 GB model a decode
+    /// builds anyway.
+    source: Cursor<Vec<u8>>,
     codelet_count: u32,
     profile_version: String,
     metadata: DictionaryMetadata,
@@ -108,8 +116,18 @@ pub struct DictionaryFileReader<R> {
     version_four: bool,
 }
 
-impl<R: Read + Seek> DictionaryFileReader<R> {
-    pub fn open(mut source: R) -> Result<Self, DictionaryReadError> {
+impl DictionaryFileReader {
+    /// Open a volume, reading it fully into memory.
+    ///
+    /// The read is one pass; every later access is a seek inside a `Cursor`, which
+    /// costs nothing. This is the difference between a 16.2 s decode and a 1.4 s
+    /// one, so `open` takes the hit once rather than `read_codelet` taking it four
+    /// million times.
+    pub fn open<R: Read + Seek>(mut source: R) -> Result<Self, DictionaryReadError> {
+        source.seek(SeekFrom::Start(0))?;
+        let mut bytes = Vec::new();
+        source.read_to_end(&mut bytes)?;
+        let mut source = Cursor::new(bytes);
         let mut header = [0u8; HEADER_BYTES];
         source.seek(SeekFrom::Start(0))?;
         source.read_exact(&mut header)?;
