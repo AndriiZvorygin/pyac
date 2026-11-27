@@ -340,6 +340,56 @@ impl<'a> Builder<'a> {
         self.current()[0] = used & !self.summary;
     }
 
+    /// Seal the indexed codelet and open a raw continuation region.
+    ///
+    /// A text quote longer than fourteen units carries its units in codelets whose
+    /// every slot is payload — no summary word. `pack_words` chunks them sixteen
+    /// words at a time and `read_sentence_with_raw_width` reads sixteen per codelet,
+    /// so slot 0 is data here.
+    fn begin_raw_region(&mut self) -> Result<(), ParseError> {
+        self.seal();
+        self.advance_blank()
+    }
+
+    /// Close a raw region: start a fresh indexed codelet for the words that follow.
+    fn end_raw_region(&mut self) -> Result<(), ParseError> {
+        self.advance_blank()
+    }
+
+    /// Append a raw payload word, starting a new codelet when the current fills.
+    fn push_raw(&mut self, word: u32) -> Result<(), ParseError> {
+        if self.used == CODELET_WIDTH {
+            if self.count == self.codelets.len() {
+                return Err(ParseError::CodeletCapacity);
+            }
+            self.count += 1;
+            self.used = 0;
+            let codelet = self.current();
+            for slot in codelet.iter_mut() {
+                *slot = 0;
+            }
+        }
+        let used = self.used;
+        self.current()[used] = word;
+        self.used += 1;
+        Ok(())
+    }
+
+    /// Move to a fresh, zeroed codelet with an empty summary.
+    fn advance_blank(&mut self) -> Result<(), ParseError> {
+        if self.count == self.codelets.len() {
+            return Err(ParseError::CodeletCapacity);
+        }
+        self.count += 1;
+        self.used = 0;
+        self.summary = 0;
+        let codelet = self.current();
+        for slot in codelet.iter_mut() {
+            *slot = 0;
+        }
+        Ok(())
+    }
+
     /// Fold one digit into the numeric literal already on the codelet.
     ///
     /// The literal's words were pushed when `do` opened it, so the value word is
@@ -413,21 +463,17 @@ fn parse_zi_frame(text: &[u8]) -> Option<(usize, &[u8], &[u8])> {
 ///
 /// A backslash escapes the next character, so a payload can carry the frame's own
 /// closing marker literally. Length is counted in UTF-16 units, matching the
-/// dictionary writer.
+/// dictionary writer. Fifteen or more units spill into raw continuation codelets
+/// where every slot is payload, as `pack_words` writes and the reader expects.
 fn encode_zi_text(builder: &mut Builder<'_>, payload: &[u8]) -> Result<(), ParseError> {
     let text = core::str::from_utf8(payload).map_err(|_| ParseError::BadGlyph)?;
-    let mut units = 0u32;
-    let mut chars = text.chars();
-    while let Some(character) = chars.next() {
-        let value = if character == '\\' {
-            chars.next().ok_or(ParseError::BadGlyph)?
-        } else {
-            character
-        };
-        units += value.len_utf16() as u32;
-    }
+    let count = zi_unit_count(text)?;
     builder.push(TEXT_QUOTE, false)?;
-    builder.push(units, false)?;
+    builder.push(count, false)?;
+    let raw = count > 14;
+    if raw {
+        builder.begin_raw_region()?;
+    }
     let mut chars = text.chars();
     while let Some(character) = chars.next() {
         let value = if character == '\\' {
@@ -437,10 +483,32 @@ fn encode_zi_text(builder: &mut Builder<'_>, payload: &[u8]) -> Result<(), Parse
         };
         let mut buffer = [0u16; 2];
         for unit in value.encode_utf16(&mut buffer) {
-            builder.push(u32::from(*unit), false)?;
+            if raw {
+                builder.push_raw(u32::from(*unit))?;
+            } else {
+                builder.push(u32::from(*unit), false)?;
+            }
         }
     }
+    if raw {
+        builder.end_raw_region()?;
+    }
     Ok(())
+}
+
+/// The UTF-16 unit count of an (optionally backslash-escaped) frame payload.
+fn zi_unit_count(text: &str) -> Result<u32, ParseError> {
+    let mut count = 0u32;
+    let mut chars = text.chars();
+    while let Some(character) = chars.next() {
+        let value = if character == '\\' {
+            chars.next().ok_or(ParseError::BadGlyph)?
+        } else {
+            character
+        };
+        count += value.len_utf16() as u32;
+    }
+    Ok(count)
 }
 
 /// The header word for a vector of `count` lanes, and whether the count must

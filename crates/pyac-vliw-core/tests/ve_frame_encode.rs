@@ -28,7 +28,9 @@ fn ve_emits_a_single_lane_vector_header() {
     let body = &flat[1..];
     assert_eq!(
         &body[..10],
-        &[0x225e, 0x0801, 0x280e, 0x24de, 0x8e1d, 0x0001, 0x0801, 0x313e, 0x8a28, 0x217e]
+        &[
+            0x225e, 0x0801, 0x280e, 0x24de, 0x8e1d, 0x0001, 0x0801, 0x313e, 0x8a28, 0x217e
+        ]
     );
 }
 
@@ -39,7 +41,12 @@ fn ve_uses_a_fixed_width_header_for_two_lanes() {
     let flat = words("gi sa na ve 2 27403 27682 so hwus li");
     let body = &flat[1..];
     // gi sa na [891d 6b0b 6c22] so hwus li
-    assert_eq!(&body[..8], &[0x225e, 0x253e, 0x24de, 0x891d, 0x6b0b, 0x6c22, 0x313e, 0x8a28]);
+    assert_eq!(
+        &body[..8],
+        &[
+            0x225e, 0x253e, 0x24de, 0x891d, 0x6b0b, 0x6c22, 0x313e, 0x8a28
+        ]
+    );
 }
 
 #[test]

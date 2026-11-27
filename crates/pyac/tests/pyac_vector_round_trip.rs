@@ -17,8 +17,8 @@ fn a_vector_record_reproduces_the_published_codelet() {
     let Some(path) = common::reference_volume_or_skip() else {
         return;
     };
-    let mut reader = DictionaryFileReader::open(File::open(&path).expect("open volume"))
-        .expect("read volume");
+    let mut reader =
+        DictionaryFileReader::open(File::open(&path).expect("open volume")).expect("read volume");
     let original = reader
         .read_entry(&[0x0801, 0x280e])
         .expect("entry myim ryik");
