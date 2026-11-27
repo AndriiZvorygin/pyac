@@ -24,16 +24,30 @@ use pyac::dictionary::{
     decode_dictionary, encode_dictionary, parse_source,
 };
 
-fn source_path() -> Option<PathBuf> {
+/// The source: a whole file if one is present, otherwise the shard directory
+/// assembled. The shards are what the tree ships; the whole file is a generated
+/// convenience artifact.
+fn source_text() -> Option<String> {
     if let Some(explicit) = std::env::var_os("PYAC_REFERENCE_SOURCE") {
-        return Some(PathBuf::from(explicit));
+        return std::fs::read_to_string(PathBuf::from(explicit)).ok();
     }
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .parent()
         .and_then(|path| path.parent())
         .map(PathBuf::from)?;
-    let path = root.join("dictionary/reference.pya");
-    path.is_file().then_some(path)
+    let whole = root.join("dictionary/reference.pya");
+    if whole.is_file() {
+        return std::fs::read_to_string(whole).ok();
+    }
+    let shards = root.join("dictionary/shard");
+    let manifest = std::fs::read_to_string(shards.join(pyac::dictionary::MANIFEST_FILE)).ok()?;
+    let records = pyac::dictionary::parse_manifest(&manifest).ok()?;
+    let mut contents = std::collections::BTreeMap::new();
+    for record in records {
+        let body = std::fs::read_to_string(shards.join(format!("{}.pya", record.name))).ok()?;
+        contents.insert(record.name, body);
+    }
+    pyac::dictionary::assemble_shards(&manifest, &contents).ok()
 }
 
 /// Mirror of the `compile` subcommand: source -> volume -> bytes.
@@ -128,11 +142,10 @@ fn compile_to_bytes(source: &str) -> Vec<u8> {
 
 #[test]
 fn the_authored_source_parses_at_full_scale() {
-    let Some(path) = source_path() else {
-        eprintln!("skipping: dictionary/reference.pya is absent");
+    let Some(source) = source_text() else {
+        eprintln!("skipping: no dictionary source or shards present");
         return;
     };
-    let source = std::fs::read_to_string(&path).expect("the source is readable");
     let parsed = parse_source(&source).expect("the authored source parses");
 
     assert!(
@@ -171,11 +184,10 @@ fn the_authored_source_parses_at_full_scale() {
 
 #[test]
 fn compiling_the_source_is_deterministic() {
-    let Some(path) = source_path() else {
-        eprintln!("skipping: dictionary/reference.pya is absent");
+    let Some(source) = source_text() else {
+        eprintln!("skipping: no dictionary source or shards present");
         return;
     };
-    let source = std::fs::read_to_string(&path).expect("the source is readable");
     let first = compile_to_bytes(&source);
     let second = compile_to_bytes(&source);
     assert_eq!(
@@ -189,11 +201,10 @@ fn a_compiled_source_decodes_and_re_encodes_identically() {
     // This is the round-trip property, provable without the published volume.
     // It is weaker than byte-identity against the shipped artifact, but it runs
     // everywhere and catches any lossy encode or decode.
-    let Some(path) = source_path() else {
-        eprintln!("skipping: dictionary/reference.pya is absent");
+    let Some(source) = source_text() else {
+        eprintln!("skipping: no dictionary source or shards present");
         return;
     };
-    let source = std::fs::read_to_string(&path).expect("the source is readable");
     let compiled = compile_to_bytes(&source);
 
     let volume = decode_dictionary(std::io::Cursor::new(compiled.clone()))

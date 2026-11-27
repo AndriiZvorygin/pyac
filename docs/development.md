@@ -57,7 +57,7 @@ cargo test --release --test gpu_parity_shape      # runs in ms once compiled;
 | the word codec (spelling ↔ HNUC) | `crates/pyac-vliw-core/src/semantics_runtime/word_code.rs` |
 | volume read/write, indexes | `crates/pyac/src/dictionary/` |
 | the `.pya` source grammar | `crates/pyac/src/dictionary/source.rs` |
-| the shipped vocabulary | `dictionary/reference.pya` (then `compile`) |
+| the shipped vocabulary | `dictionary/shard/*.pya` (then `compile`) |
 | what a citation resolves to | `dictionary/SOURCES.md` |
 | a device kernel | `crates/gpu/{shader,cuda-kernel}/` |
 

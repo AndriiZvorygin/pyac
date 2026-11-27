@@ -6,8 +6,9 @@ use std::time::Instant;
 
 use pyac::dictionary::{
     ArgumentSlot, DictionaryFileReader, DictionaryMetadata, DictionarySource, DictionaryVolume,
-    DictionaryVolumeEntry, LexicalForm, OperationParameter, OperationResult, OperationSignature,
-    SourceGloss, SourceLink, decode_dictionary, encode_dictionary, parse_source,
+    DictionaryVolumeEntry, LAYERS, LayerIndex, LexicalForm, MANIFEST_FILE, OperationParameter,
+    OperationResult, OperationSignature, SourceGloss, SourceLink, assemble_shards,
+    decode_dictionary, encode_dictionary, parse_manifest, parse_source, split_source_with_layers,
 };
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -224,6 +225,50 @@ fn convert_input(input: BuildInput) -> Result<DictionaryVolume, String> {
     })
 }
 
+/// Read a shard directory: manifest plus every shard it names, assembled.
+fn assemble_shard_directory(directory: &Path) -> io::Result<String> {
+    let manifest_path = directory.join(MANIFEST_FILE);
+    let manifest = fs::read_to_string(&manifest_path).map_err(|error| {
+        io::Error::other(format!(
+            "shard directory {} has no {MANIFEST_FILE}: {error}",
+            directory.display()
+        ))
+    })?;
+    let records = parse_manifest(&manifest)
+        .map_err(|error| io::Error::other(format!("{}: {error}", error.code())))?;
+    let mut contents = std::collections::BTreeMap::new();
+    for record in records {
+        let path = directory.join(format!("{}.pya", record.name));
+        let body = fs::read_to_string(&path)?;
+        contents.insert(record.name.clone(), body);
+    }
+    assemble_shards(&manifest, &contents)
+        .map_err(|error| io::Error::other(format!("{}: {error}", error.code())))
+}
+
+/// The glyph layer lists, for deciding which shard an entry belongs to.
+///
+/// They live beside the vocabulary in the `pyash` checkout, not here, so the path
+/// is configured rather than assumed. Without them the split still works, it just
+/// puts every compound in one shard.
+fn load_layer_index() -> io::Result<LayerIndex> {
+    let Ok(directory) = env::var("PYAC_LAYER_LISTS") else {
+        return Ok(LayerIndex::default());
+    };
+    let mut lists = Vec::new();
+    for layer in LAYERS {
+        let path = Path::new(&directory).join(format!("{layer}GlyphWordList.txt"));
+        let Ok(text) = fs::read_to_string(&path) else {
+            return Err(io::Error::other(format!(
+                "PYAC_LAYER_LISTS is set but {} is not readable",
+                path.display()
+            )));
+        };
+        lists.push((layer, text));
+    }
+    Ok(LayerIndex::from_lists(lists))
+}
+
 /// Turn a parsed source directly into a volume, without the JSON round trip.
 ///
 /// `build` takes a request over stdin so scripts can edit it; `compile` reads the
@@ -422,8 +467,16 @@ fn execute(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
         "compile" if args.len() == 3 => {
             // The bootstrap: source in, volume out, no intermediate JSON and no
             // JavaScript. `build` remains for scripts that want to edit a request.
+            //
+            // The first argument is either a single `.pya` file or a shard
+            // directory: a directory is assembled from its manifest first, so one
+            // code path parses both.
             let source_path = Path::new(&args[1]);
-            let text = fs::read_to_string(source_path)?;
+            let text = if source_path.is_dir() {
+                assemble_shard_directory(source_path)?
+            } else {
+                fs::read_to_string(source_path)?
+            };
             let parse_started = Instant::now();
             let source = parse_source(&text)
                 .map_err(|error| io::Error::other(format!("{}: {error}", error.code())))?;
@@ -442,6 +495,32 @@ fn execute(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
                 "codeletCount": encoded.len().saturating_sub(32) / 32,
                 "sourceBytes": text.len(),
                 "parseMs": parse_ms, "encodeMs": encode_ms, "writeMs": write_ms
+            })
+        }
+        "shard" if args.len() == 3 => {
+            // Split the source along its dependency order so each piece fits
+            // standard git. See `dictionary/shard.rs` for the grouping.
+            let source_path = Path::new(&args[1]);
+            let out_dir = Path::new(&args[2]);
+            let text = fs::read_to_string(source_path)?;
+            let layers = load_layer_index()?;
+            let set = split_source_with_layers(&text, &layers)
+                .map_err(|error| io::Error::other(format!("{}: {error}", error.code())))?;
+            fs::create_dir_all(out_dir)?;
+            let mut written = Vec::new();
+            for (name, body) in &set.shards {
+                let path = out_dir.join(format!("{name}.pya"));
+                fs::write(&path, body)?;
+                written.push(json!({
+                    "name": name, "file": path, "bytes": body.len()
+                }));
+            }
+            let manifest_path = out_dir.join(MANIFEST_FILE);
+            fs::write(&manifest_path, &set.manifest)?;
+            json!({
+                "command": "shard", "source": args[1], "directory": args[2],
+                "shards": written, "manifest": manifest_path,
+                "manifestBytes": set.manifest.len()
             })
         }
         "build" if args.len() == 2 => {

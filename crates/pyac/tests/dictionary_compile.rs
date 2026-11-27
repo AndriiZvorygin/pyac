@@ -14,32 +14,37 @@
 
 mod common;
 
+use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use pyac::dictionary::{encode_dictionary, parse_source};
 
-/// The authored source, from `$PYAC_REFERENCE_SOURCE` or the workspace.
-fn reference_source() -> Option<PathBuf> {
+/// The authored source, assembled from the shard directory the tree ships.
+///
+/// The whole `reference.pya` is 101.5 MB and git-ignored; `dictionary/shard/` is
+/// the committed form. `PYAC_REFERENCE_SOURCE` overrides with a single file.
+fn reference_source_text() -> Option<String> {
     if let Some(explicit) = std::env::var_os("PYAC_REFERENCE_SOURCE") {
-        let path = PathBuf::from(explicit);
-        return path.is_file().then_some(path);
+        return std::fs::read_to_string(PathBuf::from(explicit)).ok();
     }
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .parent()
         .and_then(|path| path.parent())
         .map(PathBuf::from)?;
-    [
-        root.join("dictionary/reference.pya"),
-        root.join("../pyash/program/library/dictionary/reference.pya"),
-    ]
-    .into_iter()
-    .find(|path| path.is_file())
+    let shards = root.join("dictionary/shard");
+    let manifest = std::fs::read_to_string(shards.join(pyac::dictionary::MANIFEST_FILE)).ok()?;
+    let records = pyac::dictionary::parse_manifest(&manifest).ok()?;
+    let mut contents = BTreeMap::new();
+    for record in records {
+        let body = std::fs::read_to_string(shards.join(format!("{}.pya", record.name))).ok()?;
+        contents.insert(record.name, body);
+    }
+    pyac::dictionary::assemble_shards(&manifest, &contents).ok()
 }
 
-/// Turn a parsed source into encoded bytes, mirroring the `compile` subcommand.
-fn compile(path: &std::path::Path) -> Vec<u8> {
-    let text = std::fs::read_to_string(path).expect("the reference source is readable");
-    let parsed = parse_source(&text).expect("the reference source parses");
+/// Turn assembled source text into encoded bytes, mirroring the `compile` subcommand.
+fn compile(text: &str) -> Vec<u8> {
+    let parsed = parse_source(text).expect("the reference source parses");
     let volume = pyac::dictionary::DictionaryVolume {
         metadata: pyac::dictionary::DictionaryMetadata {
             kind: parsed.metadata.kind,
@@ -129,7 +134,8 @@ fn compile(path: &std::path::Path) -> Vec<u8> {
 
 #[test]
 fn compiling_the_source_reproduces_the_published_volume() {
-    let (Some(source), Some(published)) = (reference_source(), common::reference_volume_or_skip())
+    let (Some(source), Some(published)) =
+        (reference_source_text(), common::reference_volume_or_skip())
     else {
         return;
     };

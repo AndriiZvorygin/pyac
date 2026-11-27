@@ -7,14 +7,61 @@ The vocabulary lives here as two artifacts:
 | `reference.pya` | the authored source — ordinary Pyash sentences, diffable |
 | `reference.pyac` | the compiled v4 volume, what runtimes read |
 
+## Layout
+
+```
+dictionary/
+  shard/                    what the repository ships
+    00-manifest.pya         profile sentences + one row per shard
+    atoms.pya               7,840 atoms, 17.9 MB
+    compounds-16.pya        compounds whose deepest word needs 16 glyphs
+    compounds-19.pya        …then 19, 24, 28, 32
+  reference.pya             optional whole-source convenience file (git-ignored)
+  reference.pyac            the compiled volume (git-ignored)
+```
+
+The source is split because it is **101.5 MB** — over git's 100 MB per-file hard
+limit. The split follows the vocabulary's own dependency order, not byte
+offsets:
+
+- **atoms** form one shard. A compound may only name components that are
+  themselves entries, so atoms must come first, and they are only 17.9 MB.
+- **compounds** group by glyph layer. The layers in `~/pyac/pyachso2n/`
+  (16 → 19 → 24 → 28 → 32) each add glyphs to the last, so a word's layer is the
+  lowest one that can spell it. A compound's layer is the maximum over its key
+  and components, which means a shard never depends on a later one.
+
+Measured shard sizes: atoms 17.9 MB, compounds-16 16.0 MB, -19 23.9 MB,
+-24 20.5 MB, -28 8.9 MB, -32 14.3 MB. **All are under half git's 50 MB warning.**
+
 ## Regenerating the volume
 
 ```sh
-cargo run --release --bin pyac-dictionary -- \
-  compile dictionary/reference.pya dictionary/reference.pyac
+cargo run --release --bin pyac-dictionary -- compile dictionary/shard dictionary/reference.pyac
 ```
 
-`compile` reads the `.pya` source directly. There is no JavaScript in this path.
+`compile` takes either a shard directory or a single `.pya` file, assembles if
+needed, and parses. There is no JavaScript in this path.
+
+`compile` is byte-identical to the published volume either way;
+`crates/pyac/tests/dictionary_compile.rs` is the gate.
+
+## Re-splitting after an edit
+
+```sh
+PYAC_LAYER_LISTS=~/pyac/pyachso2n \
+  cargo run --release --bin pyac-dictionary -- \
+  shard dictionary/reference.pya dictionary/shard
+```
+
+Without `PYAC_LAYER_LISTS` the split still runs but puts every compound in one
+shard — correct, just coarser. The glyph lists live in the `pyash` checkout, so
+the path is configured rather than assumed.
+
+Assembly verifies each shard's sha256 and entry count, so a hand-edited shard
+fails loudly instead of compiling into a plausible-looking volume. It also
+rejects a compound that precedes a component, which is the ordering rule the
+split exists to honour.
 
 ## Working without the volume
 

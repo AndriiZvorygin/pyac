@@ -1,0 +1,11 @@
+su name pyac_dictionary_shards be map def
+su text "format" ob text "pyac-dictionary-shards-v1" ya
+su name lyin kwon ob text "Pyash accepted vocabulary reference dictionary" be text ya
+su name lyin kwon ob text "Pyash accepted vocabulary reference" as num 1 from text "ar,en,es,fi,fr,he,hi,ia,id,isv,nl,ru,tr,uk,yue-Latn-jyutping,zh,zh-Latn-pinyin" to text "NFC" with text "pyac-vliw-dictionary/3" be text ya
+su text "atoms" ob text "{\"name\":\"atoms\",\"sha256\":\"7cc91c77b55f50007d57fd77952b1a4067e850ca7171529099cd7604e37f8214\",\"entries\":7840,\"maxLayer\":0}" ya
+su text "compounds-16" ob text "{\"name\":\"compounds-16\",\"sha256\":\"94cc02638f57f464caece4809c2cd7b5fa889edf2562350bd7641b458c0aa1f3\",\"entries\":10398,\"maxLayer\":16}" ya
+su text "compounds-19" ob text "{\"name\":\"compounds-19\",\"sha256\":\"d410ef19c63163024d579a2cb99af023a7e5f0f4be006dd87f440f0124d63cea\",\"entries\":16456,\"maxLayer\":19}" ya
+su text "compounds-24" ob text "{\"name\":\"compounds-24\",\"sha256\":\"5095a6b8990d887ebafd52db589d30350651291e7fb9c7416dfded2d14b1d94f\",\"entries\":13560,\"maxLayer\":24}" ya
+su text "compounds-28" ob text "{\"name\":\"compounds-28\",\"sha256\":\"f062ecac25d5b404e53b2c3525998240cd42a04abac6a97b83a1058bb52828e1\",\"entries\":6291,\"maxLayer\":28}" ya
+su text "compounds-32" ob text "{\"name\":\"compounds-32\",\"sha256\":\"d99f90bd0bbc58310893ac6a62cee42c0ff8312e70dad40b0fe5d8fbdf18a37a\",\"entries\":10053,\"maxLayer\":32}" ya
+prah

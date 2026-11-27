@@ -5,6 +5,7 @@ mod operation;
 mod reader;
 mod reader_codec;
 mod reader_index;
+mod shard;
 mod source;
 mod volume;
 mod volume_records;
@@ -18,6 +19,10 @@ pub use operation::{
     ArgumentSlot, OperationParameter, OperationResult, OperationSignature, OperationSignatureKey,
 };
 pub use reader::{DictionaryFileReader, DictionaryReadError, DictionarySection};
+pub use shard::{
+    BEYOND_LAST_LAYER, LAYERS, LayerIndex, MANIFEST_FILE, ShardError, ShardRecord, ShardSet,
+    assemble_shards, parse_manifest, shard_digest, split_source, split_source_with_layers,
+};
 pub use source::{
     ArgumentRecord, DictionarySource, EntryRecord, LexicalFormRecord, ResultRecord,
     SignatureRecord, SourceError, SourceGlossRecord, SourceLinkRecord, VolumeMetadataRecord,

@@ -1,0 +1,7 @@
+# The compiled dictionary volume is 131 MB, over git's per-file limit, and is
+# reproduced byte-identically from `dictionary/shard/`. One canonical copy lives
+# on LFS so the byte-identity gate can run on a fresh clone.
+#
+# Quota: 1 GB free, so this is ~7 objects. Prune beyond the newest:
+#   git lfs prune
+dictionary/reference.pyac filter=lfs diff=lfs merge=lfs -text

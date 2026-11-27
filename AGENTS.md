@@ -63,9 +63,12 @@ English surface. Those are attributes of an entry, not names for it.
 clean clone regenerates it:
 
 ```sh
-cargo run --release --bin pyac-dictionary -- \
-  compile dictionary/reference.pya dictionary/reference.pyac
+cargo run --release --bin pyac-dictionary -- compile dictionary/shard dictionary/reference.pyac
 ```
+
+The source ships as structural shards, not one file: it is 101.5 MB, over git's
+100 MB per-file limit. `compile` takes either the shard directory or a single
+`.pya`, so the command above and a whole-file build behave identically.
 
 That command is **byte-identical** to the published volume, and
 `crates/pyac/tests/dictionary_compile.rs` is the gate on it. If it ever stops
@@ -86,8 +89,9 @@ checkout is green. Do not turn those skips into failures; a clone has to build.
 ```
 crates/pyac-vliw-core/    the ISA. no_std. codelets, programlets, storage,
                           literals/vectors, the word codec.
-crates/pyac/              dictionary reader/writer, source parser, catalog
-                          parser, IWSP evaluator, RISC-V backend, CLI.
+crates/pyac/              dictionary reader/writer, source parser, shard
+                          splitter/assembler, catalog parser, IWSP evaluator,
+                          RISC-V backend, CLI.
 crates/gpu/shader/        SPIR-V kernel. Builds; pipeline cache unproven.
 crates/gpu/cuda-kernel/   PTX/CUDA kernel. The proven device path.
 crates/gpu/worker/        GPU runtime service: HTTP execute API.
