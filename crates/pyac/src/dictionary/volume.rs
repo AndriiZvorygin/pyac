@@ -354,9 +354,13 @@ pub fn encode_dictionary(volume: &DictionaryVolume) -> Result<Vec<u8>, Dictionar
         ));
     }
     let (marker, metadata) = profile_records_v4(&metadata_copy, input_entries.len())?;
-    let entry_group_sizes = input_entries
+    // Encode each entry once. The sizes are needed before the offsets are known,
+    // so the obvious shape is a sizing pass followed by a building pass — but
+    // that encodes all 64,598 entries twice, which is most of the encoder's cost.
+    // The group is cheap to hold, so encode first and read the size off it.
+    let mut encoded_entries = input_entries
         .iter()
-        .map(|entry| encode_entry_v4(entry).map(|group| group.codelets.len()))
+        .map(encode_entry_v4)
         .collect::<Result<Vec<_>, _>>()?;
     // The placeholder offsets keep the grouping of the real ones: an offset is
     // part of the index row identity, so equal placeholders would collapse the
@@ -375,21 +379,21 @@ pub fn encode_dictionary(volume: &DictionaryVolume) -> Result<Vec<u8>, Dictionar
         next += group.len();
     }
     let entries_start = next;
-    let mut actual_entries = Vec::new();
-    let mut entry_offsets = Vec::new();
-    let mut descriptors = Vec::new();
+    let mut actual_entries = Vec::with_capacity(encoded_entries.len());
+    let mut entry_offsets = Vec::with_capacity(encoded_entries.len());
+    let mut descriptors = Vec::with_capacity(encoded_entries.len());
     let mut entry_start = entries_start;
-    for (entry, count) in input_entries.iter().zip(entry_group_sizes) {
-        let mut actual = encode_entry_v4(entry)?;
+    for actual in &mut encoded_entries {
+        let count = actual.codelets.len();
         actual.entry.codelet_start =
             u32::try_from(entry_start).map_err(|_| DictionaryVolumeError::TooManyCodelets)?;
         actual.entry.codelet_count =
             u32::try_from(count).map_err(|_| DictionaryVolumeError::TooManyCodelets)?;
         entry_offsets.push(actual.entry.codelet_start);
         descriptors.push(actual.entry.clone());
-        actual_entries.push(actual);
         entry_start += count;
     }
+    actual_entries.extend(encoded_entries);
     let index_groups = index_records_v4(&input_entries, &entry_offsets)?;
     if index_groups
         .iter()

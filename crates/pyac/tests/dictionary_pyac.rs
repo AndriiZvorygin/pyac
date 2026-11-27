@@ -21,6 +21,16 @@ fn rendering_as_pyac_and_re_encoding_reproduces_the_published_codelets() {
         .expect("decode volume");
     let mut reader = pyac::dictionary::DictionaryFileReader::open(File::open(&path).expect("open"))
         .expect("read volume");
+    // Read the entry bodies forward, in index order. `read_entry(key)` searches the
+    // index for every key, which costs 9.4 s on this volume against 0.04 s for the
+    // sequential walk, and the walk is already ordered.
+    let rows = reader
+        .canonical_keys_with_offsets()
+        .expect("canonical index with offsets");
+    let entries_end = reader
+        .section_range("entries")
+        .expect("entries section")
+        .end;
 
     let text = pyac::dictionary::render_pyac_source(&model).expect("render pyac");
 
@@ -37,7 +47,7 @@ fn rendering_as_pyac_and_re_encoding_reproduces_the_published_codelets() {
     // Every line belongs to an entry in order; walk entries and their line counts.
     let mut lines = text.lines();
     let (mut checked, mut matched) = (0usize, 0usize);
-    for entry in &model.entries {
+    for (position, entry) in model.entries.iter().enumerate() {
         let signatures: usize = entry
             .operation_signatures
             .iter()
@@ -60,8 +70,11 @@ fn rendering_as_pyac_and_re_encoding_reproduces_the_published_codelets() {
             let filled = encode_sentence(line, &mut codelets).expect("line parses");
             produced.extend(codelets[..filled].iter().flatten().copied());
         }
+        let next = rows
+            .get(position + 1)
+            .map_or(entries_end, |(_, start)| *start);
         let published: Vec<u32> = reader
-            .read_entry(&entry.key)
+            .entry_codelets_at(rows[position].1, next)
             .expect("entry")
             .iter()
             .flatten()

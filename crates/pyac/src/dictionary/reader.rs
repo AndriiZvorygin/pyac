@@ -329,7 +329,7 @@ impl<R: Read + Seek> DictionaryFileReader<R> {
     ///
     /// `next_start` comes from the canonical index the caller already walked, so
     /// no index search happens here. That is what lets a full decode stream.
-    pub(crate) fn entry_codelets_at(
+    pub fn entry_codelets_at(
         &mut self,
         offset: u32,
         next_start: u32,

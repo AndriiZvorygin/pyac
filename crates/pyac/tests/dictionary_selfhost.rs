@@ -17,12 +17,23 @@
 //! it does not have it. It checks the next best thing, and it runs everywhere.
 
 use std::path::PathBuf;
+use std::sync::OnceLock;
 
 use pyac::dictionary::{
     ArgumentSlot, DictionaryMetadata, DictionaryVolume, DictionaryVolumeEntry, LexicalForm,
     OperationParameter, OperationResult, OperationSignature, SourceGloss, SourceLink,
     decode_dictionary, encode_dictionary, parse_source,
 };
+
+/// The source, assembled once per test binary.
+///
+/// Assembling and reading 101 MB is not free, and each of the three tests below
+/// wanted the same string; three separate calls spent more time reading the tree
+/// than running assertions.
+fn source() -> Option<&'static str> {
+    static SOURCE: OnceLock<Option<String>> = OnceLock::new();
+    SOURCE.get_or_init(source_text).as_deref()
+}
 
 /// The source: a whole file if one is present, otherwise the shard directory
 /// assembled. The shards are what the tree ships; the whole file is a generated
@@ -52,10 +63,9 @@ fn source_text() -> Option<String> {
     pyac::dictionary::assemble_shards(&manifest, &contents).ok()
 }
 
-/// Mirror of the `compile` subcommand: source -> volume -> bytes.
-fn compile_to_bytes(source: &str) -> Vec<u8> {
-    let parsed = parse_source(source).expect("the authored source parses");
-    let volume = DictionaryVolume {
+/// Mirror of the `compile` subcommand: parsed source -> volume.
+fn parsed_to_volume(parsed: pyac::dictionary::DictionarySource) -> DictionaryVolume {
+    DictionaryVolume {
         metadata: DictionaryMetadata {
             kind: parsed.metadata.kind,
             title: parsed.metadata.title,
@@ -138,13 +148,18 @@ fn compile_to_bytes(source: &str) -> Vec<u8> {
                 }),
             })
             .collect(),
-    };
-    encode_dictionary(&volume).expect("the parsed source encodes")
+    }
+}
+
+/// Mirror of the `compile` subcommand: source -> volume -> bytes.
+fn compile_to_bytes(source: &str) -> Vec<u8> {
+    let parsed = parse_source(source).expect("the authored source parses");
+    encode_dictionary(&parsed_to_volume(parsed)).expect("the parsed source encodes")
 }
 
 #[test]
 fn the_authored_source_parses_at_full_scale() {
-    let Some(source) = source_text() else {
+    let Some(source) = source() else {
         eprintln!("skipping: no dictionary source or shards present");
         return;
     };
@@ -186,15 +201,19 @@ fn the_authored_source_parses_at_full_scale() {
 
 #[test]
 fn compiling_the_source_is_deterministic() {
-    let Some(source) = source_text() else {
+    let Some(source) = source() else {
         eprintln!("skipping: no dictionary source or shards present");
         return;
     };
-    let first = compile_to_bytes(&source);
-    let second = compile_to_bytes(&source);
+    // Parse once and encode twice. Determinism is a property of the encoder: the
+    // same model must give the same bytes. Parsing the 96 MB source a second time
+    // would only re-test the parser, and it costs more than everything else here.
+    let volume = parsed_to_volume(parse_source(source).expect("the authored source parses"));
+    let first = encode_dictionary(&volume).expect("the parsed source encodes");
+    let second = encode_dictionary(&volume).expect("the parsed source encodes again");
     assert_eq!(
         first, second,
-        "compile is not deterministic; the encoder or parser has nondeterministic ordering"
+        "compile is not deterministic; the encoder has nondeterministic ordering"
     );
 }
 
@@ -203,7 +222,7 @@ fn a_compiled_source_decodes_and_re_encodes_identically() {
     // This is the round-trip property, provable without the published volume.
     // It is weaker than byte-identity against the shipped artifact, but it runs
     // everywhere and catches any lossy encode or decode.
-    let Some(source) = source_text() else {
+    let Some(source) = source() else {
         eprintln!("skipping: no dictionary source or shards present");
         return;
     };

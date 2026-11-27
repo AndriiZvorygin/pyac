@@ -121,10 +121,18 @@ fn the_pyac_record_surface_reproduces_the_published_codelets() {
         .expect("decode volume");
     let mut reader = pyac::dictionary::DictionaryFileReader::open(File::open(&path).expect("open"))
         .expect("read volume");
-    let keys = reader.canonical_keys().expect("keys");
+    // Read forward in index order: `read_entry(key)` searches the index per key,
+    // 9.4 s on this volume against 0.04 s for the sequential walk.
+    let rows = reader
+        .canonical_keys_with_offsets()
+        .expect("canonical index with offsets");
+    let entries_end = reader
+        .section_range("entries")
+        .expect("entries section")
+        .end;
 
     let (mut reproduced, mut total) = (0usize, 0usize);
-    for (entry, key) in model.entries.iter().zip(keys.iter()) {
+    for (position, entry) in model.entries.iter().enumerate() {
         // Signatures and authored definitions are not emitted by this renderer yet.
         if !entry.operation_signatures.is_empty() || entry.definition.is_some() {
             continue;
@@ -143,8 +151,11 @@ fn the_pyac_record_surface_reproduces_the_published_codelets() {
                 }
             }
         }
+        let next = rows
+            .get(position + 1)
+            .map_or(entries_end, |(_, start)| *start);
         let published: Vec<u32> = reader
-            .read_entry(key)
+            .entry_codelets_at(rows[position].1, next)
             .expect("entry")
             .iter()
             .flatten()
