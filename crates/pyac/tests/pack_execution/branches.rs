@@ -1,0 +1,400 @@
+//! Pack execution: conditionals, boolean locals, and branch selection.
+
+use pyac::{PyacValue, WORDS_PER_CODELET, decode_pack, encode_pack, execute_pack};
+
+use super::fixtures::*;
+
+const ALTERNATIVE_BRANCH_PROGRAMLET: [[u16; WORDS_PER_CODELET]; 8] = [
+    [
+        0x0511, 0x225e, 0xaa90, 0x8918, 0x24de, 0x327e, 0x225e, 0x4930, 0x243e, 0xe8c9, 0x5217,
+        0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+    [
+        0x0a49, 0x225e, 0x4930, 0x24de, 0x881d, 0, 0x245e, 0x225e, 0xc8c4, 0x414f, 0xea30, 0x217e,
+        0, 0, 0, 0,
+    ],
+    [
+        0x76b6, 0x881d, 0x0007, 0x245e, 0x881d, 0x0005, 0x313e, 0x6c0d, 0x29be, 0x881d, 0x0002,
+        0x245e, 0x327e, 0x225e, 0x4930, 0x243e,
+    ],
+    [
+        0x0005, 0x8a64, 0x295e, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+        0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+    [
+        0x0289, 0x881d, 0x0009, 0x245e, 0x327e, 0x225e, 0x4930, 0x243e, 0x8a64, 0x295e, 0x0000,
+        0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+    [
+        0x0019, 0x225e, 0x4930, 0x24de, 0xa828, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0051, 0x225e, 0xaa90, 0x8918, 0x24de, 0xe8c9, 0x4e27, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0091, 0x327e, 0x225e, 0x4930, 0x243e, 0xaa90, 0x8918, 0x295e, 0x0000, 0x0000, 0x0000,
+        0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+];
+
+const BOOLEAN_ARGUMENT_PROGRAMLET: [[u16; WORDS_PER_CODELET]; 5] = [
+    [
+        0x1451, 0x225e, 0xaa90, 0x8918, 0x24de, 0x680d, 0x245e, 0x538f, 0x225e, 0x4930, 0x243e,
+        0xe8c9, 0x5217, 0x0000, 0x0000, 0x0000,
+    ],
+    [
+        0x5209, 0x225e, 0xaa90, 0x24de, 0x4a57, 0x215e, 0x245e, 0x215e, 0x538f, 0x245e, 0x225e,
+        0xc8c4, 0x414f, 0x7271, 0x217e, 0,
+    ],
+    [
+        0x0019, 0x225e, 0xaa90, 0x245e, 0xa828, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0051, 0x225e, 0xaa90, 0x8918, 0x24de, 0xe8c9, 0x4e27, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0245, 0x6909, 0x245e, 0x538f, 0x225e, 0x4930, 0x243e, 0xaa90, 0x8918, 0x295e, 0x0000,
+        0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+];
+
+const BOOLEAN_CALL_PROGRAMLET: [[u16; WORDS_PER_CODELET]; 13] = [
+    [
+        0x0289, 0x225e, 0x6909, 0x24de, 0x538f, 0x225e, 0x4930, 0x243e, 0xe8c9, 0x5217, 0x0000,
+        0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+    [
+        0x000d, 0x6909, 0x245e, 0xa828, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0029, 0x225e, 0x6909, 0x24de, 0xe8c9, 0x4e27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0289, 0x225e, 0x680d, 0x24de, 0x538f, 0x225e, 0x4930, 0x243e, 0xe8c9, 0x5217, 0x0000,
+        0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+    [
+        0x000d, 0x680d, 0x245e, 0xa828, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0029, 0x225e, 0x680d, 0x24de, 0xe8c9, 0x4e27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0511, 0x225e, 0xaa90, 0x8918, 0x24de, 0x538f, 0x225e, 0x4930, 0x243e, 0xe8c9, 0x5217,
+        0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+    [
+        0x0a49, 0x225e, 0xaa90, 0x24de, 0x881d, 1, 0x245e, 0x225e, 0xc8c4, 0x414f, 0xea30, 0x217e,
+        0, 0, 0, 0,
+    ],
+    [
+        0x76b6, 0x225e, 0xaa90, 0x245e, 0x881d, 0x0001, 0x313e, 0x4809, 0x29be, 0x225e, 0x6909,
+        0x24de, 0x538f, 0x225e, 0x4930, 0x243e,
+    ],
+    [
+        0x0a25, 0x6909, 0x295e, 0x225e, 0x680d, 0x24de, 0x538f, 0x225e, 0x4930, 0x243e, 0x680d,
+        0x295e, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+    [
+        0x0019, 0x225e, 0x4930, 0x24de, 0xa828, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0051, 0x225e, 0xaa90, 0x8918, 0x24de, 0xe8c9, 0x4e27, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0091, 0x538f, 0x225e, 0x4930, 0x243e, 0xaa90, 0x8918, 0x295e, 0x0000, 0x0000, 0x0000,
+        0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+];
+
+const BOOLEAN_COMPARISON_BRANCH_PROGRAMLET: [[u16; WORDS_PER_CODELET]; 7] = [
+    [
+        0x1451, 0x225e, 0xaa90, 0x8918, 0x24de, 0x680d, 0x245e, 0x538f, 0x225e, 0x4930, 0x243e,
+        0xe8c9, 0x5217, 0x0000, 0x0000, 0x0000,
+    ],
+    [
+        0x0529, 0x225e, 0xaa90, 0x24de, 0x6909, 0x245e, 0x225e, 0xc8c4, 0x414f, 0x7271, 0x217e, 0,
+        0, 0, 0, 0,
+    ],
+    [
+        0x5d56, 0x225e, 0xaa90, 0x245e, 0x6909, 0x313e, 0x4809, 0x29be, 0x680d, 0x245e, 0x538f,
+        0x225e, 0x4930, 0x243e, 0x7271, 0x295e,
+    ],
+    [
+        0x0145, 0x6909, 0x245e, 0x538f, 0x225e, 0x4930, 0x243e, 0x7271, 0x295e, 0x0000, 0x0000,
+        0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+    [
+        0x0019, 0x225e, 0x4930, 0x24de, 0xa828, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0051, 0x225e, 0xaa90, 0x8918, 0x24de, 0xe8c9, 0x4e27, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0245, 0x680d, 0x245e, 0x538f, 0x225e, 0x4930, 0x243e, 0xaa90, 0x8918, 0x295e, 0x0000,
+        0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+];
+
+const BOOLEAN_LOCAL_COMPARISON_BRANCH_PROGRAMLET: [[u16; WORDS_PER_CODELET]; 8] = [
+    [
+        0x2891, 0x225e, 0xaaa2, 0x8918, 0x24de, 0x881d, 0x0000, 0x245e, 0x327e, 0x225e, 0x4930,
+        0x243e, 0xe8c9, 0x5217, 0x0000, 0x0000,
+    ],
+    [
+        0x5209, 0x225e, 0xaa90, 0x24de, 0x4a57, 0x215e, 0x245e, 0x215e, 0x327e, 0x245e, 0x225e,
+        0xc8c4, 0x414f, 0xea30, 0x217e, 0,
+    ],
+    [
+        0x756e, 0x257e, 0x225e, 0xaa90, 0x245e, 0x881d, 5, 0x313e, 0x4809, 0x295e, 0x305e, 0x245e,
+        0x257e, 0x225e, 0xaa90, 0x245e,
+    ],
+    [
+        0xed56, 0x881d, 0x0003, 0x313e, 0x69b3, 0x295e, 0x305e, 0x490f, 0x24be, 0x29be, 0x881d,
+        0x0001, 0x245e, 0x327e, 0x225e, 0x4930,
+    ],
+    [
+        0x144b, 0x243e, 0x8a64, 0x295e, 0x881d, 0x0002, 0x245e, 0x327e, 0x225e, 0x4930, 0x243e,
+        0x8a64, 0x295e, 0x0000, 0x0000, 0x0000,
+    ],
+    [
+        0x0019, 0x225e, 0x4930, 0x24de, 0xa828, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0051, 0x225e, 0xaaa2, 0x8918, 0x24de, 0xe8c9, 0x4e27, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0489, 0x881d, 0x0005, 0x245e, 0x327e, 0x225e, 0x4930, 0x243e, 0xaaa2, 0x8918, 0x295e,
+        0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+];
+
+const BRANCH_WITH_ALTERNATIVE_PROGRAMLET: [[u16; WORDS_PER_CODELET]; 7] = [
+    [
+        0x0511, 0x225e, 0xaa90, 0x8918, 0x24de, 0x327e, 0x225e, 0x4930, 0x243e, 0xe8c9, 0x5217,
+        0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+    [
+        0x0a49, 0x225e, 0xaa90, 0x24de, 0x881d, 5, 0x245e, 0x225e, 0xc8c4, 0x414f, 0xea30, 0x217e,
+        0, 0, 0, 0,
+    ],
+    [
+        0x76b6, 0x225e, 0xaa90, 0x245e, 0x881d, 0x0005, 0x313e, 0x6c0d, 0x29be, 0x881d, 0x0001,
+        0x245e, 0x327e, 0x225e, 0x4930, 0x243e,
+    ],
+    [
+        0x0a25, 0x8a64, 0x295e, 0x881d, 0x0002, 0x245e, 0x327e, 0x225e, 0x4930, 0x243e, 0x8a64,
+        0x295e, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+    [
+        0x0019, 0x225e, 0x4930, 0x24de, 0xa828, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0051, 0x225e, 0xaa90, 0x8918, 0x24de, 0xe8c9, 0x4e27, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0091, 0x327e, 0x225e, 0x4930, 0x243e, 0xaa90, 0x8918, 0x295e, 0x0000, 0x0000, 0x0000,
+        0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+];
+
+const LOCAL_COMPARISON_BRANCH_PROGRAMLET: [[u16; WORDS_PER_CODELET]; 8] = [
+    [
+        0x0511, 0x225e, 0xaa90, 0x8918, 0x24de, 0x327e, 0x225e, 0x4930, 0x243e, 0xe8c9, 0x5217,
+        0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+    [
+        0x1449, 0x225e, 0xe9a2, 0x24de, 0x881d, 3, 0x245e, 0x225e, 0x0b50, 0xea30, 0x414f, 0xea30,
+        0x217e, 0, 0, 0,
+    ],
+    [
+        0x0a49, 0x225e, 0x4930, 0x24de, 0x881d, 0, 0x245e, 0x225e, 0xc8c4, 0x414f, 0xea30, 0x217e,
+        0, 0, 0, 0,
+    ],
+    [
+        0x76b6, 0x225e, 0xe9a2, 0x245e, 0x881d, 0x0003, 0x313e, 0x4809, 0x29be, 0x881d, 0x0001,
+        0x245e, 0x327e, 0x225e, 0x4930, 0x243e,
+    ],
+    [
+        0x0005, 0x8a64, 0x295e, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+        0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+    [
+        0x0019, 0x225e, 0x4930, 0x24de, 0xa828, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0051, 0x225e, 0xaa90, 0x8918, 0x24de, 0xe8c9, 0x4e27, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0091, 0x327e, 0x225e, 0x4930, 0x243e, 0xaa90, 0x8918, 0x295e, 0x0000, 0x0000, 0x0000,
+        0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+];
+
+const MUTABLE_BOOLEAN_PROGRAMLET: [[u16; WORDS_PER_CODELET]; 6] = [
+    [
+        0x1451, 0x225e, 0xaa90, 0x8918, 0x24de, 0x680d, 0x245e, 0x538f, 0x225e, 0x4930, 0x243e,
+        0xe8c9, 0x5217, 0x0000, 0x0000, 0x0000,
+    ],
+    [
+        0x0529, 0x225e, 0xaa90, 0x24de, 0x6909, 0x245e, 0x225e, 0xc8c4, 0x414f, 0x7271, 0x217e, 0,
+        0, 0, 0, 0,
+    ],
+    [
+        0x0145, 0x680d, 0x245e, 0x538f, 0x225e, 0xaa90, 0x243e, 0x7271, 0x295e, 0x0000, 0x0000,
+        0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+    [
+        0x0019, 0x225e, 0xaa90, 0x245e, 0xa828, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0051, 0x225e, 0xaa90, 0x8918, 0x24de, 0xe8c9, 0x4e27, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ],
+    [
+        0x0245, 0x6909, 0x245e, 0x538f, 0x225e, 0x4930, 0x243e, 0xaa90, 0x8918, 0x295e, 0x0000,
+        0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+    ],
+];
+
+#[test]
+fn initializes_mutates_and_returns_a_boolean_local() {
+    let bytes = encode_pack(&MUTABLE_BOOLEAN_PROGRAMLET).expect("boolean pack fits");
+    let pack = decode_pack(&bytes).expect("boolean pack decodes");
+    let result = run_numeric_programlet(
+        &MUTABLE_BOOLEAN_PROGRAMLET,
+        pyac_vliw_core::DEFAULT_PROGRAMLET_STEP_BUDGET,
+    );
+    assert_eq!(result.error, 0, "{result:?}");
+    assert_eq!(result.value_kind, pyac_vliw_core::VALUE_BOOLEAN);
+    assert_eq!(result.values[0], 0);
+    assert_eq!(execute_pack(&pack), Ok(vec![PyacValue::Boolean(false)]));
+}
+
+#[test]
+fn compares_boolean_locals_and_selects_the_matching_branch_arm() {
+    let mut true_case = BOOLEAN_COMPARISON_BRANCH_PROGRAMLET;
+    let true_result =
+        run_numeric_programlet(&true_case, pyac_vliw_core::DEFAULT_PROGRAMLET_STEP_BUDGET);
+    assert_eq!(true_result.error, 0, "{true_result:?}");
+    assert_eq!(true_result.value_kind, pyac_vliw_core::VALUE_BOOLEAN);
+    assert_eq!(true_result.values[0], 0);
+
+    true_case[1][4] = 0x680d;
+    let false_result =
+        run_numeric_programlet(&true_case, pyac_vliw_core::DEFAULT_PROGRAMLET_STEP_BUDGET);
+    assert_eq!(false_result.error, 0, "{false_result:?}");
+    assert_eq!(false_result.values[0], 1);
+}
+
+#[test]
+fn binds_boolean_case_arguments_to_typed_this_local_declarations() {
+    let bytes = encode_pack(&BOOLEAN_ARGUMENT_PROGRAMLET).expect("boolean argument pack fits");
+    let pack = decode_pack(&bytes).expect("boolean argument pack decodes");
+    let result = run_numeric_programlet(
+        &BOOLEAN_ARGUMENT_PROGRAMLET,
+        pyac_vliw_core::DEFAULT_PROGRAMLET_STEP_BUDGET,
+    );
+    assert_eq!(result.error, 0, "{result:?}");
+    assert_eq!(result.value_kind, pyac_vliw_core::VALUE_BOOLEAN);
+    assert_eq!(result.values[0], 1);
+    assert_eq!(execute_pack(&pack), Ok(vec![PyacValue::Boolean(true)]));
+}
+
+#[test]
+fn evaluates_programlet_comparisons_against_local_slots() {
+    let result = run_numeric_programlet(
+        &LOCAL_COMPARISON_BRANCH_PROGRAMLET,
+        pyac_vliw_core::DEFAULT_PROGRAMLET_STEP_BUDGET,
+    );
+    assert_eq!(result.error, 0, "{result:?}");
+    assert_eq!(result.values[0], 1);
+}
+
+#[test]
+fn composes_local_comparison_leaves_in_programlet_branches() {
+    let run_core = |programlet: &[[u16; WORDS_PER_CODELET]; 8]| {
+        let words = programlet
+            .iter()
+            .flat_map(|codelet| codelet.iter().map(|word| u32::from(*word)))
+            .collect::<Vec<_>>();
+        let mut symbols = [0; pyac_vliw_core::MAX_PROGRAMLET_SYMBOL_WORDS];
+        let mut frames = pyac_vliw_core::ProgramletStack::EMPTY;
+        pyac_vliw_core::execute_numeric_programlet(
+            &words,
+            programlet.len(),
+            pyac_vliw_core::DEFAULT_PROGRAMLET_STEP_BUDGET,
+            &mut symbols,
+            &mut frames,
+        )
+    };
+    let direct = run_core(&BOOLEAN_LOCAL_COMPARISON_BRANCH_PROGRAMLET);
+    assert_eq!(direct.error, 0, "{direct:?}");
+    assert_eq!(direct.values[0], 1);
+    let bytes = encode_pack(&BOOLEAN_LOCAL_COMPARISON_BRANCH_PROGRAMLET)
+        .expect("boolean comparison branch pack fits");
+    let pack = decode_pack(&bytes).expect("boolean comparison branch pack decodes");
+    assert_eq!(execute_pack(&pack), Ok(vec![PyacValue::Unsigned(1)]));
+
+    let mut false_branch = BOOLEAN_LOCAL_COMPARISON_BRANCH_PROGRAMLET;
+    false_branch[7][2] = 2;
+    let direct_false = run_core(&false_branch);
+    assert_eq!(direct_false.error, 0, "{direct_false:?}");
+    assert_eq!(direct_false.values[0], 2);
+    let bytes = encode_pack(&false_branch).expect("false branch pack fits");
+    let pack = decode_pack(&bytes).expect("false branch pack decodes");
+    assert_eq!(execute_pack(&pack), Ok(vec![PyacValue::Unsigned(2)]));
+}
+
+#[test]
+fn executes_only_the_selected_programlet_branch_arm() {
+    let result = run_numeric_programlet(
+        &ALTERNATIVE_BRANCH_PROGRAMLET,
+        pyac_vliw_core::DEFAULT_PROGRAMLET_STEP_BUDGET,
+    );
+    assert_eq!(result.error, 0, "{result:?}");
+    assert_eq!(result.values[0], 9);
+}
+
+#[test]
+fn selects_explicit_programlet_alternative_arms_for_true_and_false_predicates() {
+    let mut true_branch = BRANCH_WITH_ALTERNATIVE_PROGRAMLET;
+    true_branch[2][5] = 6;
+    let true_result =
+        run_numeric_programlet(&true_branch, pyac_vliw_core::DEFAULT_PROGRAMLET_STEP_BUDGET);
+    assert_eq!(true_result.error, 0, "{true_result:?}");
+    assert_eq!(true_result.values[0], 1);
+
+    let false_result = run_numeric_programlet(
+        &BRANCH_WITH_ALTERNATIVE_PROGRAMLET,
+        pyac_vliw_core::DEFAULT_PROGRAMLET_STEP_BUDGET,
+    );
+    assert_eq!(false_result.error, 0, "{false_result:?}");
+    assert_eq!(false_result.values[0], 2);
+}
+
+#[test]
+fn preserves_boolean_types_through_branch_calls_and_returns() {
+    let result = run_numeric_programlet(
+        &BOOLEAN_CALL_PROGRAMLET,
+        pyac_vliw_core::DEFAULT_PROGRAMLET_STEP_BUDGET,
+    );
+    assert_eq!(result.error, 0, "{result:?}");
+    assert_eq!(result.value_kind, pyac_vliw_core::VALUE_BOOLEAN);
+    assert_eq!(result.values[0], 1);
+
+    let bytes = encode_pack(&BOOLEAN_CALL_PROGRAMLET).expect("bool programlet pack fits");
+    assert_eq!(
+        execute_pack(&decode_pack(&bytes).expect("bool pack decodes")),
+        Ok(vec![PyacValue::Boolean(true)])
+    );
+
+    let mut false_branch = BOOLEAN_CALL_PROGRAMLET;
+    false_branch[7][5] = 0;
+    let result = run_numeric_programlet(
+        &false_branch,
+        pyac_vliw_core::DEFAULT_PROGRAMLET_STEP_BUDGET,
+    );
+    assert_eq!(result.error, 0, "{result:?}");
+    assert_eq!(result.value_kind, pyac_vliw_core::VALUE_BOOLEAN);
+    assert_eq!(result.values[0], 0);
+}
