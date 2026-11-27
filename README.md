@@ -14,8 +14,7 @@ crates/pyac-vliw-core   the ISA
                         literal and vector encoding, the word codec
 crates/pyac             the dictionary and runtime services
                         volume reader/writer, in-band indexes, source parser,
-                        catalog parser, IWSP evaluator, RISC-V backend,
-                        the pyac-dictionary CLI
+                        catalog parser, IWSP evaluator, the pyac-dictionary CLI
 crates/gpu/shader       SPIR-V compute kernel (Rust-GPU); builds, pipeline cache
                         unproven — see "GPU parity" below
 crates/gpu/cuda-kernel  PTX/CUDA kernel
@@ -135,9 +134,14 @@ returning the expected result.
 
 ## What is not here yet
 
-`pyac-riscv` (RISC-V image build) and `pyac-browser` (wasm/wgpu bindings) still
-live in `pyash/rust/`. Neither has a path dependency outside what is present, so
-they move when they have something to be proven on.
+`pyac-browser` (wasm/wgpu bindings) still lives in `pyash/rust/`. It has no path
+dependency outside what is present, so it moves when it has something to be
+proven on.
+
+The RISC-V backend was retired: there is no RISC-V hardware or emulator here to
+run its output on, so its only proof was its own executor agreeing with the
+interpreter. That is a test of the encoder, not of the destination. When there is
+a machine to run on, the backend comes back from `pyash/rust/`.
 
 ## Working on the vocabulary
 

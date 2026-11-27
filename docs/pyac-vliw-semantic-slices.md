@@ -342,7 +342,7 @@ result. The bounded programlet evaluator also accepts `not`/`and`/`or`
 predicates whose comparison leaves resolve numeric or boolean arguments and
 local slots in the active frame. The expression stack is bounded to eight
 levels and preserves short-circuit evaluation. Nested conditional branches,
-side-effecting arms, and conditional RISC-V code generation remain
+side-effecting arms, and conditional code generation for other backends remain
 unsupported. CPU true/false coverage is in
 `rust/pyac/tests/pack_execution.rs`; the Rust GPU conformance matrix includes
 true and false composed-local cases, and browser CPU/GPU parity coverage is in
@@ -585,60 +585,22 @@ back to CPU to make a GPU test pass. Browser tests must treat an available raw
 WebGPU adapter and a successfully created VLIW pipeline as separate facts; a
 CPU fallback does not count as GPU parity.
 
-## The RISC-V destination
+## The RISC-V destination (retired)
 
 A destination compiles a codelet into the machine code that computes the same
-result the interpreter produces: the quoted operands become immediates, the
-operator word becomes the instruction that computes the result, and the result
-leaves in the first argument register. The compiler is in
-`rust/pyac/src/backend/riscv.rs` and the image it builds is
-`rust/pyac-riscv/`.
+result the interpreter produces. The RISC-V backend did this: the quoted operands
+became immediates, the operator word became the instruction that computes the
+result, and the result left in the first argument register.
 
-The compiled program keeps the Rust VLIW runtime's numeric semantics, including
-the saturation to `0xffff` applied to addition, subtraction, and exponentiation.
-The backend emits no branches: a
-branchless program needs no label resolution, so the emitted words are the
-whole program.
+**It has been retired from this repository.** There is no RISC-V machine or
+emulator here to run its output on, so its only proof was the backend's own
+executor agreeing with the interpreter. That is a test of the encoder — the
+instruction words are correct — not a test of the destination, because nothing
+executed the program as real RISC-V. Keeping it meant maintaining a second
+decoder of the same semantics for a claim nobody could check.
 
-The evidence that the two agree is the golden codelet
-`0149 881D 0001 245E 881D 0001 243E 8A64 295E`. The interpreter runs it and
-answers `2`; the Rust backend compiles it and its executor answers `2`; and the
-image holds the machine code for the same result:
-
-```text
-0000000080000000 <pyac_body>:
-  addi t0, zero, 1
-  addi t1, zero, 1
-  add  t2, t0, t1
-  lui  t4, 0x10
-  addi t4, t4, -1
-  sltu t5, t4, t2
-  sub  t5, zero, t5
-  xori t6, t5, -1
-  and  t2, t2, t6
-  and  t4, t4, t5
-  or   t2, t2, t4
-  addi a0, t2, 0
-  ret
-```
-
-Building the image needs the bare-metal target:
-
-```bash
-rustup target add riscv64gc-unknown-none-elf
-cargo build --manifest-path rust/pyac-riscv/Cargo.toml --release \
-  --target riscv64gc-unknown-none-elf
-```
-
-The conformance tests are `rust/pyac/tests/riscv_backend.rs` and
-`quiz/vliw_riscv.test.mjs`, and the instruction encodings are pinned to the
-instruction set's own field layout in
-`rust/pyac/src/backend/riscv.rs`.
-
-The image is not executed here. The backend carries its own executor for the
-instruction subset it emits, and that executor is what proves the result
-matches the interpreter; running the image itself needs a RISC-V machine or
-emulator, which this repository does not yet depend on.
+It comes back when there is a machine to run on. The instructions to rebuild it
+from `pyash/rust/` are in `README.md`.
 
 ## Pyash source through a persisted `.pyac` pack
 

@@ -1,6 +1,5 @@
 #![forbid(unsafe_code)]
 
-pub mod backend;
 pub mod catalog;
 pub mod dictionary;
 pub mod iwsp;
@@ -11,10 +10,6 @@ mod storage;
 
 pub use storage::{PyacStorageSections, StorageSectionError, prepare_storage_sections};
 
-pub use backend::riscv::{
-    BackendError, RiscvProgram, compile_and_execute_numeric_arithmetic, compile_numeric_arithmetic,
-    compile_numeric_invert, execute,
-};
 pub use catalog::{CatalogError, PyacCatalog, parse_catalog_pya};
 pub use iwsp::{IwspError, IwspEvaluator, IwspScore, MAX_IWSP_WIDTH, SealedIwspEvaluator};
 pub use literal::{

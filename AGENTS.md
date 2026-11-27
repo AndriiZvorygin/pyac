@@ -97,7 +97,7 @@ crates/pyac-vliw-core/    the ISA. no_std. codelets, programlets, storage,
                           literals/vectors, the word codec.
 crates/pyac/              dictionary reader/writer, source parser, shard
                           splitter/assembler, catalog parser, IWSP evaluator,
-                          RISC-V backend, CLI.
+                          CLI.
 crates/gpu/shader/        SPIR-V kernel. Builds; pipeline cache unproven.
 crates/gpu/cuda-kernel/   PTX/CUDA kernel. The proven device path.
 crates/gpu/worker/        GPU runtime service: HTTP execute API.

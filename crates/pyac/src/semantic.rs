@@ -1,8 +1,10 @@
 //! Numeric and conditional semantics: what a codelet computes.
 //!
 //! A decoder reads a codelet's words into an instruction; an executor runs that
-//! instruction. Splitting decode from execute is what lets the RISC-V backend
-//! share the decoding and differ only in how the arithmetic is performed.
+//! instruction. Keeping decode separate from execute is what would let another
+//! destination share the decoding and differ only in how the arithmetic is
+//! performed — that is why the two are distinct steps even though the CPU
+//! interpreter is currently the only destination.
 //!
 //! - `words`        — the HNUC words the decoders compare against
 //! - `types`        — the decoded instruction shapes

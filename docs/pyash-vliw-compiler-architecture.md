@@ -149,7 +149,7 @@ senses and the canonical Pyash vocabulary before assigning them VLIW meaning.
 | C output from `.pyac` | Compile supported codelets to C, then use the host C compiler | Verified arithmetic and invert subset; not a general Pyash-to-C replacement |
 | Shared VLIW semantics runtime | `rust/pyac-vliw-core/src/semantics_runtime.rs`, compiled as a `no_std` Rust library and called by the CPU pack interpreter and GPU kernels | Canonical codelet families plus bounded scalar programlets with nested calls, branches, loops, signed/unsigned numbers, and booleans; not full Pyash interpreter parity |
 | Rust-GPU native | Rust-GPU compiles that same semantics runtime to Vulkan SPIR-V for the native Housekeeper worker | Requires an NVIDIA discrete GPU and Vulkan; execution is explicitly bounded to the supported operations |
-| Rust and RISC-V | Decode/execute supported PyAC semantics; direct RISC-V instruction/ELF prototype | Narrow subset; the generated RISC-V image is not emulator-executed |
+| Rust and RISC-V | Decode/execute supported PyAC semantics; direct RISC-V instruction/ELF prototype | Narrow subset; the generated RISC-V image is not emulator-executed. The prototype has since been retired from this repository — see `pyac-vliw-semantic-slices.md` |
 
 The general Pyash-to-JavaScript/C compiler is a distinct route. Its existence
 does not mean arbitrary Pyash programs already pass through VLIW. Likewise,
@@ -197,10 +197,9 @@ See
 RTX smoke test.
 
 NASM and RISC-V assembly are intended readable compiler outputs, not new
-source-language syntax. The direct RISC-V encoder remains a useful independent
-backend/prototype; it does not replace the planned RISC-V assembly emitter. Each
-backend needs an explicit target ABI, data layout, calling convention, and
-conformance path before it can claim native execution support.
+source-language syntax. Each backend needs an explicit target ABI, data layout,
+calling convention, and conformance path before it can claim native execution
+support.
 
 ### Browser-Deployed Program Pathway
 
@@ -554,6 +553,5 @@ read-only constant quantities.
 
 The relevant contracts and implementation evidence are in
 [`27-pyash-vliw-isa.md`](27-pyash-vliw-isa.md),
-[`pyac-vliw-database.md`](pyac-vliw-database.md),
-[`pyac-vliw-semantic-slices.md`](pyac-vliw-semantic-slices.md), and the
-[RISC-V prototype note).
+[`pyac-vliw-database.md`](pyac-vliw-database.md), and
+[`pyac-vliw-semantic-slices.md`](pyac-vliw-semantic-slices.md).
