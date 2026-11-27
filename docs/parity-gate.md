@@ -1,5 +1,18 @@
 # Parity gate and semantic authority
 
+> **In this repository.** The authority map below is normative and applies here
+> unchanged: Rust is the reference, and the JavaScript interpreter is historical.
+>
+> The *gate runner* it describes — `npm run parity:gate`, the case corpus at
+> `program/library/parity/cases.mjs`, and the interpreter/JavaScript/C comparison
+> — lives in the `pyash` repository, not this one. This crate holds the normative
+> implementation that harness checks against.
+>
+> What parity means **here** is in `../README.md`: `pyac-vliw-core` is `#![no_std]`
+> and both GPU kernels call into it, so CPU and device agreement is a property of
+> one implementation. `container/pyac-vliw-runtime/command/parity.sh` proves it on
+> a CUDA device.
+
 Status: reference contract for the declared result-level parity gate. The
 normative behavior remains the numbered specifications; this document records
 which implementation is authoritative for each surface and how drift is caught.

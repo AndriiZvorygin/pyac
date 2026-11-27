@@ -570,15 +570,19 @@ fn is_root_name(tokens: &SentenceView<'_, impl VliwWord>, start: usize, end: usi
 /// rather than a name. A field with no `gi` is not policed here: it may be a
 /// pronoun, a genitive construction, a quoted value, or a nested clause, and
 /// those are validated by the code that understands them.
-pub(super) fn validate_field_tags(tokens: &SentenceView<'_, impl VliwWord>, start: usize, end: usize) -> u32 {
+pub(super) fn validate_field_tags(
+    tokens: &SentenceView<'_, impl VliwWord>,
+    start: usize,
+    end: usize,
+) -> u32 {
     if start >= end {
         return ERROR_MALFORMED;
     }
     // A field holding a nested clause is a sentence in its own right, and is
     // validated when that clause is parsed.
-    if (start..end).any(|index| {
-        matches!(sentence_at!(*tokens, index), DEPENDENT_CLAUSE | CLAUSE_TAIL)
-    }) {
+    if (start..end)
+        .any(|index| matches!(sentence_at!(*tokens, index), DEPENDENT_CLAUSE | CLAUSE_TAIL))
+    {
         return 0;
     }
     // A quoted value is its own encoding, not a name.

@@ -1,4 +1,4 @@
-use pyac_vliw_core::{scan_storage_sections, StorageSectionRange, MAX_PROGRAMLET_SECTIONS};
+use pyac_vliw_core::{MAX_PROGRAMLET_SECTIONS, StorageSectionRange, scan_storage_sections};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct StorageSectionError {
@@ -83,15 +83,12 @@ pub fn prepare_storage_sections(
         let payload_offset = payload_bytes;
         // Payload words start at slot 1 of each payload codelet; slot 0 is the
         // codelet header.
-        const PAYLOAD_WORDS_PER_CODELET: usize =
-            pyac_vliw_core::CODELET_WORDS - 1;
+        const PAYLOAD_WORDS_PER_CODELET: usize = pyac_vliw_core::CODELET_WORDS - 1;
         let payload_start_word = section.payload_start * pyac_vliw_core::CODELET_WORDS + 1;
         for byte_index in 0..section.byte_length as usize {
-            let word = words
-                [payload_start_word
-                    + byte_index / (PAYLOAD_WORDS_PER_CODELET * 2)
-                        * pyac_vliw_core::CODELET_WORDS
-                    + (byte_index % (PAYLOAD_WORDS_PER_CODELET * 2)) / 2];
+            let word = words[payload_start_word
+                + byte_index / (PAYLOAD_WORDS_PER_CODELET * 2) * pyac_vliw_core::CODELET_WORDS
+                + (byte_index % (PAYLOAD_WORDS_PER_CODELET * 2)) / 2];
             let byte = if byte_index % 2 == 0 {
                 (word & 0xff) as u8
             } else {
@@ -145,7 +142,9 @@ mod tests {
                 0x0949, 0x327e, 0, 0x313e, 0x327e, 4, 0x243e, 0x309e, 0x414f, 0xaca2, 0xaa02,
                 0x5217, 0, 0, 0, 0,
             ],
-            [0x0001, 0x0201, 0x0403, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [
+                0x0001, 0x0201, 0x0403, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            ],
         ];
         let prepared = prepare_storage_sections(&codelets).expect("storage packet is valid");
         assert_eq!(prepared.executable_codelet_count, 1);
@@ -167,7 +166,9 @@ mod tests {
                 0x0949, 0x327e, 0, 0x313e, 0x327e, 4, 0x243e, 0x309e, 0x414f, 0xaca2, 0xaa02,
                 0x5217, 0, 0, 0, 0,
             ],
-            [0x0001, 0x0201, 0x0403, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [
+                0x0001, 0x0201, 0x0403, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            ],
         ];
         codelets.push([0; pyac_vliw_core::CODELET_WORDS]);
         let error = prepare_storage_sections(&codelets).expect_err("trailing codelet is invalid");

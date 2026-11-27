@@ -7,22 +7,23 @@ RUN apt-get update \
   && cargo install --git https://github.com/rust-gpu/rust-gpu --tag v0.11.0 cargo-gpu --locked
 
 WORKDIR /src
-COPY rust-toolchain.toml /src/rust-toolchain.toml
-COPY rust/pyac /src/rust/pyac
-COPY rust/pyac-vliw-core /src/rust/pyac-vliw-core
-COPY rust/pyac-gpu/shader /src/rust/pyac-gpu/shader
+COPY Cargo.toml Cargo.lock rust-toolchain.toml /src/
+COPY crates/pyac /src/crates/pyac
+COPY crates/pyac-vliw-core /src/crates/pyac-vliw-core
+COPY crates/gpu/shader /src/crates/gpu/shader
+COPY crates/gpu/cuda-kernel /src/crates/gpu/cuda-kernel
 
 RUN cargo gpu build --auto-install-rust-toolchain \
-    --shader-crate /src/rust/pyac-gpu/shader \
+    --shader-crate /src/crates/gpu/shader \
     --target spirv-unknown-spv1.5 \
     --features vulkan-device-atomics,shader-f64 \
     --capabilities Float64 --capabilities Int64 \
-    --output-dir /src/rust/pyac-gpu/target/generated/vulkan
-RUN spirv-val --target-env vulkan1.2 /src/rust/pyac-gpu/target/generated/vulkan/pyac_vliw_gpu_kernel.spv
+    --output-dir /src/crates/gpu/target/generated/vulkan
+RUN spirv-val --target-env vulkan1.2 /src/crates/gpu/target/generated/vulkan/pyac_vliw_gpu_kernel.spv
 
-COPY rust/pyac-gpu/worker /src/rust/pyac-gpu/worker
+COPY crates/gpu/worker /src/crates/gpu/worker
 RUN cargo build --release \
-    --manifest-path /src/rust/pyac-gpu/worker/Cargo.toml \
+    --manifest-path /src/crates/gpu/worker/Cargo.toml \
     --bin pyac-vliw-gpu-worker \
     --bin pyac-vliw-runtime \
     --bin pyac-vliw-pipeline-compiler
@@ -42,10 +43,10 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /service
-COPY --from=vliw-build /src/rust/pyac-gpu/worker/target/release/pyac-vliw-gpu-worker /service/pyac-vliw-gpu-worker
-COPY --from=vliw-build /src/rust/pyac-gpu/worker/target/release/pyac-vliw-runtime /service/pyac-vliw-runtime
-COPY --from=vliw-build /src/rust/pyac-gpu/worker/target/release/pyac-vliw-pipeline-compiler /service/pyac-vliw-pipeline-compiler
-COPY --from=vliw-build /src/rust/pyac-gpu/target/generated/vulkan/pyac_vliw_gpu_kernel.spv /service/pyac_vliw_gpu_kernel.spv
+COPY --from=vliw-build /src/target/release/pyac-vliw-gpu-worker /service/pyac-vliw-gpu-worker
+COPY --from=vliw-build /src/target/release/pyac-vliw-runtime /service/pyac-vliw-runtime
+COPY --from=vliw-build /src/target/release/pyac-vliw-pipeline-compiler /service/pyac-vliw-pipeline-compiler
+COPY --from=vliw-build /src/crates/gpu/target/generated/vulkan/pyac_vliw_gpu_kernel.spv /service/pyac_vliw_gpu_kernel.spv
 
 EXPOSE 18887
 ENTRYPOINT ["/service/pyac-vliw-runtime"]

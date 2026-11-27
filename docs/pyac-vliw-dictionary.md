@@ -5,9 +5,9 @@ indexes directly in the raw `.pyac` file. Profile v2 and v3 remain readable
 through a seek-and-scan compatibility path; those legacy profiles do not get
 runtime-built indexes.
 The accepted-vocabulary source is published in
-`program/library/dictionary/reference.pya`; its source marker remains profile
+`dictionary/reference.pya`; its source marker remains profile
 v3 for the established entry-record grammar. Rust compiles it into the current
-v4 runtime volume, `program/library/dictionary/reference.pyac`. Both contain
+v4 runtime volume, `dictionary/reference.pyac`. Both contain
 64,595 entries. The v4 volume contains 4,101,061 codelets and is 131,233,984
 bytes. This snapshot includes 7,084 promoted SUMO source links (5,658
 `superclass-of` and 1,426 `equivalent-to`). The previously documented
@@ -295,7 +295,7 @@ Build the Rust command once during setup. Normal dictionary commands use this
 compiled executable and never invoke Cargo or compile source:
 
 ```sh
-cargo build --release --manifest-path rust/pyac/Cargo.toml --bin pyac-dictionary
+cargo build --release --manifest-path crates/pyac/Cargo.toml --bin pyac-dictionary
 ```
 
 The author-facing interface is `pyash dictionary volume`. It imports a
@@ -306,15 +306,15 @@ after a vocabulary update, regenerate `reference.pya` there, sync that source
 to the runtime worktree, and rebuild the compiled volume:
 
 ```sh
-pyash dictionary volume build from program/library/dictionary/reference.pya to program/library/dictionary/reference.pyac
-pyash dictionary volume inspect program/library/dictionary/reference.pyac
+pyash dictionary volume build from dictionary/reference.pya to dictionary/reference.pyac
+pyash dictionary volume inspect dictionary/reference.pyac
 pyash dictionary forecast
 pyash dictionary n:07285306-n
 pyash dictionary sumo:Identifier
 pyash dictionary hnan to zh
-pyash dictionary volume lookup program/library/dictionary/reference.pyac surface zh 你
-pyash dictionary volume lookup program/library/dictionary/reference.pyac source wordnet "Open English WordNet 2025" n:07285306-n
-pyash dictionary volume read program/library/dictionary/reference.pyac key hdiftyec
+pyash dictionary volume lookup dictionary/reference.pyac surface zh 你
+pyash dictionary volume lookup dictionary/reference.pyac source wordnet "Open English WordNet 2025" n:07285306-n
+pyash dictionary volume read dictionary/reference.pyac key hdiftyec
 pyash dictionary volume benchmark <v4-volume.pyac> surface en forecast 100000 to artifacts/dictionary-benchmarks/reference.pya
 ```
 
@@ -372,7 +372,7 @@ count, warmup and measured iteration counts, index-open time, total and mean
 lookup time, lookup rate, and result count. It is persistent comparison
 evidence; printed JSON is only the immediate CLI response.
 
-`rust/pyac/src/dictionary.rs` exposes the deterministic writer and seek-based
+`crates/pyac/src/dictionary.rs` exposes the deterministic writer and seek-based
 reader APIs. V4 lookup searches raw index codelets directly; v2/v3 lookup uses
 query-time scanning without runtime indexes. Throughput benchmarks require
 v4 so a high iteration count cannot accidentally scan a legacy volume for
@@ -380,7 +380,7 @@ hours. Entry records and optional native definitions are fetched on demand
 using codelet offsets. Gloss-only entries remain searchable. The separate
 in-memory `DictionaryIndex` retains its language/task projection API.
 The synthetic scaling comparison remains available with
-`cargo bench --manifest-path rust/pyac/Cargo.toml --bench dictionary_index`;
+`cargo bench --manifest-path crates/pyac/Cargo.toml --bench dictionary_index`;
 it is an algorithmic baseline, not a substitute for the file-backed CLI
 measurement above.
 
@@ -417,8 +417,8 @@ The same trap applies to any key word equal to a structural marker — `OB`,
 collides today, but the decoder no longer depends on a value probe.
 
 Known remaining limit: the JavaScript decoder in
-`program/library/vliw/sentence.mjs` still cannot spell a name that ends in an
-underscore, so `pyash dictionary volume read` cannot render `and_`. The Rust
+`crates/pyac/src/sentence.mjs` still cannot spell a name that ends in an
+underscore, so `pyac-dictionary read` cannot render `and_`. The Rust
 reader handles it, and the volume itself is correct.
 
 ## 9. Vocabulary-agent workflow

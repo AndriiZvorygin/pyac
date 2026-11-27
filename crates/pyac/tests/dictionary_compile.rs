@@ -101,8 +101,7 @@ fn compile(path: &std::path::Path) -> Vec<u8> {
                                     noun_class: argument.noun_class,
                                 },
                                 tag_label: argument.tag_label,
-                                descriptive_specification: argument
-                                    .descriptive_specification,
+                                descriptive_specification: argument.descriptive_specification,
                             })
                             .collect(),
                         results: signature
@@ -111,8 +110,7 @@ fn compile(path: &std::path::Path) -> Vec<u8> {
                             .map(|result| pyac::dictionary::OperationResult {
                                 noun_class: result.noun_class,
                                 tag_label: result.tag_label,
-                                descriptive_specification: result
-                                    .descriptive_specification,
+                                descriptive_specification: result.descriptive_specification,
                             })
                             .collect(),
                     })

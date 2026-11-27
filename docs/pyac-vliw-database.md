@@ -578,7 +578,7 @@ Rust now reads the existing generated catalog subset with
 `parse_catalog_pya`. It validates the series/header/footer shape, the six
 required metadata rows, optional pack locator, and JSON-shaped codelet rows;
 it does not define a second catalog schema. The shared fixture is
-`rust/pyac/tests/fixture_catalog.pya`, and the JavaScript renderer remains the
+`crates/pyac/tests/fixture_catalog.pya`, and the JavaScript renderer remains the
 authority for producing parser-backed `.pya` text; execution semantics are
 defined by the shared Rust runtime.
 
@@ -605,8 +605,8 @@ unsupported catalog rows, and unproven domains remain outside this adapter.
 Run both Rust checks with:
 
 ```text
-cargo fmt --manifest-path rust/pyac/Cargo.toml -- --check
-cargo test --manifest-path rust/pyac/Cargo.toml
+cargo fmt --manifest-path crates/pyac/Cargo.toml -- --check
+cargo test --manifest-path crates/pyac/Cargo.toml
 ```
 
 The toolchain is pinned in `rust-toolchain.toml`; `rustup` installs that

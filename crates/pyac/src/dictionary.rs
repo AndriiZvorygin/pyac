@@ -15,14 +15,13 @@ pub use decode::decode_dictionary;
 pub use index::DictionaryIndex;
 pub use model::{DictionaryEntry, DictionaryIndexError, LexicalForm, SourceGloss, SourceLink};
 pub use operation::{
-    OperationParameter, ArgumentSlot, OperationResult, OperationSignature,
-    OperationSignatureKey,
+    ArgumentSlot, OperationParameter, OperationResult, OperationSignature, OperationSignatureKey,
 };
 pub use reader::{DictionaryFileReader, DictionaryReadError, DictionarySection};
 pub use source::{
-    parse_source, ArgumentRecord, DictionarySource, EntryRecord, LexicalFormRecord,
-    ResultRecord, SignatureRecord, SourceError, SourceGlossRecord, SourceLinkRecord,
-    VolumeMetadataRecord,
+    ArgumentRecord, DictionarySource, EntryRecord, LexicalFormRecord, ResultRecord,
+    SignatureRecord, SourceError, SourceGlossRecord, SourceLinkRecord, VolumeMetadataRecord,
+    parse_source,
 };
 pub use volume::{
     DictionaryMetadata, DictionaryVolume, DictionaryVolumeEntry, DictionaryVolumeError,

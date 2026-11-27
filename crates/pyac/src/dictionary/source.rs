@@ -120,14 +120,31 @@ pub struct DictionarySource {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SourceError {
-    Unsupported { line: usize, text: String },
-    Orphan { line: usize, key: String },
-    Duplicate { line: usize, key: String },
-    UnknownWord { line: usize, word: String },
+    Unsupported {
+        line: usize,
+        text: String,
+    },
+    Orphan {
+        line: usize,
+        key: String,
+    },
+    Duplicate {
+        line: usize,
+        key: String,
+    },
+    UnknownWord {
+        line: usize,
+        word: String,
+    },
     /// A sentence with no `at` clause — a definition sentence. Rejected.
-    DefinitionSentence { line: usize },
+    DefinitionSentence {
+        line: usize,
+    },
     MissingMetadata,
-    EmptyText { line: usize, field: &'static str },
+    EmptyText {
+        line: usize,
+        field: &'static str,
+    },
 }
 
 impl SourceError {
@@ -148,7 +165,10 @@ impl Display for SourceError {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Unsupported { line, text } => {
-                write!(formatter, "line {line}: unsupported source sentence: {text}")
+                write!(
+                    formatter,
+                    "line {line}: unsupported source sentence: {text}"
+                )
             }
             Self::Orphan { line, key } => write!(
                 formatter,
@@ -364,7 +384,9 @@ fn apply_record(
                     text: "operation-signature requires a from vector".to_owned(),
                 });
             };
-            entry.operation_signatures.push(parse_signature(&words, line)?);
+            entry
+                .operation_signatures
+                .push(parse_signature(&words, line)?);
         }
         "operation-argument" => {
             let Some(words) = vector("as") else {
@@ -472,14 +494,19 @@ fn key_for_name(name: &str, line: usize) -> Result<Vec<u16>, SourceError> {
 
 /// Every case word the source uses, including the two that are not cases in the
 /// encoded volume: `su` carries the subject and `name` names it.
-const CASES: [&str; 10] = ["su", "ob", "as", "from", "to", "by", "with", "at", "be", "name"];
+const CASES: [&str; 10] = [
+    "su", "ob", "as", "from", "to", "by", "with", "at", "be", "name",
+];
 
 /// Split one sentence into `su` plus its case clauses.
 ///
 /// The source writes each case word immediately before its value, so a clause
 /// runs from a case word to the next one. Quoted text is skipped, so a value that
 /// contains a word like `from` is never mistaken for a case.
-fn parse_line(line: &str, line_number: usize) -> Result<HashMap<&'static str, ClauseValue>, SourceError> {
+fn parse_line(
+    line: &str,
+    line_number: usize,
+) -> Result<HashMap<&'static str, ClauseValue>, SourceError> {
     let unsupported = || SourceError::Unsupported {
         line: line_number,
         text: line.to_owned(),
@@ -565,10 +592,11 @@ fn parse_value(
                 line,
                 text: token.to_owned(),
             })?;
-            let parsed: String = serde_json::from_str(raw).map_err(|_| SourceError::Unsupported {
-                line,
-                text: raw.to_owned(),
-            })?;
+            let parsed: String =
+                serde_json::from_str(raw).map_err(|_| SourceError::Unsupported {
+                    line,
+                    text: raw.to_owned(),
+                })?;
             (ClauseValue::Text(parsed), 2)
         }
         "num" => {
@@ -595,10 +623,12 @@ fn parse_value(
             })?;
             let mut words = Vec::with_capacity(count);
             for offset in 0..count {
-                let raw = tokens.get(index + 2 + offset).ok_or(SourceError::Unsupported {
-                    line,
-                    text: token.to_owned(),
-                })?;
+                let raw = tokens
+                    .get(index + 2 + offset)
+                    .ok_or(SourceError::Unsupported {
+                        line,
+                        text: token.to_owned(),
+                    })?;
                 let parsed = parse_vector_word(raw).ok_or_else(|| SourceError::Unsupported {
                     line,
                     text: raw.to_owned(),
@@ -639,7 +669,10 @@ fn parse_value(
 /// JavaScript parser this replaces.
 fn parse_vector_word(word: &str) -> Option<u16> {
     let trimmed = word.trim();
-    if let Some(hex) = trimmed.strip_prefix("0x").or_else(|| trimmed.strip_prefix("0X")) {
+    if let Some(hex) = trimmed
+        .strip_prefix("0x")
+        .or_else(|| trimmed.strip_prefix("0X"))
+    {
         return u16::from_str_radix(hex, 16).ok();
     }
     if let Ok(value) = trimmed.parse::<u16>() {

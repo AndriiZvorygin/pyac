@@ -2,7 +2,7 @@ use std::hint::black_box;
 use std::time::Instant;
 
 use pyac::dictionary::{
-    DictionaryEntry, DictionaryIndex, LexicalForm, OperationParameter, ArgumentSlot,
+    ArgumentSlot, DictionaryEntry, DictionaryIndex, LexicalForm, OperationParameter,
     OperationSignature, OperationSignatureKey, SourceLink,
 };
 
@@ -168,7 +168,7 @@ fn main() {
                         && signature
                             .arguments
                             .iter()
-                            .map(|argument| &argument.key)
+                            .map(|argument| &argument.case_type)
                             .eq(key.arguments().iter())
                 })
             })) as usize

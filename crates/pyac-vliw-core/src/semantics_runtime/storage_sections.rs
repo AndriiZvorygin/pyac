@@ -35,8 +35,6 @@ struct StorageMetadata {
     shape: [u32; 8],
 }
 
-
-
 fn storage_metadata(
     words: &[u16],
     codelet_count: usize,
@@ -96,10 +94,7 @@ fn storage_metadata(
 /// `num` is `do` (uint16), but a larger offset can be written `pu` (uint32) or
 /// `tl6h` (uint64). The width word leads and decides how many payload words the
 /// value occupies, little-endian: one for `do`, two for `pu`, four for `tl6h`.
-fn field_offset(
-    tokens: &SentenceView<'_, impl VliwWord>,
-    field: SentenceField,
-) -> Option<u64> {
+fn field_offset(tokens: &SentenceView<'_, impl VliwWord>, field: SentenceField) -> Option<u64> {
     let width_word = tokens.token(field.start)?;
     let (width, words) = match width_word {
         NUMBER_WIDTH_TYPE => (2u32, 1usize),
@@ -263,7 +258,12 @@ mod tests {
     }
 
     /// A descriptor followed by its payload codelets.
-    fn pack(start_offset: u16, end_offset: u16, ty: u32, payload_codelets: usize) -> std::vec::Vec<u16> {
+    fn pack(
+        start_offset: u16,
+        end_offset: u16,
+        ty: u32,
+        payload_codelets: usize,
+    ) -> std::vec::Vec<u16> {
         let mut words = std::vec::Vec::new();
         words.extend(descriptor(start_offset, end_offset, ty));
         words.extend(std::vec![0u16; payload_codelets * CODELET_WORDS]);
@@ -318,14 +318,23 @@ mod tests {
     #[test]
     fn a_reversed_or_empty_range_is_rejected() {
         // end <= start is malformed.
-        assert_eq!(scan(&pack(64, 64, PAUCAL_NUMBER_TYPE, 3), 4), Err(ERROR_MALFORMED));
-        assert_eq!(scan(&pack(64, 0, PAUCAL_NUMBER_TYPE, 3), 4), Err(ERROR_MALFORMED));
+        assert_eq!(
+            scan(&pack(64, 64, PAUCAL_NUMBER_TYPE, 3), 4),
+            Err(ERROR_MALFORMED)
+        );
+        assert_eq!(
+            scan(&pack(64, 0, PAUCAL_NUMBER_TYPE, 3), 4),
+            Err(ERROR_MALFORMED)
+        );
     }
 
     #[test]
     fn a_length_that_does_not_fill_whole_elements_is_rejected() {
         // 65 bytes of uint32 is not a whole number of elements.
-        assert_eq!(scan(&pack(0, 65, PLURAL_NUMBER_TYPE, 3), 4), Err(ERROR_MALFORMED));
+        assert_eq!(
+            scan(&pack(0, 65, PLURAL_NUMBER_TYPE, 3), 4),
+            Err(ERROR_MALFORMED)
+        );
     }
 
     #[test]
@@ -336,10 +345,19 @@ mod tests {
         let payload_codelets = 70_000usize.div_ceil((CODELET_WORDS - 1) * 2);
         let mut words = std::vec![0u16; (1 + payload_codelets) * CODELET_WORDS];
         let tokens = [
-            PLURAL_NUMBER_TYPE, 0x1170u32, 1u32, FROM,
-            PLURAL_NUMBER_TYPE, 0x22E0u32, 2u32, TO,
-            PAUCAL_NUMBER_TYPE, AS,
-            STORAGE_GATHER, STORAGE_COMPUTER, DEF,
+            PLURAL_NUMBER_TYPE,
+            0x1170u32,
+            1u32,
+            FROM,
+            PLURAL_NUMBER_TYPE,
+            0x22E0u32,
+            2u32,
+            TO,
+            PAUCAL_NUMBER_TYPE,
+            AS,
+            STORAGE_GATHER,
+            STORAGE_COMPUTER,
+            DEF,
         ];
         for (index, token) in tokens.iter().enumerate() {
             words[1 + index] = *token as u16;
@@ -355,5 +373,3 @@ mod tests {
         assert_eq!(sections[0].element_count, 70_000);
     }
 }
-
-

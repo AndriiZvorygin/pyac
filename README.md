@@ -16,7 +16,8 @@ crates/pyac             the dictionary and runtime services
                         volume reader/writer, in-band indexes, source parser,
                         catalog parser, IWSP evaluator, RISC-V backend,
                         the pyac-dictionary CLI
-crates/gpu/shader       SPIR-V compute kernel (Rust-GPU)
+crates/gpu/shader       SPIR-V compute kernel (Rust-GPU); builds, pipeline cache
+                        unproven — see "GPU parity" below
 crates/gpu/cuda-kernel  PTX/CUDA kernel
 crates/gpu/worker       the GPU runtime service: wgpu + CUDA, HTTP execute API
 container/              the CUDA image build (cubin compiled at build time)
@@ -92,7 +93,7 @@ copied.
 |---|---|
 | CPU | `pyac` executes core directly |
 | CUDA / PTX | `crates/gpu/cuda-kernel` compiles core for `nvptx64-nvidia-cuda`, then `ptxas` assembles the cubin |
-| SPIR-V | `crates/gpu/shader` compiles core via Rust-GPU for Vulkan |
+| SPIR-V | `crates/gpu/shader` compiles core via Rust-GPU, but see below |
 
 Same source, three backends. Parity is therefore structural rather than a
 checked claim: there is no second implementation to drift.
@@ -115,6 +116,15 @@ if the GPU disagrees.
 
 The image compiles the cubin at **build** time and the runtime stage copies only
 artifacts — service startup never compiles. Startup has a 60-second ceiling.
+
+### Only the CUDA path is proven
+
+The SPIR-V shader **compiles**, and `Dockerfile` validates its memory model, but
+the Vulkan pipeline cache is not known to work and has not been demonstrated here.
+Do not treat Vulkan as a supported backend on the strength of it building.
+
+The cubin path is the working one: built, loaded, and exercised on an RTX 3090
+returning the expected result.
 
 ## What is not here yet
 

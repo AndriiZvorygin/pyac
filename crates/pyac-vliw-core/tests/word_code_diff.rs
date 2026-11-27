@@ -30,7 +30,9 @@ fn every_vocabulary_spelling_encodes_to_the_reference_identity() {
     for (word, expected) in &corpus {
         match encode(word) {
             Ok(actual) if actual == *expected => {}
-            Ok(actual) => failures.push(format!("{word}: rust 0x{actual:04x} != ref 0x{expected:04x}")),
+            Ok(actual) => failures.push(format!(
+                "{word}: rust 0x{actual:04x} != ref 0x{expected:04x}"
+            )),
             Err(error) => failures.push(format!("{word}: rust rejected {error:?}")),
         }
     }
@@ -105,7 +107,9 @@ fn identity_classification_agrees_with_spelling_classification() {
         let by_spelling = pyac_vliw_core::word_code::classify(word.as_bytes()).ok();
         let by_identity = pyac_vliw_core::word_code::classify_identity(*identity);
         if by_spelling != by_identity {
-            failures.push(format!("{word} 0x{identity:04x}: {by_spelling:?} != {by_identity:?}"));
+            failures.push(format!(
+                "{word} 0x{identity:04x}: {by_spelling:?} != {by_identity:?}"
+            ));
         }
     }
     assert!(

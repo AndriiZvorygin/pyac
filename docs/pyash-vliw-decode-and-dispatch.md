@@ -111,14 +111,14 @@ buffer with read-time validation.
 ### Dispatch dictionary
 
 The reference dictionary already carries the descriptive table. In
-`rust/pyac/src/dictionary/operation.rs`, `OperationSignature { verb, mood,
+`crates/pyac/src/dictionary/operation.rs`, `OperationSignature { verb, mood,
 arguments, results }` has `OperationArgument { grammatical_case, value_type,
 name, description }` and `OperationResult { value_type, name, description }`,
 with validation requiring a name and description for every argument and result.
 
 That key includes mood because the reference volume is the global view across
 all classes; the execution table is its `do`-only projection. The volume is
-`program/library/dictionary/reference.pyac`, built from `reference.pya`. It
+`dictionary/reference.pyac`, built from `reference.pya`. It
 keeps multiple named results, so the runtime's single destination fold is the
 part that should eventually adopt the dictionary's shape, not the reverse.
 
@@ -150,7 +150,7 @@ exists for the first; the loop does not yet exist for the rest.
 
 Two scales that are easy to confuse:
 
-- the **lexical catalog** is `program/library/dictionary/reference.pya` and its
+- the **lexical catalog** is `dictionary/reference.pya` and its
   compiled `reference.pyac`: the vocabulary reference, generated on `dev-vocab`,
   never hand-edited. It carries 64,593 keys and 85,553 English surfaces;
 - the **executable namespace** per programlet is bounded (64 routines, 8

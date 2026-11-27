@@ -5,10 +5,9 @@ use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 use pyac::dictionary::{
-    DictionaryFileReader, DictionaryMetadata, DictionarySource, DictionaryVolume,
-    DictionaryVolumeEntry, LexicalForm, OperationParameter, ArgumentSlot, OperationResult,
-    OperationSignature, SourceGloss, SourceLink, decode_dictionary, encode_dictionary,
-    parse_source,
+    ArgumentSlot, DictionaryFileReader, DictionaryMetadata, DictionarySource, DictionaryVolume,
+    DictionaryVolumeEntry, LexicalForm, OperationParameter, OperationResult, OperationSignature,
+    SourceGloss, SourceLink, decode_dictionary, encode_dictionary, parse_source,
 };
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -292,8 +291,7 @@ fn source_to_volume(source: DictionarySource) -> DictionaryVolume {
                                     noun_class: argument.noun_class,
                                 },
                                 tag_label: argument.tag_label,
-                                descriptive_specification: argument
-                                    .descriptive_specification,
+                                descriptive_specification: argument.descriptive_specification,
                             })
                             .collect(),
                         results: signature
@@ -302,8 +300,7 @@ fn source_to_volume(source: DictionarySource) -> DictionaryVolume {
                             .map(|result| OperationResult {
                                 noun_class: result.noun_class,
                                 tag_label: result.tag_label,
-                                descriptive_specification: result
-                                    .descriptive_specification,
+                                descriptive_specification: result.descriptive_specification,
                             })
                             .collect(),
                     })
@@ -408,7 +405,9 @@ fn benchmark_guard_reason(profile_version: &str) -> Option<&'static str> {
     if profile_version == "pyac-vliw-dictionary/4" {
         return None;
     }
-    Some("dictionary throughput benchmark requires v4 direct-file indexes; v2/v3 use compatibility scans")
+    Some(
+        "dictionary throughput benchmark requires v4 direct-file indexes; v2/v3 use compatibility scans",
+    )
 }
 
 fn open_reader(path: &Path) -> Result<DictionaryFileReader<File>, Box<dyn std::error::Error>> {
@@ -426,9 +425,8 @@ fn execute(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
             let source_path = Path::new(&args[1]);
             let text = fs::read_to_string(source_path)?;
             let parse_started = Instant::now();
-            let source = parse_source(&text).map_err(|error| {
-                io::Error::other(format!("{}: {error}", error.code()))
-            })?;
+            let source = parse_source(&text)
+                .map_err(|error| io::Error::other(format!("{}: {error}", error.code())))?;
             let parse_ms = parse_started.elapsed().as_secs_f64() * 1000.0;
             let entry_count = source.entries.len();
             let volume = source_to_volume(source);

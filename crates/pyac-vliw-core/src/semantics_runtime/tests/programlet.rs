@@ -358,4 +358,3 @@ fn rejects_incomplete_or_malformed_programlet_sentence_headers() {
 
 #[path = "programlet_conditionals.rs"]
 mod conditionals;
-

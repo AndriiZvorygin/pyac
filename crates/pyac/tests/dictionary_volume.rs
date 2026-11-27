@@ -2,10 +2,9 @@ use std::fs::File;
 use std::io::Cursor;
 
 use pyac::dictionary::{
-    DictionaryField, DictionaryFileReader, DictionaryMetadata, DictionaryValue,
-    DictionaryVolume, DictionaryVolumeEntry, LexicalForm, OperationParameter,
-    ArgumentSlot, OperationSignature, OperationSignatureKey, SourceGloss, SourceLink,
-    encode_dictionary, encode_text_sentence,
+    ArgumentSlot, DictionaryField, DictionaryFileReader, DictionaryMetadata, DictionaryValue,
+    DictionaryVolume, DictionaryVolumeEntry, LexicalForm, OperationParameter, OperationSignature,
+    OperationSignatureKey, SourceGloss, SourceLink, encode_dictionary, encode_text_sentence,
 };
 
 const ENTRY_KEY: [u16; 2] = [0xa96a, 0x6c22]; // tlat kwon
@@ -388,10 +387,9 @@ fn every_canonical_entry_reads_back_by_its_own_key() {
     let Some(path) = common::reference_volume_or_skip() else {
         return;
     };
-    let mut reader = DictionaryFileReader::open(
-        File::open(&path).expect("the reference volume is readable"),
-    )
-    .expect("open reference dictionary by seeking");
+    let mut reader =
+        DictionaryFileReader::open(File::open(&path).expect("the reference volume is readable"))
+            .expect("open reference dictionary by seeking");
 
     // Every key mentioned by the canonical index must read back. The index row
     // addresses an entry offset, so this covers the whole volume without
@@ -425,10 +423,9 @@ fn published_reference_volume_indexes_the_promoted_sumo_concepts() {
     let Some(path) = common::reference_volume_or_skip() else {
         return;
     };
-    let mut reader = DictionaryFileReader::open(
-        File::open(&path).expect("the reference volume is readable"),
-    )
-    .expect("open reference dictionary by seeking");
+    let mut reader =
+        DictionaryFileReader::open(File::open(&path).expect("the reference volume is readable"))
+            .expect("open reference dictionary by seeking");
 
     assert_eq!(reader.profile_version(), "pyac-vliw-dictionary/4");
     // The published volume grows as vocabulary is added, so pin a floor rather
@@ -470,10 +467,9 @@ fn published_reference_volume_indexes_current_iwsp_vocabulary() {
     let Some(path) = common::reference_volume_or_skip() else {
         return;
     };
-    let mut reader = DictionaryFileReader::open(
-        File::open(&path).expect("the reference volume is readable"),
-    )
-    .expect("open reference dictionary by seeking");
+    let mut reader =
+        DictionaryFileReader::open(File::open(&path).expect("the reference volume is readable"))
+            .expect("open reference dictionary by seeking");
 
     let vocabulary: [(&[u16], &str); 10] = [
         (&[0xab44, 0xa9b2], "tensor"), // pset gjat
