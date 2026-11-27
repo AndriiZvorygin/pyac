@@ -5,6 +5,11 @@ description: Work with the Pyac dictionary — the vocabulary volume, its shards
 
 # Working with the Pyac vocabulary
 
+> **This is plain Markdown, not a harness plugin.** The frontmatter above is
+> optional metadata for tools that read it; nothing here depends on a particular
+> agent harness. Read it directly, or point any agent at `skills/README.md`.
+> The repository is the source of truth; the skill is a reading path through it.
+
 The vocabulary is a **131 MB volume** (`dictionary/reference.pyac`, on LFS) compiled
 from **English-form source shards** (`dictionary/shard/*.en.pya`). Rust is
 normative. Nothing here uses JavaScript.

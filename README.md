@@ -139,6 +139,14 @@ returning the expected result.
 live in `pyash/rust/`. Neither has a path dependency outside what is present, so
 they move when they have something to be proven on.
 
+## Working on the vocabulary
+
+Before changing an entry, the source grammar, the volume format, or the word and
+quote encoding, read [`skills/pyac-vocabulary/SKILL.md`](skills/pyac-vocabulary/SKILL.md).
+It is plain Markdown, not tied to any tool: the three invariants, the two source
+forms, the record grammar, the value encodings, and the traps that have already
+cost time. `AGENTS.md` is the orientation for the repository as a whole.
+
 ## Licence
 
 Apache 2.0. See `LICENSE`. This crate is extracted from the `pyash` project and
