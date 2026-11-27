@@ -42,8 +42,10 @@ const VOWEL_GLYPHS: &[u8] = b"iaueo631";
 /// Tone marks. `M` is the unmarked tone for the codec but a real glyph here.
 const TONE_GLYPHS: &[u8] = b"M72";
 
-/// The quote header the C writes for a numeric literal.
+/// Quote header words and the frame marker.
 const NUMBER_QUOTE: u32 = 0x881d;
+/// Opens a text quote: the length, then the UTF-16 units.
+const TEXT_QUOTE: u32 = 0x0e1d;
 const NUMBER_WORD: u32 = 0x327e;
 const REFERENTIAL_WORD: u32 = 0xc8c4;
 
@@ -318,10 +320,20 @@ impl<'a> Builder<'a> {
         Ok(())
     }
 
-    /// Write the summary word for the codelet being filled.
+    /// Write the summary word for a codelet that continues into a later one.
+    ///
+    /// The writer marks boundaries **negatively** on an incomplete codelet: a
+    /// slot that closes a field has its bit clear and every other used slot has
+    /// its bit set. `reader_codec::slot_is_boundary` reads exactly that (`!set`
+    /// when incomplete). The completion bit stays clear. The final codelet uses
+    /// the positive form instead; see [`Builder::finish`].
     fn seal(&mut self) {
-        let summary = self.summary;
-        self.current()[0] = summary;
+        let used = if self.used == 0 {
+            0
+        } else {
+            ((1u32 << (self.used + 1)) - 1) & !1
+        };
+        self.current()[0] = used & !self.summary;
     }
 
     /// Fold one digit into the numeric literal already on the codelet.
@@ -363,6 +375,68 @@ impl<'a> Builder<'a> {
         self.current()[0] = summary;
         self.count
     }
+}
+
+/// Find a `zi.<kind>.<payload>.<kind>.zi` frame at the start of `text`.
+///
+/// Returns `(consumed_bytes, kind, payload_bytes)`. `None` when the run is not a
+/// complete frame, so a bare `zi` word still parses as itself. The payload is the
+/// raw bytes between the second and third dots; `encode_zi_text` unescapes it.
+fn parse_zi_frame(text: &[u8]) -> Option<(usize, &[u8], &[u8])> {
+    let rest = text.strip_prefix(b"zi.")?;
+    let dot = rest.iter().position(|byte| *byte == b'.')?;
+    if dot == 0 {
+        return None;
+    }
+    let kind = &rest[..dot];
+    let payload_start = dot + 1;
+    let mut index = payload_start;
+    while index + kind.len() + 4 <= rest.len() {
+        if rest[index] == b'.'
+            && &rest[index + 1..index + 1 + kind.len()] == kind
+            && rest[index + 1 + kind.len()..].starts_with(b".zi")
+        {
+            let payload = &rest[payload_start..index];
+            let consumed = 3 + index + 1 + kind.len() + 3;
+            return Some((consumed, kind, payload));
+        }
+        index += 1;
+    }
+    None
+}
+
+/// Encode a text quote payload: `TEXT_QUOTE`, the UTF-16 unit count, then units.
+///
+/// A backslash escapes the next character, so a payload can carry the frame's own
+/// closing marker literally. Length is counted in UTF-16 units, matching the
+/// dictionary writer.
+fn encode_zi_text(builder: &mut Builder<'_>, payload: &[u8]) -> Result<(), ParseError> {
+    let text = core::str::from_utf8(payload).map_err(|_| ParseError::BadGlyph)?;
+    let mut units = 0u32;
+    let mut chars = text.chars();
+    while let Some(character) = chars.next() {
+        let value = if character == '\\' {
+            chars.next().ok_or(ParseError::BadGlyph)?
+        } else {
+            character
+        };
+        units += value.len_utf16() as u32;
+    }
+    builder.push(TEXT_QUOTE, false)?;
+    builder.push(units, false)?;
+    let mut chars = text.chars();
+    while let Some(character) = chars.next() {
+        let value = if character == '\\' {
+            chars.next().ok_or(ParseError::BadGlyph)?
+        } else {
+            character
+        };
+        let mut buffer = [0u16; 2];
+        for unit in value.encode_utf16(&mut buffer) {
+            builder.push(u32::from(*unit), false)?;
+        }
+    }
+    Ok(())
 }
 
 /// Encode one PyAC sentence into `codelets`, returning how many were filled.
@@ -409,6 +483,17 @@ pub fn encode_sentence_with(
             break;
         }
         let rest = &letters[index..];
+
+        // A `zi.<kind>.<payload>.<kind>.zi` frame is a text value. It spans the
+        // dots and any spaces inside, so it is taken whole before the word scan.
+        if let Some((consumed, kind, payload)) = parse_zi_frame(rest) {
+            if kind == b"kyit" {
+                encode_zi_text(&mut builder, payload)?;
+                index += consumed;
+                continue;
+            }
+        }
+
         let Some(length) = first_word_length(rest) else {
             return Err(ParseError::BadGlyph);
         };
