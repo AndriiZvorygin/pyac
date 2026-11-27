@@ -202,6 +202,19 @@ Do the work that was asked, in this repository. If a prerequisite turns out to b
 missing and lives in `pyash`, say so and stop rather than importing a subtree.
 The extraction is deliberate and narrow; keeping it narrow is the work.
 
+## Red, then green
+
+Write the failing test before the implementation. Reading the source and reasoning
+about what it "should" do produces confident, wrong conclusions; running it does
+not. When you are unsure whether something is possible, the cheapest experiment is
+a `#[test]` or a throwaway example that calls the real API and prints the real
+error — not another pass over the code.
+
+The order is: state the claim as an assertion, run it, watch it fail for the
+reason you expect, then make it pass. A test that has never been red has not been
+shown to test anything. If the failure is not the one you predicted, the
+prediction was wrong and that is the finding.
+
 ## Commit when a change is done
 
 A major change is not finished until it is committed. Leaving a finished change

@@ -5,6 +5,7 @@ mod operation;
 mod reader;
 mod reader_codec;
 mod reader_index;
+mod render;
 mod shard;
 mod source;
 mod volume;
@@ -19,6 +20,7 @@ pub use operation::{
     ArgumentSlot, OperationParameter, OperationResult, OperationSignature, OperationSignatureKey,
 };
 pub use reader::{DictionaryFileReader, DictionaryReadError, DictionarySection};
+pub use render::{RenderError, render_source};
 pub use shard::{
     BEYOND_LAST_LAYER, EN_SOURCE_EXT, LAYERS, LayerIndex, MANIFEST_FILE, PYAC_SOURCE_EXT,
     REFERENCE_SOURCE_FILE, ShardError, ShardRecord, ShardSet, assemble_shards, parse_manifest,

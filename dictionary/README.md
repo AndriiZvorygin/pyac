@@ -123,6 +123,22 @@ cargo run --release --bin pyac-dictionary -- build   dictionary/reference.pyac <
 intermediate format to keep in sync. It is byte-identical on the published
 volume.
 
+## The source round-trip: `render`
+
+`render` is the inverse of `compile` — it turns a volume back into `.en.pya`
+source text, with no JSON in the loop:
+
+```sh
+cargo run --release --bin pyac-dictionary -- render dictionary/reference.pyac > reference.en.pya
+cargo run --release --bin pyac-dictionary -- compile reference.en.pya /tmp/back.pyac
+cmp dictionary/reference.pyac /tmp/back.pyac   # identical
+```
+
+A key is spelled back through the word codec, text stays a JSON string literal
+(so non-ASCII surfaces survive), and every record kind is emitted in the order
+`parse_source` reads it. `crates/pyac/tests/dictionary_render.rs` is the gate:
+it renders the published volume, recompiles it, and requires the same bytes.
+
 ## Where the entries' evidence comes from
 
 Each entry carries `source-link` records citing the dataset it was derived from,
