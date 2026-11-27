@@ -125,19 +125,27 @@ volume.
 
 ## The source round-trip: `render`
 
-`render` is the inverse of `compile` — it turns a volume back into `.en.pya`
-source text, with no JSON in the loop:
+`render` is the inverse of `compile` — it turns a volume back into source text:
 
 ```sh
-cargo run --release --bin pyac-dictionary -- render dictionary/reference.pyac > reference.en.pya
-cargo run --release --bin pyac-dictionary -- compile reference.en.pya /tmp/back.pyac
+# write to a file; only the JSON report reaches the terminal
+cargo run --release --bin pyac-dictionary -- render dictionary/reference.pyac /tmp/back.en.pya
+cargo run --release --bin pyac-dictionary -- compile /tmp/back.en.pya /tmp/back.pyac
 cmp dictionary/reference.pyac /tmp/back.pyac   # identical
+
+# the glyph Pyac form
+cargo run --release --bin pyac-dictionary -- render dictionary/reference.pyac /tmp/back.pya --glyph
 ```
 
+Pass an output path: a render is 100 MB, and piping it to a terminal is how it
+ends up in a transcript. With no output path the source goes to stdout, so
+`render … > file` also works.
+
 A key is spelled back through the word codec, text stays a JSON string literal
-(so non-ASCII surfaces survive), and every record kind is emitted in the order
-`parse_source` reads it. `crates/pyac/tests/dictionary_render.rs` is the gate:
-it renders the published volume, recompiles it, and requires the same bytes.
+in the English form (`zi.kyit.` frames in the glyph form), and every record kind
+is emitted in the order `parse_source` reads it. `crates/pyac/tests/dictionary_render.rs`
+and `crates/pyac/tests/dictionary_pyac.rs` are the gates: both render the
+published volume, recompile it, and require the same bytes.
 
 ## Where the entries' evidence comes from
 

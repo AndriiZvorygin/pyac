@@ -162,7 +162,30 @@ never at service startup, and keep startup under 60 seconds.
 | how to work the vocabulary (for agents) | `skills/pyac-vocabulary/SKILL.md` |
 | what the GUARD self-improvement paper means here | `docs/guard-integration.md` |
 
+`skills/` is plain Markdown in the repository, not a plugin format. Read
+`skills/README.md` for the index; it works under any harness, or by hand.
+
 Start with the ISA. It is normative and everything else follows from it.
+
+## Running checks without burning the context
+
+The full suite takes about four minutes and prints roughly 40 KB. Most of that is
+noise, and an agent that reads it pays for every byte.
+
+```sh
+cargo test --release -p pyac-vliw-core       # 0.6 s, 17 KB — the core and the ISA
+cargo test --release -q                      # 10 KB instead of 40 KB
+cargo test --release --test dictionary_pyac  # one gate, not forty
+```
+
+Gate the expensive ones only when they can fail: the dictionary gates need
+`PYAC_REFERENCE_VOLUME` set and skip otherwise, so a plain `cargo test` is not
+running them at all. Say which gates you ran rather than implying the full suite.
+
+`render` produces about 100 MB. Pass an output path
+(`render <volume> out.en.pya`); with no path it writes to stdout, so
+`render … > file` is correct but `render … | head` is not — it fills the
+transcript with half a vocabulary.
 
 ## Traps that have already cost time
 

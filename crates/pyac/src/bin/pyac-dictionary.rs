@@ -106,7 +106,7 @@ struct OperationResultInput {
 }
 
 fn usage() -> &'static str {
-    "usage:\n  pyac-dictionary compile <source.en.pya|shard-dir> <volume.pyac>  # the bootstrap; no JSON, no JS.\n  pyac-dictionary build <volume.pyac>  # Build JSON request is read from stdin.\n  pyac-dictionary inspect <volume.pyac>\n  pyac-dictionary surface <volume.pyac> <language> <surface>\n  pyac-dictionary surface-entries <volume.pyac> <language> <surface>\n  pyac-dictionary source <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary source-entries <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary key <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary entry <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary decode <volume.pyac>  # edit -> build request on stdout.\n  pyac-dictionary render <volume.pyac>  # the inverse of compile: .en.pya source on stdout.\n  pyac-dictionary verify <volume.pyac>  # every canonical key must read back.\n  pyac-dictionary export <volume.pyac>  # every key with its English forms.\n  pyac-dictionary benchmark <volume.pyac> <iterations> surface <language> <surface>"
+    "usage:\n  pyac-dictionary compile <source.en.pya|shard-dir> <volume.pyac>  # the bootstrap; no JSON, no JS.\n  pyac-dictionary build <volume.pyac>  # Build JSON request is read from stdin.\n  pyac-dictionary inspect <volume.pyac>\n  pyac-dictionary surface <volume.pyac> <language> <surface>\n  pyac-dictionary surface-entries <volume.pyac> <language> <surface>\n  pyac-dictionary source <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary source-entries <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary key <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary entry <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary decode <volume.pyac>  # edit -> build request on stdout.\n  pyac-dictionary render <volume.pyac> [out.pya] [--glyph]  # inverse of compile; stdout if no path.\n  pyac-dictionary verify <volume.pyac>  # every canonical key must read back.\n  pyac-dictionary export <volume.pyac>  # every key with its English forms.\n  pyac-dictionary benchmark <volume.pyac> <iterations> surface <language> <surface>"
 }
 
 fn binary_bytes() -> io::Result<u64> {
@@ -716,16 +716,42 @@ fn execute(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
                 "request": volume_to_build_input(&volume)
             })
         }
-        "render" if args.len() == 2 => {
-            // The inverse of `compile`: a volume back to `.en.pya` source text on
-            // stdout, no JSON. The gate is byte identity through a recompile; see
-            // `crates/pyac/tests/dictionary_render.rs`.
-            let path = Path::new(&args[1]);
+        "render" => {
+            // The inverse of `compile`: a volume back to source text. With one
+            // operand the source goes to stdout and the report to stderr; with an
+            // output path the source is written there, so a 101 MB render never
+            // lands in a transcript. `--glyph` selects the Pyac form; the default
+            // is the English form `.en.pya` reads.
+            let operands: Vec<&String> = args
+                .iter()
+                .filter(|argument| argument.as_str() != "--glyph")
+                .collect();
+            if operands.len() < 2 || operands.len() > 3 {
+                return Err(io::Error::other(usage()).into());
+            }
+            let glyph = args.iter().any(|argument| argument == "--glyph");
+            let path = Path::new(operands[1]);
             let volume = decode_dictionary(File::open(path)?)?;
-            eprint!("{}", pyac::dictionary::render_source(&volume)?);
+            let source = if glyph {
+                pyac::dictionary::render_pyac_source(&volume)?
+            } else {
+                pyac::dictionary::render_source(&volume)?
+            };
+            match operands.get(2) {
+                Some(output) => {
+                    atomic_write(Path::new(output), source.as_bytes())?;
+                }
+                None => {
+                    // stdout for the source, so `render … > file` is correct.
+                    print!("{source}");
+                }
+            }
             json!({
-                "command": "render", "path": args[1],
+                "command": "render", "path": operands[1],
+                "form": if glyph { "pya" } else { "en.pya" },
+                "output": operands.get(2).copied(),
                 "entries": volume.entries.len(),
+                "bytes": source.len(),
             })
         }
         "verify" if args.len() == 2 => {
