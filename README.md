@@ -138,3 +138,8 @@ returning the expected result.
 `pyac-riscv` (RISC-V image build) and `pyac-browser` (wasm/wgpu bindings) still
 live in `pyash/rust/`. Neither has a path dependency outside what is present, so
 they move when they have something to be proven on.
+
+## Licence
+
+Apache 2.0. See `LICENSE`. This crate is extracted from the `pyash` project and
+carries the same licence.

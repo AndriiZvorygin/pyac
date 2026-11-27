@@ -12,6 +12,7 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.85"
 publish = false
+license = "Apache-2.0"
 
 # No `[workspace.lints]`. A workspace lint only applies to a crate that opts in
 # with `[lints] workspace = true`, and none here does — declaring one would
