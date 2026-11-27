@@ -213,7 +213,7 @@ fn benchmark_guard_reason(profile_version: &str) -> Option<&'static str> {
     )
 }
 
-fn open_reader(path: &Path) -> Result<DictionaryFileReader, Box<dyn std::error::Error>> {
+fn open_reader(path: &Path) -> Result<DictionaryFileReader<File>, Box<dyn std::error::Error>> {
     Ok(DictionaryFileReader::open(File::open(path)?)?)
 }
 

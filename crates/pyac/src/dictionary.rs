@@ -11,6 +11,7 @@ mod shard;
 mod source;
 mod volume;
 mod volume_records;
+mod window;
 mod wire;
 mod words;
 

@@ -12,9 +12,10 @@ use super::volume::{DictionaryMetadata, DictionaryVolumeError};
 use super::volume_records::{
     PROFILE_VERSION, PROFILE_VERSION_V2, PROFILE_VERSION_V3, TOC_ROLES, TOC_ROLES_V4,
 };
+use super::window::Window;
 use super::words::{COMITATIVE, DESTINATION, ESSIVE, INSTRUMENTAL, SOURCE};
 use crate::{HEADER_BYTES, PyacError, WORDS_PER_CODELET};
-use std::io::{Cursor, Read, Seek, SeekFrom};
+use std::io::{Read, Seek, SeekFrom};
 use std::ops::Range;
 use unicode_normalization::UnicodeNormalization;
 
@@ -98,16 +99,16 @@ struct ProfileRecords {
     version_four: bool,
 }
 
-pub struct DictionaryFileReader {
-    /// The volume, held in memory.
+pub struct DictionaryFileReader<R> {
+    /// The volume, read through a bounded window.
     ///
     /// `read_codelet` seeks and reads 32 bytes at a time, and the volume holds
-    /// four million codelets. Unbuffered that is two syscalls per codelet, and
-    /// `BufReader` cannot rescue it because a seek discards the buffer. Measured
-    /// on the reference volume: 16.2 s decoding from a file, 1.37 s from memory.
-    /// The whole thing is 131 MB, which is small next to the 1.3 GB model a decode
-    /// builds anyway.
-    source: Cursor<Vec<u8>>,
+    /// four million codelets. Against a bare `File` that is two syscalls per
+    /// codelet: 16.2 s for one decode, against 1.4 s from memory. `BufReader` is
+    /// not the fix — a seek discards its buffer — so the reader gets a `Window`
+    /// that keeps its buffer across forward seeks, which is the pattern here.
+    /// Memory stays at one window, not one volume.
+    source: Window<R>,
     codelet_count: u32,
     profile_version: String,
     metadata: DictionaryMetadata,
@@ -116,18 +117,15 @@ pub struct DictionaryFileReader {
     version_four: bool,
 }
 
-impl DictionaryFileReader {
-    /// Open a volume, reading it fully into memory.
+impl<R: Read + Seek> DictionaryFileReader<R> {
+    /// Open a volume, streaming it through a bounded window.
     ///
-    /// The read is one pass; every later access is a seek inside a `Cursor`, which
-    /// costs nothing. This is the difference between a 16.2 s decode and a 1.4 s
-    /// one, so `open` takes the hit once rather than `read_codelet` taking it four
-    /// million times.
-    pub fn open<R: Read + Seek>(mut source: R) -> Result<Self, DictionaryReadError> {
-        source.seek(SeekFrom::Start(0))?;
-        let mut bytes = Vec::new();
-        source.read_to_end(&mut bytes)?;
-        let mut source = Cursor::new(bytes);
+    /// Nothing is read up front beyond the header and the table of contents; the
+    /// entry bodies are pulled as they are asked for. `Window` makes the
+    /// seek-per-codelet access pattern cost one read per window rather than two
+    /// syscalls per codelet.
+    pub fn open(source: R) -> Result<Self, DictionaryReadError> {
+        let mut source = Window::new(source);
         let mut header = [0u8; HEADER_BYTES];
         source.seek(SeekFrom::Start(0))?;
         source.read_exact(&mut header)?;
@@ -288,6 +286,75 @@ impl DictionaryFileReader {
                 .ok_or(DictionaryReadError::InvalidRecord("index ordinal overflow"))?;
         }
         Ok(keys)
+    }
+
+    /// Every canonical key, and where its entry body starts, in index order.
+    ///
+    /// The offsets are strictly increasing and the canonical index sits before
+    /// the entries section, so walking this list in order touches the volume
+    /// forward and sequentially. That is the difference between a decode that
+    /// streams and one that seeks: `location` per key costs four binary searches
+    /// over a 2 MB index plus a re-read of the entry, sixty-five thousand times.
+    pub fn canonical_keys_with_offsets(
+        &mut self,
+    ) -> Result<Vec<(Vec<u16>, u32)>, DictionaryReadError> {
+        let section = self.section("canonical-index")?;
+        let entries = self.section("entries")?;
+        let entries_end = entries.codelet_start + entries.codelet_count;
+        let mut rows = Vec::with_capacity(self.entry_count);
+        let mut ordinal = section.codelet_start;
+        let end = section.codelet_start + section.codelet_count;
+        while ordinal < end {
+            let sentence = read_sentence_v4(&mut self.source, ordinal, end)?;
+            let mut cursor = 0;
+            let subject = take_record_subject(&sentence, &mut cursor)?;
+            if let RecordSubject::Name(name) = subject {
+                let offset = super::reader_codec::take_uint32(&sentence.words, &mut cursor)?;
+                if offset < entries.codelet_start || offset >= entries_end {
+                    return Err(DictionaryReadError::InvalidRecord(
+                        "canonical index points outside the entries section",
+                    ));
+                }
+                rows.push((name, offset));
+            }
+            ordinal = ordinal
+                .checked_add(sentence.consumed)
+                .ok_or(DictionaryReadError::InvalidRecord("index ordinal overflow"))?;
+        }
+        Ok(rows)
+    }
+
+    /// The codelets of the entry body starting at `offset`, ending where the next
+    /// entry begins.
+    ///
+    /// `next_start` comes from the canonical index the caller already walked, so
+    /// no index search happens here. That is what lets a full decode stream.
+    pub(crate) fn entry_codelets_at(
+        &mut self,
+        offset: u32,
+        next_start: u32,
+    ) -> Result<Vec<[u16; WORDS_PER_CODELET]>, DictionaryReadError> {
+        let entries = self.section("entries")?;
+        let entries_end = entries.codelet_start + entries.codelet_count;
+        if offset < entries.codelet_start || offset >= entries_end {
+            return Err(DictionaryReadError::InvalidRecord(
+                "entry offset is outside the entries section",
+            ));
+        }
+        if next_start <= offset || next_start > entries_end {
+            return Err(DictionaryReadError::InvalidRecord(
+                "entry offsets are not strictly increasing within entries",
+            ));
+        }
+        self.read_range(offset..next_start)
+    }
+
+    /// Decode every sentence in an explicit codelet range.
+    pub(crate) fn sentences_at(
+        &mut self,
+        range: Range<u32>,
+    ) -> Result<Vec<super::reader_codec::Sentence>, DictionaryReadError> {
+        self.sentences_in(range, false)
     }
 
     /// Every canonical key with all of its English lexical forms.
@@ -546,22 +613,6 @@ impl DictionaryFileReader {
         self.read_range(range)
     }
 
-    /// Every sentence an entry's codelet range holds, decoded.
-    ///
-    /// The reader already knows how to walk a range into sentences, including the
-    /// raw-text continuation codelets that long text literals spill into. The
-    /// volume decoder needs the same walk in pack coordinates, so this exposes it
-    /// rather than making the decoder re-implement the scanner.
-    pub(crate) fn entry_sentences(
-        &mut self,
-        key: &[u16],
-    ) -> Result<Vec<super::reader_codec::Sentence>, DictionaryReadError> {
-        let range = self
-            .location(key)?
-            .ok_or_else(|| DictionaryReadError::MissingEntry(key.to_vec()))?;
-        self.sentences_in(range, false)
-    }
-
     /// Decode every sentence in a codelet range, seeking by pack ordinal.
     ///
     /// Index sections use the v4 quote layout (raw continuation codelets keep
@@ -605,6 +656,11 @@ impl DictionaryFileReader {
             result.push(read_codelet(&mut self.source, ordinal)?);
         }
         Ok(result)
+    }
+
+    /// The codelet range a section occupies.
+    pub fn section_range(&self, role: &str) -> Result<Range<u32>, DictionaryReadError> {
+        Ok(self.section(role)?.range())
     }
 
     fn section(&self, role: &str) -> Result<DictionarySection, DictionaryReadError> {

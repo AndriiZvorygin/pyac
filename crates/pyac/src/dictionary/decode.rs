@@ -46,19 +46,30 @@ pub fn decode_dictionary<R: Read + Seek>(
         languages: reader.metadata().languages.clone(),
         normalization_policy: reader.metadata().normalization_policy.clone(),
     };
-    let keys = reader
-        .canonical_keys()
+    let rows = reader
+        .canonical_keys_with_offsets()
         .map_err(|error| fail(error.to_string()))?;
+    let entries_end = reader
+        .section_range("entries")
+        .map_err(|error| fail(error.to_string()))?
+        .end;
 
-    let mut entries = Vec::with_capacity(keys.len());
-    for key in keys {
+    // Walk the entries section forward, once, in the order the canonical index
+    // gives. Taking the next entry's offset from the index means no per-entry
+    // index search, and the reads run sequentially, which is what lets the
+    // reader stream instead of seek.
+    let mut entries = Vec::with_capacity(rows.len());
+    for (position, (key, offset)) in rows.iter().enumerate() {
+        let next = rows
+            .get(position + 1)
+            .map_or(entries_end, |(_, next)| *next);
         let codelets = reader
-            .read_entry(&key)
+            .entry_codelets_at(*offset, next)
             .map_err(|error| fail(error.to_string()))?;
         let sentences = reader
-            .entry_sentences(&key)
+            .sentences_at(*offset..next)
             .map_err(|error| fail(error.to_string()))?;
-        entries.push(decode_entry(&key, &codelets, &sentences)?);
+        entries.push(decode_entry(key, &codelets, &sentences)?);
     }
     Ok(DictionaryVolume { metadata, entries })
 }
