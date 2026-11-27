@@ -12,10 +12,7 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use pyac::dictionary::{
-    BEYOND_LAST_LAYER, LayerIndex, MANIFEST_FILE, assemble_shards, parse_manifest, split_source,
-    split_source_with_layers,
-};
+use pyac::dictionary::{LEFTOVER_MARKER, parse_manifest, split_source, split_source_with_layers};
 
 fn workspace_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
