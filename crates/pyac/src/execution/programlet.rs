@@ -1,10 +1,7 @@
 //! Programlet execution: one ceremony's body, run over its own frame.
 
 use crate::semantic::SemanticError;
-use crate::{
-    PackExecutionError, PyacValue, VectorElements, execute_date_codelet, execute_pack_sections,
-    execute_vector_codelet, prepare_storage_sections,
-};
+use crate::{PackExecutionError, PyacValue, VectorElements};
 
 pub fn execute_shared_programlet(
     words: &[impl pyac_vliw_core::VliwWord],

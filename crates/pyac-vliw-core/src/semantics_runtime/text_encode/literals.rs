@@ -8,7 +8,6 @@ use super::super::word_code;
 use super::builder::*;
 use super::errors::*;
 use super::glyph::*;
-use super::numbers::*;
 use super::words::*;
 /// Find a `zi.<kind>.<payload>.<kind>.zi` frame at the start of `text`.
 ///

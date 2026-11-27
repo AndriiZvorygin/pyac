@@ -6,11 +6,9 @@
 
 use super::*;
 use crate::WORDS_PER_CODELET;
-
-use super::*;
 use crate::semantic::{
-    NumericArithmeticInstruction, NumericOperandCase, execute_numeric_arithmetic,
-    execute_numeric_arithmetic_codelet, execute_numeric_invert_codelet,
+    NumericArithmeticInstruction, NumericOperandCase, NumericOperator, decode_numeric_arithmetic,
+    execute_numeric_arithmetic, execute_numeric_arithmetic_codelet, execute_numeric_invert_codelet,
 };
 
 const HEAD: u16 = 0x0149;

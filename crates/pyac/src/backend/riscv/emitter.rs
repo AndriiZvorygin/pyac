@@ -5,9 +5,7 @@
 //! whole program and the executor checks them without a control-flow model.
 
 use super::encoding::*;
-use crate::backend::riscv::{
-    A0, BackendError, Instruction, NUMERIC_MAX, RA, T0, T1, T2, T3, T4, T5, T6,
-};
+use crate::backend::riscv::{BackendError, Instruction, T3, T4, T5, T6};
 
 /// The register names the listings use.
 pub(crate) fn register_name(register: u8) -> &'static str {

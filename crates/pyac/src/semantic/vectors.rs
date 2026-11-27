@@ -1,6 +1,5 @@
 //! Vector arithmetic: elementwise, with the width and sign rules.
 
-use super::arithmetic::*;
 use super::arithmetic::{execute_numeric_pair, expect};
 use super::errors::*;
 use super::types::*;

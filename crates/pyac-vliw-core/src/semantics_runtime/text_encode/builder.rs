@@ -7,7 +7,6 @@
 
 use super::errors::*;
 use super::numbers::*;
-use super::words::*;
 /// A codelet under construction, writing straight into the caller's buffer.
 pub(super) struct Builder<'a> {
     codelets: &'a mut [[u32; CODELET_WIDTH]],

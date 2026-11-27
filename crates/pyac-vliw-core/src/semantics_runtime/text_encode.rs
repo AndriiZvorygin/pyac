@@ -45,11 +45,11 @@ use numbers::number_digit;
 use builder::Builder;
 use literals::{
     FLOAT_WORD, SIGN_WORD, encode_zi_text, parse_zi_frame, peek_word, read_decimal, vector_header,
-    vector_width, zi_unit_count,
+    vector_width,
 };
 use words::{
-    CASE_WORDS, NAME_WORD, NOMINATIVE_WORD, NUMBER_QUOTE, NUMBER_WORD, PERSPECTIVE_WORDS,
-    REFERENTIAL_WORD, TEXT_QUOTE, VECTOR_WORD, WIDTH_WORDS, WORD_QUOTE, WordClass, classify,
+    NAME_WORD, NOMINATIVE_WORD, NUMBER_QUOTE, NUMBER_WORD, VECTOR_WORD, WIDTH_WORDS, WORD_QUOTE,
+    WordClass, classify,
 };
 
 /// Encode one PyAC sentence into `codelets`, returning how many were filled.

@@ -37,9 +37,6 @@
 //! recently opened one, until the next `entry`. A record before any entry block
 //! is an error, not a defaulted empty entry.
 
-use std::collections::HashMap;
-use std::fmt::{Display, Formatter};
-
 mod document;
 mod errors;
 mod keys;

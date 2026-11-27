@@ -4,8 +4,6 @@
 //! `tc6h` makes it signed, `fyih` float, and the width words `po`/`do`/`pu`/`tl6h`
 //! select 8/16/32/64 bits.
 
-use super::errors::*;
-use super::glyph::*;
 use super::words::*;
 /// How a numeric literal's digit words combine into a value.
 ///

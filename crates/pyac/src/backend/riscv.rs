@@ -14,15 +14,11 @@
 //! words are the whole program, and the executor below can check them
 //! without a control-flow model.
 
-use crate::WORDS_PER_CODELET;
-use crate::semantic::{NumericOperator, decode_numeric_arithmetic, decode_numeric_invert};
-
 /// The zero register.
 pub mod emitter;
 pub mod encoding;
 pub mod frontend;
 
-pub(crate) use emitter::register_name;
 pub use encoding::*;
 pub use frontend::*;
 

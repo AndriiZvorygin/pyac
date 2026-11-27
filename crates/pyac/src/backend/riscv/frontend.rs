@@ -7,7 +7,7 @@
 use super::emitter::{Emitter, register_name};
 use super::encoding::*;
 use crate::WORDS_PER_CODELET;
-use crate::backend::riscv::{BackendError, Instruction, RiscvProgram, malformed};
+use crate::backend::riscv::{BackendError, RiscvProgram, malformed};
 use crate::semantic::{NumericOperator, decode_numeric_arithmetic, decode_numeric_invert};
 
 /// Compile a numeric arithmetic codelet into a RISC-V program.

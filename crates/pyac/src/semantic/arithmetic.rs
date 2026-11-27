@@ -7,7 +7,7 @@ use super::vectors::{
     looks_like_numeric_vector_arithmetic,
 };
 use super::words::*;
-use crate::{VectorElements, WORDS_PER_CODELET};
+use crate::WORDS_PER_CODELET;
 
 pub(super) fn expect(
     words: &[u16; WORDS_PER_CODELET],

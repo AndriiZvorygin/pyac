@@ -3,8 +3,6 @@
 //! Ported from `program/encoding.c` `process_full_word`. This ladder decides which
 //! appender runs, and therefore whether the slot's boundary bit is set.
 
-use super::errors::*;
-use super::glyph::*;
 use super::numbers::*;
 /// Quote header words and the frame marker.
 pub(super) const NUMBER_QUOTE: u32 = 0x881d;
