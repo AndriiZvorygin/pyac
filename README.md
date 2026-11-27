@@ -16,6 +16,10 @@ crates/pyac             the dictionary and runtime services
                         volume reader/writer, in-band indexes, source parser,
                         catalog parser, IWSP evaluator, RISC-V backend,
                         the pyac-dictionary CLI
+crates/gpu/shader       SPIR-V compute kernel (Rust-GPU)
+crates/gpu/cuda-kernel  PTX/CUDA kernel
+crates/gpu/worker       the GPU runtime service: wgpu + CUDA, HTTP execute API
+container/              the CUDA image build (cubin compiled at build time)
 dictionary/             the vocabulary: authored source, and how to build it
 docs/                   the normative specifications this code implements
 ```
@@ -80,9 +84,40 @@ it is the reference implementation, separated from the tree it grew in.
 Some examples and specifications still live in `pyash` and are linked rather than
 copied.
 
+## GPU parity is a constraint, not an add-on
+
+`pyac-vliw-core` is `#![no_std]`, and both GPU kernels call into it directly:
+
+| target | how |
+|---|---|
+| CPU | `pyac` executes core directly |
+| CUDA / PTX | `crates/gpu/cuda-kernel` compiles core for `nvptx64-nvidia-cuda`, then `ptxas` assembles the cubin |
+| SPIR-V | `crates/gpu/shader` compiles core via Rust-GPU for Vulkan |
+
+Same source, three backends. Parity is therefore structural rather than a
+checked claim: there is no second implementation to drift.
+
+The **CUDA/PTX path is the proven one.** Build and prove it:
+
+```sh
+bash container/pyac-vliw-runtime/command/build.sh          # 90 s, needs Docker + ptxas
+docker run -d --rm --name pyac-parity-test --network host --runtime nvidia --gpus all \
+  -e PYAC_VLIW_RUNTIME_HOST=127.0.0.1 -e PYAC_VLIW_RUNTIME_PORT=18899 \
+  -e PYAC_VLIW_WORKER_PATH=/service/pyac-vliw-gpu-worker \
+  liberit/pyac-vliw-runtime:cuda-sm86-<cubin-sha-prefix>
+
+bash container/pyac-vliw-runtime/command/parity.sh
+```
+
+On an RTX 3090 that reports `backend: rust-cuda-cubin`, loads the cubin in 0.13 s
+at startup, and returns `1 plus 1 = 2` from the kernel. `parity.sh` exits non-zero
+if the GPU disagrees.
+
+The image compiles the cubin at **build** time and the runtime stage copies only
+artifacts — service startup never compiles. Startup has a 60-second ceiling.
+
 ## What is not here yet
 
-`pyac-riscv` (RISC-V image build), `pyac-browser` (wasm/wgpu), and the GPU
-kernels (SPIR-V shader, CUDA kernel, wgpu worker) exist in `pyash/rust/` and move
-here once they have a device or toolchain to be proven on. They have no path
-dependencies outside the two crates present.
+`pyac-riscv` (RISC-V image build) and `pyac-browser` (wasm/wgpu bindings) still
+live in `pyash/rust/`. Neither has a path dependency outside what is present, so
+they move when they have something to be proven on.

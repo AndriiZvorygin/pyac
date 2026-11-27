@@ -1,6 +1,11 @@
 [workspace]
 resolver = "3"
-members = ["crates/*"]
+# The shader and CUDA kernels are `no_std` and build only for their own targets
+# (spirv-*, nvptx64) via `cargo gpu` / rustc, so they are not members: a plain
+# `cargo build` on the host would try to compile them for x86 and fail. They are
+# still in the tree beside the core they share, and their paths resolve.
+members = ["crates/pyac", "crates/pyac-vliw-core", "crates/gpu/worker"]
+exclude = ["crates/gpu/shader", "crates/gpu/cuda-kernel"]
 
 [workspace.package]
 version = "0.1.0"
