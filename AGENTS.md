@@ -159,6 +159,8 @@ never at service startup, and keep startup under 60 seconds.
 | decoding and dispatch | `docs/pyash-vliw-decode-and-dispatch.md` |
 | which implementation is authoritative | `docs/parity-gate.md` |
 | where the vocabulary's evidence comes from | `dictionary/SOURCES.md` |
+| how to work the vocabulary (for agents) | `skills/pyac-vocabulary/SKILL.md` |
+| what the GUARD self-improvement paper means here | `docs/guard-integration.md` |
 
 Start with the ISA. It is normative and everything else follows from it.
 
