@@ -1,61 +1,13 @@
 use super::*;
 
-/// Level one of dispatch: the mood chooses a class table. `def` and the
-/// conditional pre-step never reach this router, so they are not classes.
-#[derive(Clone, Copy)]
-enum MoodClass {
-    Static,
-    Execute,
-    Return,
-    Close,
-    Unsupported,
-}
+#[path = "programlet_execute/conditional.rs"]
+mod conditional;
+use conditional::{ConditionalSelection, select_conditional_sentence};
 
-fn mood_class(mood: u32) -> MoodClass {
-    match mood {
-        REALIS => MoodClass::Static,
-        DEONTIC => MoodClass::Execute,
-        MOOD_RETURN => MoodClass::Return,
-        MOOD_PARAGRAPH => MoodClass::Close,
-        _ => MoodClass::Unsupported,
-    }
-}
-
-pub fn execute_numeric_programlet_at_with_directory_words_and_storage(
-    words: &[impl VliwWord],
-    base_codelet: usize,
-    codelet_count: usize,
-    step_budget: u32,
-    routine_directory_words: &[u32],
-    directory_offset: usize,
-    storage: &StorageView<'_>,
-    symbol_words: &mut [u32; MAX_PROGRAMLET_SYMBOL_WORDS],
-    frames: &mut ProgramletStack,
-) -> CoreResult {
-    #[cfg(not(target_arch = "spirv"))]
-    let directory =
-        validate_programlet_routine_directory_words(routine_directory_words, directory_offset);
-    #[cfg(target_arch = "spirv")]
-    let directory =
-        read_programlet_routine_directory_header(routine_directory_words, directory_offset);
-    let (directory_entry_count, directory_signature_used) = match directory {
-        Ok(directory) => directory,
-        Err(error) => return CoreResult::failure(error, 0),
-    };
-    execute_numeric_programlet_at_with_directory_view(
-        words,
-        base_codelet,
-        codelet_count,
-        step_budget,
-        routine_directory_words,
-        directory_offset,
-        directory_entry_count,
-        directory_signature_used,
-        storage,
-        symbol_words,
-        frames,
-    )
-}
+#[path = "programlet_execute/entry.rs"]
+mod entry;
+pub use entry::execute_numeric_programlet_at_with_directory_words_and_storage;
+use entry::{MoodClass, mood_class};
 
 fn execute_numeric_programlet_at_with_directory_view(
     words: &[impl VliwWord],
@@ -127,38 +79,24 @@ fn execute_numeric_programlet_at_with_directory_view(
         let sentence_view = SentenceView::new(words, base_codelet + pc, token_count);
         frame.program_counter = next_codelet as u32;
         let sentence = if contains_marked_token(&sentence_view, CONDITIONAL) {
-            if steps >= step_budget {
-                return CoreResult::failure(ERROR_STEP_BUDGET, steps);
-            }
-            steps += 1;
-            frame.action_started = 1;
-            let mut action = ParsedSentence::empty();
-            let mut has_selected_action = false;
-            let arguments = array_at!(frames.arguments, frame_index);
-            if !frame_row_is_valid::<_, _, MAX_PROGRAMLET_LOCAL_SLOTS>(&frames.slots, frame_index) {
-                return CoreResult::failure(ERROR_MALFORMED, steps);
-            }
-            let slots = frame_row::<_, _, MAX_PROGRAMLET_LOCAL_SLOTS>(&frames.slots, frame_index);
-            let branch_error = programlet_branch(
+            match select_conditional_sentence(
                 &sentence_view,
+                frames,
+                &mut frame,
+                frame_index,
                 symbol_words,
-                &arguments,
-                slots,
-                &mut action,
-                &mut has_selected_action,
-            );
-            if branch_error != 0 {
-                return CoreResult::failure(branch_error, steps);
+                &mut steps,
+                step_budget,
+            ) {
+                ConditionalSelection::Selected(action) => action,
+                ConditionalSelection::Skip => {
+                    array_put!(&mut frames.controls, frame_index, frame);
+                    continue;
+                }
+                ConditionalSelection::Failed(error) => {
+                    return CoreResult::failure(error, steps);
+                }
             }
-            if !has_selected_action {
-                array_put!(&mut frames.controls, frame_index, frame);
-                continue;
-            }
-            if steps >= step_budget {
-                return CoreResult::failure(ERROR_STEP_BUDGET, steps);
-            }
-            steps += 1;
-            action
         } else {
             let mut sentence = ParsedSentence::empty();
             let parse_error = parse_sentence(&sentence_view, &mut sentence);
