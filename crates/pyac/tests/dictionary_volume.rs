@@ -394,16 +394,30 @@ fn every_canonical_entry_reads_back_by_its_own_key() {
     // Every key mentioned by the canonical index must read back. The index row
     // addresses an entry offset, so this covers the whole volume without
     // guessing entry boundaries.
-    let keys = reader.canonical_keys().expect("enumerate canonical keys");
+    //
+    // Resolve all the rows in one pass, then read the bodies forward. Calling
+    // `read_entry(key)` for each key would binary-search the index before every
+    // entry, and each search pulls the window back into the index section: two
+    // refills per entry, about 129 GB of re-reading, for the same codelets.
+    let rows = reader
+        .canonical_keys_with_offsets()
+        .expect("enumerate canonical keys");
+    let entries_end = reader
+        .section_range("entries")
+        .expect("entries section")
+        .end;
     assert!(
-        keys.len() > 1_000,
+        rows.len() > 1_000,
         "the canonical index must list the whole vocabulary, saw {}",
-        keys.len()
+        rows.len()
     );
 
     let mut failures: Vec<String> = Vec::new();
-    for key in &keys {
-        match reader.read_entry(key) {
+    for (position, (key, offset)) in rows.iter().enumerate() {
+        let next = rows
+            .get(position + 1)
+            .map_or(entries_end, |(_, start)| *start);
+        match reader.entry_codelets_at(*offset, next) {
             Ok(words) if !words.is_empty() => {}
             Ok(_) => failures.push(format!("key {key:x?} decoded as empty")),
             Err(error) => failures.push(format!("key {key:x?}: {error}")),
@@ -413,8 +427,38 @@ fn every_canonical_entry_reads_back_by_its_own_key() {
         failures.is_empty(),
         "{} of {} entries failed to read back: {:?}",
         failures.len(),
-        keys.len(),
+        rows.len(),
         &failures[..failures.len().min(10)]
+    );
+
+    // The sequential read proves the bodies; this proves the key-to-entry
+    // resolution, which is a separate path (`location`). Sampling keeps it from
+    // paying the index round trip for all sixty-five thousand keys.
+    let mut sampled = 0usize;
+    let step = (rows.len() / 200).max(1);
+    for (key, offset) in rows.iter().step_by(step) {
+        let located = reader
+            .location(key)
+            .expect("resolve a canonical key")
+            .expect("the key is indexed");
+        assert_eq!(
+            located.start, *offset,
+            "key {key:x?} resolves to {} but the index row says {offset}",
+            located.start
+        );
+        assert_eq!(
+            located,
+            reader
+                .location(key)
+                .expect("resolve again")
+                .expect("indexed"),
+            "resolving the same key twice must give the same range"
+        );
+        sampled += 1;
+    }
+    assert!(
+        sampled >= 200,
+        "expected to sample the index, saw {sampled}"
     );
 }
 

@@ -38,6 +38,22 @@ pub(super) fn lookup_v4<R: Read + Seek>(
     section: &DictionarySection,
     lookup: DirectIndexLookup<'_>,
 ) -> Result<Vec<u32>, DictionaryReadError> {
+    Ok(lookup_v4_record(source, section, lookup)?
+        .map(|record| record.offsets)
+        .unwrap_or_default())
+}
+
+/// The whole index row a lookup lands on, not just its offsets.
+///
+/// A caller that needs the entry's *end* wants `record.next`, which the row
+/// already carries. Reading the offsets alone and then searching again for the
+/// successor costs a second full binary search over the index — that is what
+/// `location` used to do, 65,598 times in a full read-back.
+fn lookup_v4_record<R: Read + Seek>(
+    source: &mut R,
+    section: &DictionarySection,
+    lookup: DirectIndexLookup<'_>,
+) -> Result<Option<DirectIndexRecord>, DictionaryReadError> {
     let mut low = section.codelet_start;
     let mut high = section.codelet_start + section.codelet_count;
     while low < high {
@@ -48,7 +64,7 @@ pub(super) fn lookup_v4<R: Read + Seek>(
         };
         match compare_lookup(&record.key, lookup) {
             std::cmp::Ordering::Less => low = record.next,
-            std::cmp::Ordering::Equal => return Ok(record.offsets),
+            std::cmp::Ordering::Equal => return Ok(Some(record)),
             std::cmp::Ordering::Greater => high = probe,
         }
     }
@@ -60,11 +76,47 @@ pub(super) fn lookup_v4<R: Read + Seek>(
         let record = parse_v4_record(&sentence, ordinal + sentence.consumed)?;
         match compare_lookup(&record.key, lookup) {
             std::cmp::Ordering::Less => ordinal = record.next,
-            std::cmp::Ordering::Equal => return Ok(record.offsets),
+            std::cmp::Ordering::Equal => return Ok(Some(record)),
             std::cmp::Ordering::Greater => break,
         }
     }
-    Ok(Vec::new())
+    Ok(None)
+}
+
+/// The canonical index row for `key`, with the offset its entry body ends at.
+///
+/// `next` is the offset of the *following* canonical row, which is the first
+/// codelet after this entry's body. `DirectIndexRecord::next` is a position in the
+/// index section rather than an entry offset, so the successor row is read from
+/// there — one sequential sentence, not a second binary search over the index.
+pub(super) fn canonical_row<R: Read + Seek>(
+    source: &mut R,
+    section: &DictionarySection,
+    key: &[u16],
+    entries_end: u32,
+) -> Result<Option<(u32, u32)>, DictionaryReadError> {
+    let Some(record) = lookup_v4_record(source, section, DirectIndexLookup::Canonical(key))? else {
+        return Ok(None);
+    };
+    let start = *record
+        .offsets
+        .first()
+        .ok_or_else(|| invalid("canonical index row carries no offset"))?;
+    let section_end = section.codelet_start + section.codelet_count;
+    let end = if record.next < section_end {
+        let sentence = read_sentence_v4(source, record.next, section_end)?;
+        let successor = parse_v4_record(&sentence, record.next + sentence.consumed)?;
+        match successor.key {
+            DirectIndexKey::Canonical(_) => *successor
+                .offsets
+                .first()
+                .ok_or_else(|| invalid("canonical index row carries no offset"))?,
+            _ => return Err(invalid("canonical index contains a noncanonical row")),
+        }
+    } else {
+        entries_end
+    };
+    Ok(Some((start, end)))
 }
 
 pub(super) fn next_canonical_offset_after<R: Read + Seek>(

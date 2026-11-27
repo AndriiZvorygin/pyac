@@ -439,24 +439,22 @@ impl<R: Read + Seek> DictionaryFileReader<R> {
             return Ok(self.find_legacy_location(key)?.map(|(entry, _)| entry));
         }
         let section = self.section("canonical-index")?;
-        let Some(offset) = lookup_v4(
-            &mut self.source,
-            &section,
-            DirectIndexLookup::Canonical(key),
-        )?
-        .first()
-        .copied() else {
-            return Ok(None);
-        };
         let entries = self.section("entries")?;
         let entries_end = entries.codelet_start + entries.codelet_count;
+        // One search, then one sequential index row. The entry's end is the next
+        // row's offset; searching the whole index for it again is what made a full
+        // read-back cost 10 s.
+        let Some((offset, next)) =
+            super::reader_index::canonical_row(&mut self.source, &section, key, entries_end)?
+        else {
+            return Ok(None);
+        };
         if offset < entries.codelet_start || offset >= entries_end {
             return Err(DictionaryReadError::InvalidRecord(
                 "canonical index points outside the entries section",
             ));
         }
-        let next =
-            next_canonical_offset_after(&mut self.source, &section, offset)?.unwrap_or(entries_end);
+        let next = next.min(entries_end);
         if next <= offset || next > entries_end {
             return Err(DictionaryReadError::InvalidRecord(
                 "canonical index offsets are not strictly increasing within entries",
