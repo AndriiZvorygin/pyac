@@ -47,6 +47,19 @@ const NUMBER_QUOTE: u32 = 0x881d;
 const NUMBER_WORD: u32 = 0x327e;
 const REFERENTIAL_WORD: u32 = 0xc8c4;
 
+/// Bit-width words that type a numeric literal: `po` 8, `do` 16, `pu` 32, `tl6h`
+/// 64. `do` is the same word the literal already opened with, so it is not listed
+/// twice; a width word opens the literal exactly as `do` does.
+///
+/// The width is carried by the type word itself on the codelet today, so the
+/// number quote's value is unchanged. Wider and narrower widths select which
+/// codelet profile the literal belongs to; that profile is not yet emitted here.
+const WIDTH_WORDS: &[u32] = &[
+    0x309e, // po   — 8-bit
+    0x289e, // pu   — 32-bit
+    0x6b57, // tl6h — 64-bit
+];
+
 /// Why a sentence could not be encoded.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ParseError {
@@ -198,14 +211,14 @@ const NUMBER_DIGITS: &[(u32, u32)] = &[
 
 /// How a numeric literal's digit words combine into a value.
 ///
-/// The digit words are the six-vowel-sound numerals, so base 6 is the natural
-/// radix: `zron`, `hyik`, `tyut`, `tyin`, `ksas`, `hfak` are 0..5. Base 10 would
-/// need four more words that do not exist, and base 16 was a historical detour
-/// that also read against the direction of speech.
+/// Decimal: `hyik tyut` is twelve, because the digit words are the ten decimal
+/// digits and a positional run reads in written order. The digit table also holds
+/// ten through fifteen (`htip`..`hpet`) for a hexadecimal profile, but those are
+/// rejected under the decimal default where the value is not below the radix.
 ///
 /// Big-endian is the default because it reads in the order it is written —
-/// `do hyik tyut` is 1*6 + 2 — and because the leading terminator means the digits
-/// arrive already in that order.
+/// `do hyik tyut` is 1*10 + 2 — and because the leading terminator means the
+/// digits arrive already in that order.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct NumberFormat {
     /// Radix. Digit words with a value at or above this are rejected.
@@ -215,10 +228,19 @@ pub struct NumberFormat {
 }
 
 impl NumberFormat {
-    /// Base 6, most significant digit first: the digit vocabulary is base 6, and
-    /// this order matches the direction of speech.
+    /// Decimal, most significant digit first: `do hyik tyut` is twelve.
+    ///
+    /// Big-endian because it reads in the order it is written and the leading
+    /// terminator means the digits arrive already in that order.
     pub const DEFAULT: Self = Self {
-        base: 6,
+        base: 10,
+        big_endian: true,
+    };
+
+    /// Base 16, most significant digit first. A hexadecimal profile uses the
+    /// digit words through `hpet` (15).
+    pub const HEX: Self = Self {
+        base: 16,
         big_endian: true,
     };
 
@@ -399,9 +421,15 @@ pub fn encode_sentence_with(
         let honuc = u32::from(word_code::encode(word).map_err(|_| ParseError::Unencodable)?);
         index += length;
 
-        // `do` opens a numeric literal and everything numeric after it belongs to
-        // that literal, so the digits arrive already in written order.
-        if honuc == NUMBER_WORD {
+        // `do` (16-bit) opens a numeric literal, and `po`/`pu`/`tl6h` type it at
+        // another width. Everything numeric after the opener belongs to that
+        // literal, so the digits arrive already in written order.
+        let width_word = honuc == NUMBER_WORD || WIDTH_WORDS.contains(&honuc);
+        if width_word {
+            // A width word that is not `do` also names the type on the codelet.
+            if honuc != NUMBER_WORD {
+                builder.push(honuc, false)?;
+            }
             in_number = true;
             number_digits = 0;
             builder.push(NUMBER_QUOTE, false)?;

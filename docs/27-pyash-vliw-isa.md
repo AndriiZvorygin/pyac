@@ -98,6 +98,24 @@ Unsigned-16-only arithmetic keeps its existing integer behavior. Typed vector
 quotes and their distinction from variable-length arrays are specified in
 `28-pyash-vliw-targets.md`.
 
+### 4.1.1 Numeric literal glyphs
+
+Numbers are **not** carried in a `zi` frame; `zi` is for strings and binary. A
+numeric literal is written with decimal digit words and a width word:
+
+```text
+do hyik tyut          uint16(12)     digit words in decimal reading order
+do hyik fyih tyut     float16(1.2)   `fyih` separates the fractional part
+tc6h do hyik tyut     int16(12)      `tc6h` marks the literal signed
+```
+
+The width word types the literal: `po` is 8-bit, `do` is 16-bit, `pu` is 32-bit,
+and `tl6h` is 64-bit. A digit run reads in written order at the radix of the
+active profile; the default is decimal, so `hyik tyut` is twelve, not base-six
+eight. The digit vocabulary is `zron`, `hyik`, `tyut`, `tyin`, `ksas`, `hfak`,
+`hlis`, `hsip`, `hwap`, `twun` for 0–9, with `htip` through `hpet` for 10–15 in a
+hexadecimal or base-sixteen profile.
+
 The source form `quoted.<kind> ... .<kind>.quoted` delimits a payload and
 annotates its kind. Preserve that kind as metadata outside the payload. A
 non-default kind uses this paired `zi` frame:
