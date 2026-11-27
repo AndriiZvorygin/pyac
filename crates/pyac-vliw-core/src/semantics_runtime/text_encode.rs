@@ -57,6 +57,9 @@ const VECTOR_WORD: u32 = 0x2ede;
 const NAME_WORD: u32 = 0x225e;
 /// The nominative case (`na`), which closes a name and marks a field boundary.
 const NOMINATIVE_WORD: u32 = 0x24de;
+/// The word quote (`wo`). It marks the word after it as data: `wo li` is the word
+/// `li` as a value, not the realis mood. Both words are pushed as non-boundary.
+const WORD_QUOTE: u32 = 0x30be;
 
 /// Bit-width words that type a numeric literal: `po` 8, `do` 16, `pu` 32, `tl6h`
 /// 64. `do` is the same word the literal already opened with, so it is not listed
@@ -672,6 +675,26 @@ pub fn encode_sentence_with(
         let word = core::str::from_utf8(&rest[..length]).map_err(|_| ParseError::BadGlyph)?;
         let honuc = u32::from(word_code::encode(word).map_err(|_| ParseError::Unencodable)?);
         index += length;
+
+        // `wo` word-quotes the roots after it: it emits **no word itself**, it only
+        // suppresses the case-boundary marking on the roots that follow. That is what
+        // lets a key that spells `na` stay data: `giwona na` encodes to gi, na, na —
+        // the first `na` is not a case ending, the second closes the name. Quoting is
+        // the point, so any word may follow, including a case or mood word; the run
+        // ends at the closing `na` or the next directive.
+        if honuc == WORD_QUOTE {
+            loop {
+                let Some((next, after)) = peek_word(letters, index) else {
+                    break;
+                };
+                if next == NOMINATIVE_WORD {
+                    break;
+                }
+                builder.push(next, false)?;
+                index = after;
+            }
+            continue;
+        }
 
         // Inside a name (`gi … na`), every word is name payload regardless of its
         // class or whether it looks like a directive. A key can be `li`, `pu`, `ve`

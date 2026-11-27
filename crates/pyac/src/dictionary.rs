@@ -2,6 +2,7 @@ mod decode;
 mod index;
 mod model;
 mod operation;
+mod pyac;
 mod reader;
 mod reader_codec;
 mod reader_index;
@@ -19,6 +20,7 @@ pub use model::{DictionaryEntry, DictionaryIndexError, LexicalForm, SourceGloss,
 pub use operation::{
     ArgumentSlot, OperationParameter, OperationResult, OperationSignature, OperationSignatureKey,
 };
+pub use pyac::render_pyac_source;
 pub use reader::{DictionaryFileReader, DictionaryReadError, DictionarySection};
 pub use render::{RenderError, render_glyph_source, render_source};
 pub use shard::{

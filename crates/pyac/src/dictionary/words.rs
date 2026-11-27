@@ -43,6 +43,11 @@ pub(super) const REALIS: u16 = 0x217e;
 /// from the text quote header below.
 pub(super) const TEXT_VERB: u16 = 0x8a28;
 
+/// The word quote (`wo`). It wraps a word so it reads as data even when the word
+/// is itself a case, mood or directive word. A key like `li` or `na` is written
+/// `wo li`, so it is a name payload and not the grammar word.
+pub(super) const WORD_QUOTE: u16 = 0x30be;
+
 // Quote headers. These open a typed literal in the codelet stream; they are not
 // vocabulary words and must not be looked up as such.
 
