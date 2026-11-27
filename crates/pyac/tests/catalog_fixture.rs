@@ -3,7 +3,7 @@ use pyac::{
     parse_catalog_pya,
 };
 
-const CATALOG: &str = include_str!("fixture_catalog.pya");
+const CATALOG: &str = include_str!("fixture_catalog.en.pya");
 
 #[test]
 fn reads_the_parser_backed_catalog_fixture() {

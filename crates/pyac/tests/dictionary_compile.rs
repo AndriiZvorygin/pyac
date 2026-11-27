@@ -21,7 +21,7 @@ use pyac::dictionary::{encode_dictionary, parse_source};
 
 /// The authored source, assembled from the shard directory the tree ships.
 ///
-/// The whole `reference.pya` is 101.5 MB and git-ignored; `dictionary/shard/` is
+/// The whole `reference.en.pya` is 101.5 MB and git-ignored; `dictionary/shard/` is
 /// the committed form. `PYAC_REFERENCE_SOURCE` overrides with a single file.
 fn reference_source_text() -> Option<String> {
     if let Some(explicit) = std::env::var_os("PYAC_REFERENCE_SOURCE") {
@@ -36,7 +36,9 @@ fn reference_source_text() -> Option<String> {
     let records = pyac::dictionary::parse_manifest(&manifest).ok()?;
     let mut contents = BTreeMap::new();
     for record in records {
-        let body = std::fs::read_to_string(shards.join(format!("{}.pya", record.name))).ok()?;
+        let body = pyac::dictionary::shard_candidates(&record.name)
+            .into_iter()
+            .find_map(|file| std::fs::read_to_string(shards.join(file)).ok())?;
         contents.insert(record.name, body);
     }
     pyac::dictionary::assemble_shards(&manifest, &contents).ok()

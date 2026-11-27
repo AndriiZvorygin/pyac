@@ -4,21 +4,28 @@ The vocabulary lives here as two artifacts:
 
 | file | what it is |
 |---|---|
-| `reference.pya` | the authored source — ordinary Pyash sentences, diffable |
+| `reference.en.pya` | the authored English-form Pyash source — diffable records |
 | `reference.pyac` | the compiled v4 volume, what runtimes read |
+
+## Two source forms, two extensions
+
+`.en.pya` is the English-form Pyash (`su name … ob text … be text ya`), which is
+what the vocabulary records are written in. Plain `.pya` is reserved for the
+glyph Pyac form, which is the language itself. The compiler emits `.en.pya`; the
+assembler accepts either on read.
 
 ## Layout
 
 ```
 dictionary/
-  shard/                    what the repository ships
-    00-manifest.pya         profile sentences + one row per shard
-    atoms.pya               7,840 atoms, 17.9 MB
-    compounds-16.pya        compounds whose deepest word needs 16 glyphs
-    compounds-19.pya        …then 19, 24, 28, 32
-    dispatch/<verb>.pya     ceremony signatures, one file per verb
-  reference.pya             optional whole-source convenience file (git-ignored)
-  reference.pyac            the compiled volume (git-ignored)
+  shard/                      what the repository ships
+    00-manifest.en.pya        profile sentences + one row per shard
+    atoms.en.pya              7,840 atoms, 17.9 MB
+    compounds-16.en.pya       compounds whose deepest word needs 16 glyphs
+    compounds-19.en.pya       …then 19, 24, 28, 32
+    dispatch/<verb>.en.pya    ceremony signatures, one file per verb
+  reference.en.pya            optional whole-source convenience file (git-ignored)
+  reference.pyac              the compiled volume (git-ignored)
 ```
 
 The source is split because it is **101.5 MB** — over git's 100 MB per-file hard
@@ -40,7 +47,7 @@ offsets:
   median file is 3 KB and an API change touches only what it changes.
 
   Named for the **verb**, not the entry: a signature's verb *is* its entry's
-  spelling (measured: 96 entries, 96 distinct verbs, 1:1), so `dispatch/clac.pya`
+  spelling (measured: 96 entries, 96 distinct verbs, 1:1), so `dispatch/clac.en.pya`
   is "the dispatch the operation `clac` accepts". Assembly places dispatch last
   and nothing in the vocabulary depends on it.
 
@@ -54,7 +61,7 @@ Measured shard sizes: atoms 17.4 MB, compounds-16 15.9 MB, -19 23.9 MB,
 cargo run --release --bin pyac-dictionary -- compile dictionary/shard dictionary/reference.pyac
 ```
 
-`compile` takes either a shard directory or a single `.pya` file, assembles if
+`compile` takes either a shard directory or a single `.en.pya` file, assembles if
 needed, and parses. There is no JavaScript in this path.
 
 `compile` is byte-identical to the published volume either way;
@@ -65,7 +72,7 @@ needed, and parses. There is no JavaScript in this path.
 ```sh
 PYAC_LAYER_LISTS=~/pyac/pyachso2n \
   cargo run --release --bin pyac-dictionary -- \
-  shard dictionary/reference.pya dictionary/shard
+  shard dictionary/reference.en.pya dictionary/shard
 ```
 
 Without `PYAC_LAYER_LISTS` the split still runs but puts every compound in one

@@ -35,7 +35,7 @@ fn source_text() -> Option<String> {
         .parent()
         .and_then(|path| path.parent())
         .map(PathBuf::from)?;
-    let whole = root.join("dictionary/reference.pya");
+    let whole = root.join(pyac::dictionary::REFERENCE_SOURCE_FILE);
     if whole.is_file() {
         return std::fs::read_to_string(whole).ok();
     }
@@ -44,7 +44,9 @@ fn source_text() -> Option<String> {
     let records = pyac::dictionary::parse_manifest(&manifest).ok()?;
     let mut contents = std::collections::BTreeMap::new();
     for record in records {
-        let body = std::fs::read_to_string(shards.join(format!("{}.pya", record.name))).ok()?;
+        let body = pyac::dictionary::shard_candidates(&record.name)
+            .into_iter()
+            .find_map(|file| std::fs::read_to_string(shards.join(file)).ok())?;
         contents.insert(record.name, body);
     }
     pyac::dictionary::assemble_shards(&manifest, &contents).ok()

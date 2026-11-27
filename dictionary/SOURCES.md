@@ -68,7 +68,7 @@ that made GOLD attractive.
 
 ```sh
 cargo run --release --bin pyac-dictionary -- \
-  compile dictionary/reference.pya dictionary/reference.pyac
+  compile dictionary/shard dictionary/reference.pyac
 ```
 
 Byte-identical to the published volume. `cargo test --test dictionary_compile`

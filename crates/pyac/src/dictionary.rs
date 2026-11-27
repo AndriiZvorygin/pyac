@@ -20,8 +20,9 @@ pub use operation::{
 };
 pub use reader::{DictionaryFileReader, DictionaryReadError, DictionarySection};
 pub use shard::{
-    BEYOND_LAST_LAYER, LAYERS, LayerIndex, MANIFEST_FILE, ShardError, ShardRecord, ShardSet,
-    assemble_shards, parse_manifest, shard_digest, split_source, split_source_with_layers,
+    BEYOND_LAST_LAYER, EN_SOURCE_EXT, LAYERS, LayerIndex, MANIFEST_FILE, PYAC_SOURCE_EXT,
+    REFERENCE_SOURCE_FILE, ShardError, ShardRecord, ShardSet, assemble_shards, parse_manifest,
+    shard_candidates, shard_digest, shard_file_name, split_source, split_source_with_layers,
 };
 pub use source::{
     ArgumentRecord, DictionarySource, EntryRecord, LexicalFormRecord, ResultRecord,

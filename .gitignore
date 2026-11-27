@@ -7,4 +7,4 @@ Cargo.lock.bak
 # The assembled whole-source is generated; the source of truth is
 # dictionary/shard/. The compiled volume is tracked on LFS (see .gitattributes),
 # not ignored, so the byte-identity gate runs on a fresh clone.
-dictionary/reference.pya
+dictionary/reference.en.pya

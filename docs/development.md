@@ -11,7 +11,7 @@ cargo test --release
 
 # regenerate the volume, then run the gates against it
 cargo run --release --bin pyac-dictionary -- \
-  compile dictionary/reference.pya dictionary/reference.pyac
+  compile dictionary/shard dictionary/reference.pyac
 PYAC_REFERENCE_VOLUME=dictionary/reference.pyac cargo test --release
 ```
 
@@ -56,8 +56,8 @@ cargo test --release --test gpu_parity_shape      # runs in ms once compiled;
 | codelet layout, execution, dispatch | `crates/pyac-vliw-core/src/semantics_runtime/` |
 | the word codec (spelling ↔ HNUC) | `crates/pyac-vliw-core/src/semantics_runtime/word_code.rs` |
 | volume read/write, indexes | `crates/pyac/src/dictionary/` |
-| the `.pya` source grammar | `crates/pyac/src/dictionary/source.rs` |
-| the shipped vocabulary | `dictionary/shard/*.pya` (then `compile`) |
+| the `.en.pya` source grammar | `crates/pyac/src/dictionary/source.rs` |
+| the shipped vocabulary | `dictionary/shard/*.en.pya` (then `compile`) |
 | what a citation resolves to | `dictionary/SOURCES.md` |
 | a device kernel | `crates/gpu/{shader,cuda-kernel}/` |
 
@@ -78,7 +78,7 @@ consequences worth internalising:
 
 Vocabulary enters through the source and `compile`, never by editing the volume:
 
-1. add rows to `dictionary/reference.pya` (see the record kinds in
+1. add rows to a shard in `dictionary/shard/*.en.pya` (see the record kinds in
    `crates/pyac/src/dictionary/source.rs`)
 2. `compile`
 3. `verify` — every key must read back
@@ -122,7 +122,7 @@ seconds.
 cargo fmt --check
 cargo test --release
 PYAC_REFERENCE_VOLUME=dictionary/reference.pyac cargo test --release
-cargo run --release --bin pyac-dictionary -- compile dictionary/reference.pya /tmp/v.pyac
+cargo run --release --bin pyac-dictionary -- compile dictionary/shard /tmp/v.pyac
 cmp /tmp/v.pyac dictionary/reference.pyac
 ```
 

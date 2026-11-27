@@ -31,7 +31,26 @@ fn source_text() -> Option<String> {
     if let Some(explicit) = std::env::var_os("PYAC_REFERENCE_SOURCE") {
         return std::fs::read_to_string(PathBuf::from(explicit)).ok();
     }
-    std::fs::read_to_string(workspace_root().join("dictionary/reference.pya")).ok()
+    let root = workspace_root();
+    let whole = root
+        .join("dictionary")
+        .join(pyac::dictionary::REFERENCE_SOURCE_FILE);
+    if let Ok(text) = std::fs::read_to_string(whole) {
+        return Some(text);
+    }
+    // The shipped source of truth is the shard directory; assemble it when the
+    // whole file is not on disk.
+    let shards = root.join("dictionary/shard");
+    let manifest = std::fs::read_to_string(shards.join(pyac::dictionary::MANIFEST_FILE)).ok()?;
+    let records = pyac::dictionary::parse_manifest(&manifest).ok()?;
+    let mut contents = BTreeMap::new();
+    for record in records {
+        let body = pyac::dictionary::shard_candidates(&record.name)
+            .into_iter()
+            .find_map(|file| std::fs::read_to_string(shards.join(file)).ok())?;
+        contents.insert(record.name, body);
+    }
+    pyac::dictionary::assemble_shards(&manifest, &contents).ok()
 }
 
 /// The glyph layer lists, when the caller points at them.
@@ -52,7 +71,7 @@ fn layer_index() -> LayerIndex {
 #[test]
 fn splitting_and_assembling_reproduces_the_entries() {
     let Some(source) = source_text() else {
-        eprintln!("skipping: dictionary/reference.pya is absent");
+        eprintln!("skipping: no dictionary source is present");
         return;
     };
     let set = split_source_with_layers(&source, &layer_index()).expect("the source splits");
@@ -91,7 +110,7 @@ fn splitting_and_assembling_reproduces_the_entries() {
 #[test]
 fn atoms_are_one_shard_and_compounds_group_by_layer() {
     let Some(source) = source_text() else {
-        eprintln!("skipping: dictionary/reference.pya is absent");
+        eprintln!("skipping: no dictionary source is present");
         return;
     };
     let set = split_source_with_layers(&source, &layer_index()).expect("the source splits");
@@ -101,10 +120,19 @@ fn atoms_are_one_shard_and_compounds_group_by_layer() {
     );
     for (name, _) in &set.shards {
         assert!(
-            name == "atoms" || name.starts_with("compounds-"),
+            name == "atoms" || name.starts_with("compounds-") || name.starts_with("dispatch/"),
             "unexpected shard name {name:?}"
         );
     }
+    // Dispatch records are lifted out of the vocabulary and written one file per
+    // verb, so a split that produced none would mean the dispatch API had been
+    // folded back in.
+    assert!(
+        set.shards
+            .iter()
+            .any(|(name, _)| name.starts_with("dispatch/")),
+        "dispatch must be its own shards, not folded into the vocabulary"
+    );
     // With no glyph lists every word resolves beyond the last layer, so all
     // compounds land in one shard. That is the documented fallback, not a failure.
     if std::env::var_os("PYAC_LAYER_LISTS").is_none() {
@@ -123,9 +151,17 @@ fn atoms_are_one_shard_and_compounds_group_by_layer() {
 #[test]
 fn no_shard_exceeds_the_git_threshold() {
     let Some(source) = source_text() else {
-        eprintln!("skipping: dictionary/reference.pya is absent");
+        eprintln!("skipping: no dictionary source is present");
         return;
     };
+    // The 50 MB warning line is the reason to split by layer at all, and only the
+    // glyph layer lists put compounds in their per-layer shards. Without them every
+    // compound is one shard by design, so the threshold cannot hold and this is a
+    // skip rather than a failure.
+    if std::env::var_os("PYAC_LAYER_LISTS").is_none() {
+        eprintln!("skipping: no PYAC_LAYER_LISTS; compounds are one shard by design");
+        return;
+    }
     let set = split_source_with_layers(&source, &layer_index()).expect("the source splits");
     // 50 MB is git's warning line; staying under it is the reason to split at all.
     const WARNING_BYTES: usize = 50_000_000;
@@ -141,7 +177,7 @@ fn no_shard_exceeds_the_git_threshold() {
 #[test]
 fn assembly_rejects_a_tampered_shard() {
     let Some(source) = source_text() else {
-        eprintln!("skipping: dictionary/reference.pya is absent");
+        eprintln!("skipping: no dictionary source is present");
         return;
     };
     let set = split_source(&source).expect("the source splits");
@@ -158,7 +194,7 @@ fn assembly_rejects_a_tampered_shard() {
 #[test]
 fn assembly_rejects_a_missing_shard() {
     let Some(source) = source_text() else {
-        eprintln!("skipping: dictionary/reference.pya is absent");
+        eprintln!("skipping: no dictionary source is present");
         return;
     };
     let set = split_source(&source).expect("the source splits");
@@ -174,7 +210,7 @@ fn assembly_rejects_a_missing_shard() {
 #[test]
 fn the_manifest_records_every_shard_with_its_digest_and_count() {
     let Some(source) = source_text() else {
-        eprintln!("skipping: dictionary/reference.pya is absent");
+        eprintln!("skipping: no dictionary source is present");
         return;
     };
     let set = split_source_with_layers(&source, &layer_index()).expect("the source splits");
@@ -210,7 +246,7 @@ fn dispatch_is_its_own_shard_and_carries_no_vocabulary() {
     // otherwise every vocabulary edit reflows the signature text and every
     // signature change reflows a vocabulary shard.
     let Some(source) = source_text() else {
-        eprintln!("skipping: dictionary/reference.pya is absent");
+        eprintln!("skipping: no dictionary source is present");
         return;
     };
     let set = split_source_with_layers(&source, &layer_index()).expect("the source splits");
@@ -255,7 +291,7 @@ fn dispatch_assembles_to_the_same_volume_as_the_whole_source() {
     // The strongest check that the separation is real: split, assemble, and the
     // result must be the same document the whole source was.
     let Some(source) = source_text() else {
-        eprintln!("skipping: dictionary/reference.pya is absent");
+        eprintln!("skipping: no dictionary source is present");
         return;
     };
     let set = split_source_with_layers(&source, &layer_index()).expect("the source splits");
@@ -279,11 +315,11 @@ fn dispatch_assembles_to_the_same_volume_as_the_whole_source() {
 
 #[test]
 fn each_operation_has_exactly_one_verb_and_one_dispatch_file() {
-    // This is what makes `dispatch/<verb>.pya` the right naming. A signature's
+    // This is what makes `dispatch/<verb>.en.pya` the right naming. A signature's
     // verb is its entry's spelling: measured, 96 entries carry signatures and
     // there are 96 distinct verbs, with no entry holding two and no verb shared.
     let Some(source) = source_text() else {
-        eprintln!("skipping: dictionary/reference.pya is absent");
+        eprintln!("skipping: no dictionary source is present");
         return;
     };
     let set = split_source_with_layers(&source, &layer_index()).expect("the source splits");
@@ -338,7 +374,7 @@ fn each_operation_has_exactly_one_verb_and_one_dispatch_file() {
         entries.len(),
         verbs.len(),
         "{} entries carry signatures but there are {} distinct verbs; \
-         if these differ, `dispatch/<verb>.pya` would collide or fragment",
+         if these differ, `dispatch/<verb>.en.pya` would collide or fragment",
         entries.len(),
         verbs.len()
     );

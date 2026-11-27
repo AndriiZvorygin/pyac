@@ -68,7 +68,13 @@ cargo run --release --bin pyac-dictionary -- compile dictionary/shard dictionary
 
 The source ships as structural shards, not one file: it is 101.5 MB, over git's
 100 MB per-file limit. `compile` takes either the shard directory or a single
-`.pya`, so the command above and a whole-file build behave identically.
+`.en.pya`, so the command above and a whole-file build behave identically.
+
+**The extension states the source form.** `.en.pya` is English-form Pyash — the
+records here (`su name … ob text … be text ya`). Plain `.pya` is reserved for the
+glyph Pyac form, which is the language itself. The splitter emits `.en.pya`; the
+assembler accepts either on read. `docs/pyash-vliw-decode-and-dispatch.md` extends
+the same convention to other languages (`.fr.pya`, `.zh.pya`).
 
 That command is **byte-identical** to the published volume, and
 `crates/pyac/tests/dictionary_compile.rs` is the gate on it. If it ever stops
@@ -112,7 +118,7 @@ cargo build --release
 cargo test --release                       # green with no volume present
 
 # the dictionary cycle
-cargo run --release --bin pyac-dictionary -- compile dictionary/reference.pya /tmp/v.pyac
+cargo run --release --bin pyac-dictionary -- compile dictionary/shard /tmp/v.pyac
 cargo run --release --bin pyac-dictionary -- verify  /tmp/v.pyac
 cargo run --release --bin pyac-dictionary -- decode  /tmp/v.pyac > v.json
 cargo run --release --bin pyac-dictionary -- build   /tmp/v.pyac < v.json
@@ -196,8 +202,17 @@ Do the work that was asked, in this repository. If a prerequisite turns out to b
 missing and lives in `pyash`, say so and stop rather than importing a subtree.
 The extraction is deliberate and narrow; keeping it narrow is the work.
 
-When a change touches the ISA, the volume format, or the word codec, run the full
-suite with a real volume first:
+## Commit when a change is done
+
+A major change is not finished until it is committed. Leaving a finished change
+uncommitted in the working tree means the next session sees two unrelated changes
+mixed together and cannot tell which tests belong to which. After a significant
+change that passes its gates — a format change, a rename that touches many files,
+a doc reconciliation — commit it with a message that states the *why*, and keep
+unrelated changes in separate commits.
+
+Before committing a change that touches the ISA, the volume format, or the word
+codec, run the full suite with a real volume:
 
 ```sh
 cargo test --release

@@ -1,4 +1,4 @@
-//! Parse the authored dictionary `.pya` source into a build request.
+//! Parse the authored dictionary `.en.pya` source into a build request.
 //!
 //! This is the bootstrap step: `pyac-dictionary compile` reads the source
 //! directly, so regenerating the volume needs no JavaScript. It replaces
@@ -6,7 +6,7 @@
 //!
 //! # The source is records, not programs
 //!
-//! Every line of `reference.pya` is one of:
+//! Every line of `reference.en.pya` is one of:
 //!
 //! ```text
 //! su name lyin kwon ob text "…" be text ya                       profile marker

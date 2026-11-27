@@ -5,7 +5,7 @@ indexes directly in the raw `.pyac` file. Profile v2 and v3 remain readable
 through a seek-and-scan compatibility path; those legacy profiles do not get
 runtime-built indexes.
 The accepted-vocabulary source is published in
-`dictionary/reference.pya`; its source marker remains profile
+`dictionary/reference.en.pya`; its source marker remains profile
 v3 for the established entry-record grammar. Rust compiles it into the current
 v4 runtime volume, `dictionary/reference.pyac`. Both contain
 64,595 entries. The v4 volume contains 4,101,061 codelets and is 131,233,984
@@ -302,11 +302,11 @@ The author-facing interface is `pyash dictionary volume`. It imports a
 Pyash-source file, builds/replaces a compiled volume, and uses the Rust binary
 for inspection, lookup, definition reads, and throughput measurement. The
 full reference is generated from canonical vocabulary catalogs on `dev-vocab`;
-after a vocabulary update, regenerate `reference.pya` there, sync that source
+after a vocabulary update, regenerate `reference.en.pya` there, sync that source
 to the runtime worktree, and rebuild the compiled volume:
 
 ```sh
-pyash dictionary volume build from dictionary/reference.pya to dictionary/reference.pyac
+pyash dictionary volume build from dictionary/reference.en.pya to dictionary/reference.pyac
 pyash dictionary volume inspect dictionary/reference.pyac
 pyash dictionary forecast
 pyash dictionary n:07285306-n
@@ -391,7 +391,7 @@ the next regeneration. Use `command/reference_dictionary.mjs`:
 
 | Command | Effect |
 | --- | --- |
-| `npm run dictionary:rebuild` | regenerate `reference.pya` and rebuild `reference.pyac` |
+| `npm run dictionary:rebuild` | regenerate `reference.en.pya` and rebuild `reference.pyac` |
 | `npm run dictionary:check` | regenerate into a scratch directory and fail if the committed artifacts are stale |
 | `npm run dictionary:verify` | read every canonical key back from the volume |
 | `npm run dictionary:gloss -- "wa" "text"` | set an authored English gloss, then rebuild |

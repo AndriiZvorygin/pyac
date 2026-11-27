@@ -19,17 +19,50 @@
 //!
 //! # The manifest
 //!
-//! `00-manifest.pya` carries the profile marker, the metadata sentence, and one
-//! row per content shard naming its file, digest, entry count and maximum layer.
-//! Assembly is: read the manifest, concatenate the named shards in order, close
-//! with `prah`. A shard with no manifest entry is ignored, so a stray file in the
-//! directory cannot silently change the vocabulary.
+//! `00-manifest.en.pya` carries the profile marker, the metadata sentence, and
+//! one row per content shard naming its file, digest, entry count and maximum
+//! layer. Assembly is: read the manifest, concatenate the named shards in order,
+//! close with `prah`. A shard with no manifest entry is ignored, so a stray file
+//! in the directory cannot silently change the vocabulary.
+//!
+//! # Two source forms, two extensions
+//!
+//! The records here are English-form Pyash (`su name … ob text … be text ya`),
+//! so they carry `.en.pya`. The plain `.pya` extension is reserved for the glyph
+//! Pyac form, which is the language, not a rendering of it. The splitter emits
+//! `.en.pya`; assembly accepts either extension on read, so a directory written
+//! before the convention still assembles.
 
 use std::collections::BTreeMap;
 use std::fmt::{Display, Formatter};
 
+/// The English-form Pyash source extension.
+pub const EN_SOURCE_EXT: &str = "en.pya";
+
+/// The glyph Pyac source extension, which the English form is never written as.
+pub const PYAC_SOURCE_EXT: &str = "pya";
+
 /// The name of the manifest file within a shard directory.
-pub const MANIFEST_FILE: &str = "00-manifest.pya";
+pub const MANIFEST_FILE: &str = "00-manifest.en.pya";
+
+/// The flat file a single-shard or whole-dictionary source is named.
+///
+/// The shipped vocabulary is a shard directory, so this names the assembled
+/// whole rather than a committed file.
+pub const REFERENCE_SOURCE_FILE: &str = "reference.en.pya";
+
+/// The file name for one content shard.
+pub fn shard_file_name(name: &str) -> String {
+    format!("{name}.{EN_SOURCE_EXT}")
+}
+
+/// Paths to try for a shard named `name`, in read order.
+///
+/// `.en.pya` first because that is what the splitter emits, then the bare `.pya`
+/// the directory may still carry from before the extension convention.
+pub fn shard_candidates(name: &str) -> [String; 2] {
+    [shard_file_name(name), format!("{name}.{PYAC_SOURCE_EXT}")]
+}
 
 /// The glyph layers the vocabulary is organised by, in ascending order.
 ///

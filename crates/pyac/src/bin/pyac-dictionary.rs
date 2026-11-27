@@ -106,7 +106,7 @@ struct OperationResultInput {
 }
 
 fn usage() -> &'static str {
-    "usage:\n  pyac-dictionary compile <source.pya> <volume.pyac>  # the bootstrap; no JSON, no JS.\n  pyac-dictionary build <volume.pyac>  # Build JSON request is read from stdin.\n  pyac-dictionary inspect <volume.pyac>\n  pyac-dictionary surface <volume.pyac> <language> <surface>\n  pyac-dictionary surface-entries <volume.pyac> <language> <surface>\n  pyac-dictionary source <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary source-entries <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary key <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary entry <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary decode <volume.pyac>  # edit -> build request on stdout.\n  pyac-dictionary verify <volume.pyac>  # every canonical key must read back.\n  pyac-dictionary export <volume.pyac>  # every key with its English forms.\n  pyac-dictionary benchmark <volume.pyac> <iterations> surface <language> <surface>"
+    "usage:\n  pyac-dictionary compile <source.en.pya|shard-dir> <volume.pyac>  # the bootstrap; no JSON, no JS.\n  pyac-dictionary build <volume.pyac>  # Build JSON request is read from stdin.\n  pyac-dictionary inspect <volume.pyac>\n  pyac-dictionary surface <volume.pyac> <language> <surface>\n  pyac-dictionary surface-entries <volume.pyac> <language> <surface>\n  pyac-dictionary source <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary source-entries <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary key <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary entry <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary decode <volume.pyac>  # edit -> build request on stdout.\n  pyac-dictionary verify <volume.pyac>  # every canonical key must read back.\n  pyac-dictionary export <volume.pyac>  # every key with its English forms.\n  pyac-dictionary benchmark <volume.pyac> <iterations> surface <language> <surface>"
 }
 
 fn binary_bytes() -> io::Result<u64> {
@@ -238,8 +238,20 @@ fn assemble_shard_directory(directory: &Path) -> io::Result<String> {
         .map_err(|error| io::Error::other(format!("{}: {error}", error.code())))?;
     let mut contents = std::collections::BTreeMap::new();
     for record in records {
-        let path = directory.join(format!("{}.pya", record.name));
-        let body = fs::read_to_string(&path)?;
+        let body = pyac::dictionary::shard_candidates(&record.name)
+            .into_iter()
+            .find_map(|file| fs::read_to_string(directory.join(file)).ok())
+            .ok_or_else(|| {
+                io::Error::new(
+                    io::ErrorKind::NotFound,
+                    format!(
+                        "shard {} is named by the manifest but neither .{} nor .{} exists",
+                        record.name,
+                        pyac::dictionary::EN_SOURCE_EXT,
+                        pyac::dictionary::PYAC_SOURCE_EXT
+                    ),
+                )
+            })?;
         contents.insert(record.name.clone(), body);
     }
     assemble_shards(&manifest, &contents)
@@ -272,7 +284,7 @@ fn load_layer_index() -> io::Result<LayerIndex> {
 /// Turn a parsed source directly into a volume, without the JSON round trip.
 ///
 /// `build` takes a request over stdin so scripts can edit it; `compile` reads the
-/// `.pya` source and calls this. Both end at the same encoder, so the two paths
+/// `.en.pya` source and calls this. Both end at the same encoder, so the two paths
 /// cannot drift.
 fn source_to_volume(source: DictionarySource) -> DictionaryVolume {
     DictionaryVolume {
@@ -468,7 +480,7 @@ fn execute(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
             // The bootstrap: source in, volume out, no intermediate JSON and no
             // JavaScript. `build` remains for scripts that want to edit a request.
             //
-            // The first argument is either a single `.pya` file or a shard
+            // The first argument is either a single `.en.pya` file or a shard
             // directory: a directory is assembled from its manifest first, so one
             // code path parses both.
             let source_path = Path::new(&args[1]);
@@ -511,7 +523,7 @@ fn execute(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
             for (name, body) in &set.shards {
                 // A shard name may carry a directory (`dispatch/<key>`), so its
                 // parent is created before the write.
-                let path = out_dir.join(format!("{name}.pya"));
+                let path = out_dir.join(pyac::dictionary::shard_file_name(name));
                 if let Some(parent) = path.parent() {
                     fs::create_dir_all(parent)?;
                 }

@@ -50,7 +50,7 @@ dictionary gates skip until one exists; see `dictionary/README.md`.
 ```sh
 # compile the authored source into the runtime volume
 cargo run --release --bin pyac-dictionary -- \
-  compile dictionary/reference.pya dictionary/reference.pyac
+  compile dictionary/shard dictionary/reference.pyac
 
 # what the volume says about a word
 cargo run --release --bin pyac-dictionary -- surface-entries \
