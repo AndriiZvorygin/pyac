@@ -16,7 +16,7 @@ dictionary/
     atoms.pya               7,840 atoms, 17.9 MB
     compounds-16.pya        compounds whose deepest word needs 16 glyphs
     compounds-19.pya        …then 19, 24, 28, 32
-    dispatch/<key>.pya      ceremony signatures, one file per entry
+    dispatch/<verb>.pya     ceremony signatures, one file per verb
   reference.pya             optional whole-source convenience file (git-ignored)
   reference.pyac            the compiled volume (git-ignored)
 ```
@@ -39,9 +39,10 @@ offsets:
   96 entries carry signatures (1,832 records, 1.16 MB); split per entry the
   median file is 3 KB and an API change touches only what it changes.
 
-  Keyed by entry, not by verb: every signature in the vocabulary uses the same
-  verb, so a `<verb>.pya` layout would collapse to one file. Assembly places
-  dispatch last and nothing in the vocabulary depends on it.
+  Named for the **verb**, not the entry: a signature's verb *is* its entry's
+  spelling (measured: 96 entries, 96 distinct verbs, 1:1), so `dispatch/clac.pya`
+  is "the dispatch the operation `clac` accepts". Assembly places dispatch last
+  and nothing in the vocabulary depends on it.
 
 Measured shard sizes: atoms 17.4 MB, compounds-16 15.9 MB, -19 23.9 MB,
 -24 19.9 MB, -28 8.9 MB, -32 14.3 MB, plus 96 dispatch files totalling 1.16 MB.

@@ -379,13 +379,18 @@ fn shard_name_for(block: &EntryBlock) -> (String, u16) {
     (format!("compounds-{layer}"), layer)
 }
 
-/// A filesystem stem for an entry key.
+/// A filesystem stem for a dispatch file, named for its verb.
+///
+/// Every signature in the vocabulary uses its entry's own spelling as its verb —
+/// measured, 96 entries and 96 distinct verbs with a 1:1 mapping — so the verb
+/// stem and the key stem are the same string. Naming the file for the verb says
+/// what the file is: the dispatch an operation named `<verb>` accepts.
 ///
 /// Pyac spellings are lowercase letters, digits and spaces, so joining on `_` is
 /// lossless enough to read and needs no escaping. The manifest records the true
 /// key inside each row, so the stem is a convenience, not the identity.
-fn file_stem(key: &str) -> String {
-    key.split_whitespace().collect::<Vec<_>>().join("_")
+fn verb_stem(verb: &str) -> String {
+    verb.split_whitespace().collect::<Vec<_>>().join("_")
 }
 
 /// One entry block: the `entry` sentence plus every record that follows it.
@@ -605,16 +610,19 @@ fn split_blocks(blocks: Vec<EntryBlock>, source: &str) -> Result<ShardSet, Shard
         manifest_lines.push(format!("su text {} ob text {} ya", json(name), json(&row)));
         shards.push((name.clone(), body));
     }
-    // Dispatch last, one file per entry. No vocabulary entry depends on a
-    // signature, and a signature set belongs to the entry it annotates. Grouped
-    // this way the median file is ~3 KB instead of one 1.16 MB blob, and an API
-    // change touches only the entries it actually changes.
+    // Dispatch last, one file per verb. No vocabulary entry depends on a
+    // signature, and each operation's signatures belong together. Grouped this
+    // way the median file is ~3 KB instead of one 1.16 MB blob, and an API change
+    // touches only the operations it actually changes.
+    //
+    // The map is keyed by entry, which is also the verb: a signature's verb is its
+    // entry's spelling, so one operation has one file.
     for (key, body) in &dispatch {
         let number = body
             .matches(" at text \"operation-signature\" be text ya")
             .count();
         let digest = shard_digest(body);
-        let name = format!("dispatch/{}", file_stem(key));
+        let name = format!("dispatch/{}", verb_stem(key));
         let row = format!(
             "{{\"name\":{},\"sha256\":{},\"entries\":{},\"maxLayer\":{}}}",
             json(&name),

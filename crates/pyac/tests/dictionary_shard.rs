@@ -274,3 +274,85 @@ fn dispatch_assembles_to_the_same_volume_as_the_whole_source() {
         "assembly lost or duplicated entry records"
     );
 }
+
+#[test]
+fn each_operation_has_exactly_one_verb_and_one_dispatch_file() {
+    // This is what makes `dispatch/<verb>.pya` the right naming. A signature's
+    // verb is its entry's spelling: measured, 96 entries carry signatures and
+    // there are 96 distinct verbs, with no entry holding two and no verb shared.
+    let Some(source) = source_text() else {
+        eprintln!("skipping: dictionary/reference.pya is absent");
+        return;
+    };
+    let set = split_source_with_layers(&source, &layer_index()).expect("the source splits");
+
+    // (entry key, verb words) for every signature record.
+    let mut pairs: Vec<(String, Vec<u16>)> = Vec::new();
+    for (name, body) in &set.shards {
+        if !name.starts_with("dispatch/") {
+            continue;
+        }
+        for line in body.lines() {
+            if !line.contains(" at text \"operation-signature\" be text ya") {
+                continue;
+            }
+            let Some(key) = line
+                .split("ob text \"")
+                .nth(1)
+                .and_then(|rest| rest.split('"').next())
+            else {
+                continue;
+            };
+            let Some(vector) = line.split(" from ve ").nth(1) else {
+                continue;
+            };
+            // `ve <count> <word> <word> ...`: the count is the run length, and
+            // the first word of the vector is the verb's own length.
+            let mut numbers = vector
+                .split_whitespace()
+                .filter_map(|t| t.parse::<u16>().ok());
+            let Some(_run_length) = numbers.next() else {
+                continue;
+            };
+            let Some(verb_length) = numbers.next() else {
+                continue;
+            };
+            let verb: Vec<u16> = numbers.take(verb_length as usize).collect();
+            if verb.len() == verb_length as usize {
+                pairs.push((key.to_owned(), verb));
+            }
+        }
+    }
+    assert!(!pairs.is_empty(), "found no signature records to check");
+
+    let mut entries: Vec<&str> = pairs.iter().map(|(key, _)| key.as_str()).collect();
+    entries.sort_unstable();
+    entries.dedup();
+    let mut verbs: Vec<Vec<u16>> = pairs.iter().map(|(_, verb)| verb.clone()).collect();
+    verbs.sort_unstable();
+    verbs.dedup();
+
+    assert_eq!(
+        entries.len(),
+        verbs.len(),
+        "{} entries carry signatures but there are {} distinct verbs; \
+         if these differ, `dispatch/<verb>.pya` would collide or fragment",
+        entries.len(),
+        verbs.len()
+    );
+
+    // Each entry must own exactly one verb, so its file is unambiguous.
+    let mut by_entry: std::collections::BTreeMap<&str, std::collections::BTreeSet<&Vec<u16>>> =
+        std::collections::BTreeMap::new();
+    for (key, verb) in &pairs {
+        by_entry.entry(key.as_str()).or_default().insert(verb);
+    }
+    for (key, set) in &by_entry {
+        assert_eq!(
+            set.len(),
+            1,
+            "entry {key:?} carries {} distinct verbs, so one file cannot name it",
+            set.len()
+        );
+    }
+}
