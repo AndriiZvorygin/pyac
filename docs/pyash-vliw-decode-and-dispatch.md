@@ -159,7 +159,7 @@ Two scales that are easy to confuse:
 `program/library/pyashWords.json` is a **deprecated historical asset** with 7,841
 rows. VLIW lowering still resolves vocabulary through it, which is why the
 encoder cannot represent most of the catalog. It is not the vocabulary
-reference; see [`pyashwords-deprecated.md`](pyashwords-deprecated.md).
+reference; see the deprecation note in the `pyash` checkout (`documentation/reference/pyashwords-deprecated.md`).
 
 Growing vocabulary as behavior eventually needs the executable namespace to
 become a persisted, queryable table, not an in-pack array.

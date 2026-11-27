@@ -9,6 +9,8 @@
 //! arbitrary: atoms form one shard, compounds group by glyph layer, no shard
 //! exceeds the git threshold, and no compound precedes a component.
 
+mod common;
+
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
@@ -355,4 +357,61 @@ fn each_operation_has_exactly_one_verb_and_one_dispatch_file() {
             set.len()
         );
     }
+}
+
+#[test]
+fn an_lfs_pointer_is_not_mistaken_for_a_volume() {
+    // A clone before `git lfs pull` has a ~134-byte pointer at the volume path.
+    // It exists as a file, so a bare `is_file()` accepts it, and the byte-identity
+    // gate then fails with "published 134 bytes" — which reads as an encoder
+    // defect rather than "the artifact is not fetched". The resolver must reject
+    // it so the gate skips, which is this repository's stated policy.
+    let directory = std::env::temp_dir().join(format!(
+        "pyac-lfs-pointer-{}-{:?}",
+        std::process::id(),
+        std::thread::current().id()
+    ));
+    std::fs::create_dir_all(&directory).expect("temp dir");
+
+    let pointer = directory.join("reference.pyac");
+    std::fs::write(
+        &pointer,
+        "version https://git-lfs.github.com/spec/v1\n\
+         oid sha256:e3600afdb742608d40c8b045252c3993995399d5af382a134a4735118baa5806\n\
+         size 131385760\n",
+    )
+    .expect("write pointer");
+
+    // Same shape a real volume has, but far too small to be one.
+    let tiny = directory.join("tiny.pyac");
+    std::fs::write(&tiny, b"PYACVLIW".repeat(4)).expect("write tiny header");
+
+    // A file with the right size class but the wrong magic.
+    let wrong = directory.join("wrong.pyac");
+    let mut bytes = vec![0u8; 2 * 1024 * 1024];
+    bytes[..8].copy_from_slice(b"NOTVLIW!");
+    std::fs::write(&wrong, &bytes).expect("write wrong magic");
+
+    for candidate in [&pointer, &tiny, &wrong] {
+        // The resolver is exercised through the environment, which is the highest
+        // priority source and so the one a caller would use to point at a volume.
+        let previous = std::env::var_os("PYAC_REFERENCE_VOLUME");
+        // SAFETY: single-threaded within this test; the variable is restored below.
+        unsafe { std::env::set_var("PYAC_REFERENCE_VOLUME", candidate) };
+        let resolved = common::reference_volume();
+        match previous {
+            Some(value) => unsafe { std::env::set_var("PYAC_REFERENCE_VOLUME", value) },
+            None => unsafe { std::env::remove_var("PYAC_REFERENCE_VOLUME") },
+        }
+        // A fallback candidate may still resolve if one exists beside the
+        // workspace; what must not happen is the bad file itself being returned.
+        assert_ne!(
+            resolved.as_deref(),
+            Some(candidate.as_path()),
+            "{} was accepted as a volume",
+            candidate.display()
+        );
+    }
+
+    std::fs::remove_dir_all(&directory).ok();
 }
