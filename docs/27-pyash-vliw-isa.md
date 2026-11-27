@@ -185,8 +185,10 @@ backend even if it can be printed as readable Pyash.
 ## 5.1 Runtime signature dispatch
 
 Dispatch has two levels. The sentence mood selects a class table; within the
-class, the key is the ordered be-verb HNUCs plus grammatical-case/value-type
-pairs sorted by unsigned HNUC.
+class, the key is the ordered be-verb HNUCs plus grammatical-case/noun-class
+pairs sorted by unsigned HNUC. At the runtime layer each noun class is encoded
+as a value-type descriptor that also carries quote sort, scalar width, and
+scalar/vector form.
 
 Level one is the six moods:
 
@@ -204,7 +206,7 @@ closes a definition at load and an invoked frame at run time. `ya` initializes
 declarations and frame slots. Only the `do` class is consulted for execution.
 
 Level two is keyed by verb. The execution (`do`) key is ordered be-verb HNUCs
-plus `(case, value-type)` pairs sorted by unsigned HNUC, so case source order
+plus `(case, noun-class)` pairs sorted by unsigned HNUC, so case source order
 does not affect lookup. Mood is not part of that key because the class is
 already selected; literals and payload values are excluded. The reference
 dictionary's mood-qualified operation key is the flattened global view across

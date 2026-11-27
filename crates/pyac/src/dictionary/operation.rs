@@ -44,10 +44,10 @@
 //! produce are the same dispatch target.
 //!
 //! Input versus output is the *case* axis, not the mood. Reading a mood as a
-//! direction is the mistake this note exists to prevent. Today
-//! `dictionary/operation_signatures.mjs` emits `results: []`, so every real
-//! signature is input-only; the field is kept because the wire format and the
-//! volume carry it.
+//! direction is the mistake this note exists to prevent. Today the shipped
+//! dispatch shards (`dictionary/shard/dispatch/`) declare no results, so every
+//! real signature is input-only; the field is kept because the wire format and
+//! the volume carry it.
 //!
 //! # Surface labels are vocabulary, and today they are not
 //!
@@ -181,7 +181,7 @@ pub(super) fn validate_signature(signature: &OperationSignature) -> Option<&'sta
     if signature.arguments.iter().any(|argument| {
         argument.case_type.grammatical_case.is_empty() || argument.case_type.noun_class.is_empty()
     }) {
-        return Some("each argument must declare a case and value type");
+        return Some("each argument must declare a case and noun class");
     }
     if signature
         .arguments

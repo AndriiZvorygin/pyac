@@ -25,9 +25,9 @@ class is already selected. The reference dictionary's mood-qualified operation
 key is the global view across all classes.
 
 The execution key is ordered be-verb HNUCs plus
-`[(case HNUC, value-type descriptor)]`, sorted by ascending unsigned HNUC for
-comparison. Type descriptors preserve quote sort, scalar width, and scalar or
-vector form. Compound-verb HNUCs retain their encoded order. Sorting changes
+`[(case HNUC, noun-class descriptor)]`, sorted by ascending unsigned HNUC for
+comparison. The packed value-type descriptor is the noun class plus quote sort,
+scalar width, and scalar or vector form. Compound-verb HNUCs retain their encoded order. Sorting changes
 only the temporary key; codelet bytes, payloads, and phrase boundaries stay
 unchanged. Identifiers and literal values remain values.
 

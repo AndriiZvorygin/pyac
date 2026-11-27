@@ -83,7 +83,7 @@ new shape and needs no new mechanism. A new value family is runtime work.
 ## 5. Dispatch
 
 Dispatch is two levels. The sentence mood selects a class table; within the
-class, the key is the ordered verb HNUCs plus `(case, value-type)` pairs.
+class, the key is the ordered verb HNUCs plus `(case, noun-class)` pairs.
 
 Level one is the six moods (exactly `is_mood`):
 
@@ -112,13 +112,18 @@ buffer with read-time validation.
 
 The reference dictionary already carries the descriptive table. In
 `crates/pyac/src/dictionary/operation.rs`, `OperationSignature { verb, mood,
-arguments, results }` has `OperationArgument { grammatical_case, value_type,
-name, description }` and `OperationResult { value_type, name, description }`,
-with validation requiring a name and description for every argument and result.
+arguments, results }` has `OperationParameter { case_type: ArgumentSlot {
+grammatical_case, noun_class }, tag_label, descriptive_specification }` and
+`OperationResult { noun_class, tag_label, descriptive_specification }`, with
+validation requiring a tag label and descriptive specification for every
+parameter and result. The JSON wire keeps the legacy key spellings
+(`value_type`, `name`, `description`) as a published contract with the source
+producer; those keys carry the same values as `noun_class`, `tag_label`, and
+`descriptive_specification`.
 
 That key includes mood because the reference volume is the global view across
 all classes; the execution table is its `do`-only projection. The volume is
-`dictionary/reference.pyac`, built from `reference.pya`. It
+`dictionary/reference.pyac`, built from `reference.en.pya`. It
 keeps multiple named results, so the runtime's single destination fold is the
 part that should eventually adopt the dictionary's shape, not the reverse.
 
@@ -150,7 +155,7 @@ exists for the first; the loop does not yet exist for the rest.
 
 Two scales that are easy to confuse:
 
-- the **lexical catalog** is `dictionary/reference.pya` and its
+- the **lexical catalog** is `dictionary/reference.en.pya` and its
   compiled `reference.pyac`: the vocabulary reference, generated on `dev-vocab`,
   never hand-edited. It carries 64,593 keys and 85,553 English surfaces;
 - the **executable namespace** per programlet is bounded (64 routines, 8
