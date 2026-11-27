@@ -40,10 +40,10 @@ whole volume byte-identically:
 
 ```sh
 # English form
-cargo run --release --bin pyac-dictionary -- render dictionary/reference.pyac > /tmp/r.en.pya
+cargo run --release --bin pyac-dictionary -- decode dictionary/reference.pyac > /tmp/r.en.pya
 cargo run --release --bin pyac-dictionary -- compile /tmp/r.en.pya /tmp/r.pyac && cmp /tmp/r.pyac dictionary/reference.pyac
 
-# glyph form (via the library; `render_pyac_source`, gated by tests/dictionary_pyac.rs)
+# glyph form (via the library; `decode_pyac_source`, gated by tests/dictionary_pyac.rs)
 ```
 
 ## The commands you will use
@@ -59,7 +59,7 @@ cargo run --release --bin pyac-dictionary -- entry   dictionary/reference.pyac 0
 cargo run --release --bin pyac-dictionary -- export  dictionary/reference.pyac
 
 # the volume back to source, and back again: both byte-identical
-cargo run --release --bin pyac-dictionary -- render dictionary/reference.pyac /tmp/back.en.pya
+cargo run --release --bin pyac-dictionary -- decode dictionary/reference.pyac /tmp/back.en.pya
 cargo run --release --bin pyac-dictionary -- compile /tmp/back.en.pya /tmp/back.pyac
 ```
 

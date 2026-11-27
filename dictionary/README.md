@@ -115,32 +115,32 @@ cargo test --release --test dictionary_roundtrip
 cargo test --release --test dictionary_volume
 ```
 
-To edit the volume, edit its source: `render` it, change the text, `compile` it
+To edit the volume, edit its source: `decode` it, change the text, `compile` it
 back. The next section is that loop. There is no JSON form of the dictionary and
 no command that produces one.
 
-## The source round-trip: `render`
+## The source round-trip: `decode`
 
-`render` is the inverse of `compile` — it turns a volume back into source text:
+`decode` is the inverse of `compile` — it turns a volume back into source text:
 
 ```sh
 # write to a file; only the JSON report reaches the terminal
-cargo run --release --bin pyac-dictionary -- render dictionary/reference.pyac /tmp/back.en.pya
+cargo run --release --bin pyac-dictionary -- decode dictionary/reference.pyac /tmp/back.en.pya
 cargo run --release --bin pyac-dictionary -- compile /tmp/back.en.pya /tmp/back.pyac
 cmp dictionary/reference.pyac /tmp/back.pyac   # identical
 
 # the glyph Pyac form
-cargo run --release --bin pyac-dictionary -- render dictionary/reference.pyac /tmp/back.pya --glyph
+cargo run --release --bin pyac-dictionary -- decode dictionary/reference.pyac /tmp/back.pya --glyph
 ```
 
-Pass an output path: a render is 100 MB, and piping it to a terminal is how it
+Pass an output path: a decode is 100 MB, and piping it to a terminal is how it
 ends up in a transcript. With no output path the source goes to stdout, so
-`render … > file` also works.
+`decode … > file` also works.
 
 A key is spelled back through the word codec, text stays a JSON string literal
 in the English form (`zi.kyit.` frames in the glyph form), and every record kind
 is emitted in the order `parse_source` reads it. `crates/pyac/tests/dictionary_render.rs`
-and `crates/pyac/tests/dictionary_pyac.rs` are the gates: both render the
+and `crates/pyac/tests/dictionary_pyac.rs` are the gates: both decode the
 published volume, recompile it, and require the same bytes.
 
 ## Where the entries' evidence comes from

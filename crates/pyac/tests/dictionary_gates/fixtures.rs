@@ -21,8 +21,8 @@ use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 
 use pyac::dictionary::{
-    DictionarySource, DictionaryVolume, LayerIndex, assemble_shards, decode_dictionary,
-    encode_dictionary, parse_manifest, parse_source, split_source_with_layers,
+    DictionarySource, DictionaryVolume, LayerIndex, assemble_shards, encode_dictionary,
+    parse_manifest, parse_source, read_volume, split_source_with_layers,
 };
 
 /// The crate that owns this test.
@@ -103,9 +103,7 @@ pub fn compiled_source() -> Option<&'static [u8]> {
 pub fn volume() -> Option<&'static DictionaryVolume> {
     static VOLUME: OnceLock<Option<DictionaryVolume>> = OnceLock::new();
     VOLUME
-        .get_or_init(|| {
-            Some(decode_dictionary(std::fs::File::open(reference_volume()?).ok()?).ok()?)
-        })
+        .get_or_init(|| Some(read_volume(std::fs::File::open(reference_volume()?).ok()?).ok()?))
         .as_ref()
 }
 
@@ -127,7 +125,7 @@ pub fn reference_volume() -> Option<&'static Path> {
 pub fn rendered_source() -> Option<&'static str> {
     static RENDERED: OnceLock<Option<String>> = OnceLock::new();
     RENDERED
-        .get_or_init(|| Some(pyac::dictionary::render_source(volume()?).ok()?))
+        .get_or_init(|| Some(pyac::dictionary::decode_source(volume()?).ok()?))
         .as_deref()
 }
 

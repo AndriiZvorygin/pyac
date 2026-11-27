@@ -21,15 +21,15 @@ mod wire;
 mod words;
 
 pub use compile::source_to_volume;
-pub use decode::decode_dictionary;
+pub use decode::read_volume;
 pub use index::DictionaryIndex;
 pub use model::{DictionaryEntry, DictionaryIndexError, LexicalForm, SourceGloss, SourceLink};
 pub use operation::{
     ArgumentSlot, OperationParameter, OperationResult, OperationSignature, OperationSignatureKey,
 };
-pub use pyac::render_pyac_source;
+pub use pyac::decode_pyac_source;
 pub use reader::{DictionaryFileReader, DictionaryReadError, DictionarySection};
-pub use render::{RenderError, render_source};
+pub use render::{DecodeError, decode_source};
 pub use shard::{
     BEYOND_LAST_LAYER, EN_SOURCE_EXT, LAYERS, LayerIndex, MANIFEST_FILE, PYAC_SOURCE_EXT,
     REFERENCE_SOURCE_FILE, ShardError, ShardRecord, ShardSet, assemble_shards, parse_manifest,

@@ -11,7 +11,7 @@
 use pyac::dictionary::{
     ArgumentSlot, DictionaryMetadata, DictionaryVolume, DictionaryVolumeEntry, LexicalForm,
     OperationParameter, OperationResult, OperationSignature, SourceGloss, SourceLink,
-    encode_dictionary, encode_text_sentence, parse_source, render_source,
+    decode_source, encode_dictionary, encode_text_sentence, parse_source,
 };
 
 const KEY: [u16; 2] = [0xa96a, 0x6c22]; // tlat kwon
@@ -69,7 +69,7 @@ fn round_trips(name: &str, volume: DictionaryVolume) {
     let bytes = encode_dictionary(&volume).expect("the case encodes");
 
     // English form.
-    let english = render_source(&volume).expect("renders English");
+    let english = decode_source(&volume).expect("renders English");
     let reparsed = parse_source(&english).unwrap_or_else(|error| {
         panic!("{name}: English source does not parse: {error}\n{english}")
     });

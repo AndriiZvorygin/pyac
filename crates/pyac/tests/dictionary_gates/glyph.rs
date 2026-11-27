@@ -1,4 +1,4 @@
-//! The Pyac renderer gate: `render_pyac_source` re-encodes to the published codelets.
+//! The Pyac renderer gate: `decode_pyac_source` re-encodes to the published codelets.
 //!
 //! Each rendered line is a record (`gi <key> na <value><case> … hwus li`). This
 //! encodes every line with the ported tablet parser and compares the flattened
@@ -29,7 +29,7 @@ fn rendering_as_pyac_and_re_encoding_reproduces_the_published_codelets() {
         .expect("entries section")
         .end;
 
-    let text = pyac::dictionary::render_pyac_source(model).expect("render pyac");
+    let text = pyac::dictionary::decode_pyac_source(model).expect("render pyac");
 
     // A glyph render must not *begin* a line with the English subject form. The
     // line start, not a substring: a surface value may contain "su ".

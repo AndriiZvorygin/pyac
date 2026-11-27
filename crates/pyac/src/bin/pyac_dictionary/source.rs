@@ -1,4 +1,4 @@
-//! Building and rendering a volume.
+//! Compiling a volume, and decoding it back to source text.
 
 use super::*;
 
@@ -74,10 +74,10 @@ pub(super) fn shard(args: &[String]) -> Result<Value, Box<dyn std::error::Error>
     }))
 }
 
-pub(super) fn render(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
+pub(super) fn decode(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
     // The inverse of `compile`: a volume back to source text. With one
     // operand the source goes to stdout and the report to stderr; with an
-    // output path the source is written there, so a 101 MB render never
+    // output path the source is written there, so a 101 MB decode never
     // lands in a transcript. `--glyph` selects the Pyac form; the default
     // is the English form `.en.pya` reads.
     let operands: Vec<&String> = args
@@ -89,23 +89,23 @@ pub(super) fn render(args: &[String]) -> Result<Value, Box<dyn std::error::Error
     }
     let glyph = args.iter().any(|argument| argument == "--glyph");
     let path = Path::new(operands[1]);
-    let volume = decode_dictionary(File::open(path)?)?;
+    let volume = read_volume(File::open(path)?)?;
     let source = if glyph {
-        pyac::dictionary::render_pyac_source(&volume)?
+        pyac::dictionary::decode_pyac_source(&volume)?
     } else {
-        pyac::dictionary::render_source(&volume)?
+        pyac::dictionary::decode_source(&volume)?
     };
     match operands.get(2) {
         Some(output) => {
             atomic_write(Path::new(output), source.as_bytes())?;
         }
         None => {
-            // stdout for the source, so `render … > file` is correct.
+            // stdout for the source, so `decode … > file` is correct.
             print!("{source}");
         }
     }
     Ok(json!({
-        "command": "render", "path": operands[1],
+        "command": "decode", "path": operands[1],
         "form": if glyph { "pya" } else { "en.pya" },
         "output": operands.get(2).copied(),
         "entries": volume.entries.len(),

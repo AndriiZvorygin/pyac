@@ -4,7 +4,7 @@
 //! `source -> volume -> source` in Rust, with no JSON in between:
 //!
 //! ```text
-//! reference.pyac --decode--> model --render--> reference.en.pya --compile--> reference.pyac
+//! reference.pyac --decode--> model --decode--> reference.en.pya --compile--> reference.pyac
 //! ```
 //!
 //! The gate is byte identity: `dictionary_render.rs` renders the published volume,
@@ -33,14 +33,14 @@ use super::volume::{DictionaryVolume, DictionaryVolumeEntry};
 
 /// Why a volume could not be rendered.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum RenderError {
+pub enum DecodeError {
     /// An HNUC in a key has no spelling.
     UnspellableKey { hnuc: u16 },
     /// A key is empty, so it has no spelling at all.
     EmptyKey,
 }
 
-impl std::fmt::Display for RenderError {
+impl std::fmt::Display for DecodeError {
     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::UnspellableKey { hnuc } => {
@@ -51,17 +51,21 @@ impl std::fmt::Display for RenderError {
     }
 }
 
-impl std::error::Error for RenderError {}
+impl std::error::Error for DecodeError {}
 
 /// The profile marker kind the source opens with.
 const SOURCE_MARKER: &str = "pyac-vliw-dictionary/3";
 
-/// Render a whole volume to `.en.pya` source text.
-pub fn render_source(volume: &DictionaryVolume) -> Result<String, RenderError> {
-    render(volume)
+/// Decode a whole volume to `.en.pya` source text.
+///
+/// **decode**, Pyac key `hkom tyac` (`pyash dict from pyac "hkom tyac"`): *"convert
+/// code into ordinary language"*. The volume is the code; the source text is the
+/// ordinary language. This is the inverse of `compile`.
+pub fn decode_source(volume: &DictionaryVolume) -> Result<String, DecodeError> {
+    write_source(volume)
 }
 
-fn render(volume: &DictionaryVolume) -> Result<String, RenderError> {
+fn write_source(volume: &DictionaryVolume) -> Result<String, DecodeError> {
     let mut out = String::new();
     let _ = writeln!(
         out,
@@ -78,13 +82,13 @@ fn render(volume: &DictionaryVolume) -> Result<String, RenderError> {
         text(SOURCE_MARKER)
     );
     for entry in &volume.entries {
-        render_entry(entry, &mut out)?;
+        write_entry(entry, &mut out)?;
     }
     out.push_str("prah\n");
     Ok(out)
 }
 
-fn render_entry(entry: &DictionaryVolumeEntry, out: &mut String) -> Result<(), RenderError> {
+fn write_entry(entry: &DictionaryVolumeEntry, out: &mut String) -> Result<(), DecodeError> {
     let key = text(&spell_key(&entry.key)?);
     let _ = writeln!(
         out,
@@ -229,15 +233,15 @@ fn word_list(words: &[u16]) -> String {
 }
 
 /// Spell an HNUC key back to the source's space-joined glyph form.
-fn spell_key(key: &[u16]) -> Result<String, RenderError> {
+fn spell_key(key: &[u16]) -> Result<String, DecodeError> {
     if key.is_empty() {
-        return Err(RenderError::EmptyKey);
+        return Err(DecodeError::EmptyKey);
     }
     let mut out = String::new();
     for hnuc in key {
         let mut buffer = [0u8; 8];
         let length = pyac_vliw_core::word_code::decode(*hnuc, &mut buffer)
-            .map_err(|_| RenderError::UnspellableKey { hnuc: *hnuc })?;
+            .map_err(|_| DecodeError::UnspellableKey { hnuc: *hnuc })?;
         if !out.is_empty() {
             out.push(' ');
         }

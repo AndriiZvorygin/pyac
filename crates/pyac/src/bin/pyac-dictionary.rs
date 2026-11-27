@@ -5,8 +5,8 @@ use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 use pyac::dictionary::{
-    DictionaryFileReader, LAYERS, LayerIndex, MANIFEST_FILE, assemble_shards, decode_dictionary,
-    encode_dictionary, parse_manifest, parse_source, split_source_with_layers,
+    DictionaryFileReader, LAYERS, LayerIndex, MANIFEST_FILE, assemble_shards, encode_dictionary,
+    parse_manifest, parse_source, read_volume, split_source_with_layers,
 };
 use serde_json::{Value, json};
 
@@ -18,7 +18,7 @@ mod query;
 mod source;
 
 fn usage() -> &'static str {
-    "usage:\n  pyac-dictionary compile <source.en.pya|shard-dir> <volume.pyac>  # source in, volume out: the whole cycle.\n  pyac-dictionary inspect <volume.pyac>\n  pyac-dictionary surface <volume.pyac> <language> <surface>\n  pyac-dictionary surface-entries <volume.pyac> <language> <surface>\n  pyac-dictionary source <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary source-entries <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary key <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary entry <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary render <volume.pyac> [out.pya] [--glyph]  # the inverse of compile; stdout if no path.\n  pyac-dictionary verify <volume.pyac>  # every canonical key must read back.\n  pyac-dictionary export <volume.pyac>  # every key with its English forms.\n  pyac-dictionary benchmark <volume.pyac> <iterations> surface <language> <surface>"
+    "usage:\n  pyac-dictionary compile <source.en.pya|shard-dir> <volume.pyac>  # source in, volume out: the whole cycle.\n  pyac-dictionary inspect <volume.pyac>\n  pyac-dictionary surface <volume.pyac> <language> <surface>\n  pyac-dictionary surface-entries <volume.pyac> <language> <surface>\n  pyac-dictionary source <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary source-entries <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary key <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary entry <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary decode <volume.pyac> [out.pya] [--glyph]  # the inverse of compile: the volume as source text.\n  pyac-dictionary verify <volume.pyac>  # every canonical key must read back.\n  pyac-dictionary export <volume.pyac>  # every key with its English forms.\n  pyac-dictionary benchmark <volume.pyac> <iterations> surface <language> <surface>"
 }
 
 fn binary_bytes() -> io::Result<u64> {
@@ -140,7 +140,7 @@ fn execute(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
     let output = match command {
         "compile" => source::compile(args)?,
         "shard" => source::shard(args)?,
-        "render" => source::render(args)?,
+        "decode" => source::decode(args)?,
         "inspect" => query::inspect(args)?,
         "surface" => query::surface(args)?,
         "surface-entries" => query::surface_entries(args)?,

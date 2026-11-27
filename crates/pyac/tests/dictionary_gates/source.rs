@@ -89,7 +89,7 @@ fn a_compiled_source_decodes_and_re_encodes_identically() {
         return;
     };
 
-    let volume = pyac::dictionary::decode_dictionary(std::io::Cursor::new(compiled.to_vec()))
+    let volume = pyac::dictionary::read_volume(std::io::Cursor::new(compiled.to_vec()))
         .expect("the compiled volume decodes");
     assert!(
         volume.entries.len() > 60_000,

@@ -120,14 +120,14 @@ cargo test --release                       # green with no volume present
 # the dictionary cycle
 cargo run --release --bin pyac-dictionary -- compile dictionary/shard /tmp/v.pyac
 cargo run --release --bin pyac-dictionary -- verify  /tmp/v.pyac
-cargo run --release --bin pyac-dictionary -- render  /tmp/v.pyac /tmp/v.en.pya
+cargo run --release --bin pyac-dictionary -- decode  /tmp/v.pyac /tmp/v.en.pya
 cargo run --release --bin pyac-dictionary -- surface-entries /tmp/v.pyac en "signature"
 
 # with the real volume, run the full-strength gates
 PYAC_REFERENCE_VOLUME=dictionary/reference.pyac cargo test --release
 ```
 
-`compile` (source → volume) and `render` → `compile` (volume → source → volume)
+`compile` (source → volume) and `decode` → `compile` (volume → source → volume)
 are **both** byte-identical to the input. Two independent round trips; a change
 that breaks either is a real defect. There is no JSON form of the dictionary.
 
@@ -182,9 +182,9 @@ Gate the expensive ones only when they can fail: the dictionary gates need
 `PYAC_REFERENCE_VOLUME` set and skip otherwise, so a plain `cargo test` is not
 running them at all. Say which gates you ran rather than implying the full suite.
 
-`render` produces about 100 MB. Pass an output path
-(`render <volume> out.en.pya`); with no path it writes to stdout, so
-`render … > file` is correct but `render … | head` is not — it fills the
+`decode` produces about 100 MB. Pass an output path
+(`decode <volume> out.en.pya`); with no path it writes to stdout, so
+`decode … > file` is correct but `decode … | head` is not — it fills the
 transcript with half a vocabulary.
 
 ## Traps that have already cost time

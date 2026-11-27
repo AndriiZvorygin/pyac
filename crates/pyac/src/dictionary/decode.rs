@@ -11,7 +11,7 @@
 //! belongs to a definition is copied back verbatim too. Re-lowering it would not
 //! be the inverse.
 //!
-//! `decode_dictionary` is only trustworthy if `encode_dictionary` reproduces the
+//! `read_volume` is only trustworthy if `encode_dictionary` reproduces the
 //! input bytes. `tests/dictionary_roundtrip.rs` asserts that; do not build an
 //! edit command on this without it passing, because a lossy decode corrupts
 //! every entry it touches and reports success.
@@ -30,9 +30,12 @@ use super::words::{COMITATIVE, DESTINATION, ESSIVE, INSTRUMENTAL, SOURCE};
 use crate::WORDS_PER_CODELET;
 
 /// Read every entry of a v4 volume into the editable model.
-pub fn decode_dictionary<R: Read + Seek>(
-    source: R,
-) -> Result<DictionaryVolume, DictionaryVolumeError> {
+///
+/// **read**, Pyac key `tyac` (`pyash dict from pyac tyac`): *"interpret something
+/// that is written or printed"*. This is the deserialize step, not `decode` —
+/// `decode` is reserved for turning the coded volume into ordinary source text
+/// (`hkom tyac`, *"convert code into ordinary language"*).
+pub fn read_volume<R: Read + Seek>(source: R) -> Result<DictionaryVolume, DictionaryVolumeError> {
     let mut reader = DictionaryFileReader::open(source).map_err(|error| fail(error.to_string()))?;
     if reader.profile_version() != super::volume_records::PROFILE_VERSION {
         return Err(DictionaryVolumeError::InvalidEntry(

@@ -27,7 +27,7 @@
 
 use std::fmt::Write;
 
-use super::render::RenderError;
+use super::render::DecodeError;
 use super::volume::{DictionaryVolume, DictionaryVolumeEntry};
 use super::words::{
     COMITATIVE, DESTINATION, ESSIVE, INSTRUMENTAL, NAME_MARKER, NOMINATIVE, REALIS, SOURCE,
@@ -92,15 +92,15 @@ fn key_word(word: u16) -> String {
     }
 }
 
-fn record_head(key: &[u16]) -> Result<String, RenderError> {
+fn record_head(key: &[u16]) -> Result<String, DecodeError> {
     if key.is_empty() {
-        return Err(RenderError::EmptyKey);
+        return Err(DecodeError::EmptyKey);
     }
     let mut out = format!("{}", spell(NAME_MARKER));
     for word in key {
         let mut buffer = [0u8; 8];
         if pyac_vliw_core::word_code::decode(*word, &mut buffer).is_err() {
-            return Err(RenderError::UnspellableKey { hnuc: *word });
+            return Err(DecodeError::UnspellableKey { hnuc: *word });
         }
         out.push(' ');
         out.push_str(&key_word(*word));
@@ -133,16 +133,19 @@ fn vector(lanes: &[u16]) -> String {
     out
 }
 
-/// Render the whole volume as Pyac records, one per line.
-pub fn render_pyac_source(volume: &DictionaryVolume) -> Result<String, RenderError> {
+/// Decode the whole volume as Pyac records, one per line.
+///
+/// **decode**, Pyac key `hkom tyac` (*"convert code into ordinary language"*), in
+/// the glyph form: the code is the volume, the ordinary language is Pyac itself.
+pub fn decode_pyac_source(volume: &DictionaryVolume) -> Result<String, DecodeError> {
     let mut out = String::new();
     for entry in &volume.entries {
-        render_entry(entry, &mut out)?;
+        write_entry(entry, &mut out)?;
     }
     Ok(out)
 }
 
-fn render_entry(entry: &DictionaryVolumeEntry, out: &mut String) -> Result<(), RenderError> {
+fn write_entry(entry: &DictionaryVolumeEntry, out: &mut String) -> Result<(), DecodeError> {
     let head = record_head(&entry.key)?;
     let tail = format!("{} {}", spell(TEXT_VERB), spell(REALIS));
     for form in &entry.lexical_forms {
