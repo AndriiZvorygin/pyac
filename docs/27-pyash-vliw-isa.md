@@ -20,7 +20,7 @@ Encoding follows the legacy `lwonprom` repository at
 sidecar is added; unproven compatibility MUST be rejected. This contract
 covers lowering, encoding, and execution. The searchable catalog and `.pyac`
 container are specified in
-[`pyac-vliw-database.md`](../reference/pyac-vliw-database.md); compiler
+[`pyac-vliw-database.md`](pyac-vliw-database.md); compiler
 optimization, GPU runtime, host memory, and new Pyash commands are out of scope.
 
 ## 2. Terms
@@ -215,7 +215,7 @@ unsupported signatures without fallback. A handler MAY be a routine body
 defined earlier in the same programlet, so the execution model is threaded code
 plus signature matching rather than a fixed set of opcodes. Structural values
 MUST validate framing first. See
-[implementation details](../reference/pyac-vliw-semantic-slices.md#runtime-signature-dispatch).
+[implementation details](pyac-vliw-semantic-slices.md#runtime-signature-dispatch).
 
 ### 5.1.1 Revision
 

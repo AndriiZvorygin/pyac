@@ -1,3 +1,7 @@
+// Calls the checked-once unchecked reader in `word_input`; no new unsafe
+// invariant is introduced here.
+#![allow(unsafe_code)]
+
 use super::*;
 
 #[derive(Clone, Copy)]

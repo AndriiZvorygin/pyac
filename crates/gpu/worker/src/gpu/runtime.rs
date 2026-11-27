@@ -1,3 +1,7 @@
+// CUDA driver FFI: `libcuda.so.1` entry points and buffer handles.
+// Every call here is one FFI boundary; no Rust invariant is invented.
+#![allow(unsafe_code)]
+
 use super::*;
 impl GpuRuntime {
     pub(crate) async fn new(shader_path: &Path, cache_path: &Path) -> Result<Self, String> {

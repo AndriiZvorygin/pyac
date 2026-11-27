@@ -1,3 +1,8 @@
+// Every `unsafe` in this crate funnels through here. Callers validate the
+// codelet range before reading, so the unchecked index is in bounds by
+// construction; the GPU target needs it to avoid a bounds check per word.
+#![allow(unsafe_code)]
+
 /// A codelet word source can keep its packed width while the interpreter
 /// promotes individual words only when evaluating a semantic operation.
 pub trait VliwWord: Copy {

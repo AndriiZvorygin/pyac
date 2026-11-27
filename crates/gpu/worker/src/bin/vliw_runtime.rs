@@ -1,3 +1,7 @@
+// `unsafe` here is CUDA driver FFI: loading `libcuda.so.1` and calling its
+// entry points. `deny` rather than `forbid` so a new site is deliberate.
+#![deny(unsafe_code)]
+
 #[path = "../gpu.rs"]
 mod gpu_worker;
 #[path = "pack_validation.rs"]

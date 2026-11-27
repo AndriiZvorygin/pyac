@@ -1,4 +1,10 @@
 #![no_std]
+// The GPU path reads codelet words through unchecked indexing: bounds checks on
+// every word in the inner loop are the difference between a usable and unusable
+// kernel on a device. Each site carries a SAFETY note and callers validate the
+// codelet range first. `deny` rather than `forbid`, so a new site must be added
+// deliberately with an allowance.
+#![deny(unsafe_code)]
 #[path = "semantics_runtime/word_input.rs"]
 mod word_input;
 pub use word_input::VliwWord;

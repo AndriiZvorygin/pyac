@@ -1,3 +1,7 @@
+// CUDA driver FFI: `libcuda.so.1` entry points and buffer handles.
+// Every call here is one FFI boundary; no Rust invariant is invented.
+#![allow(unsafe_code)]
+
 use super::*;
 use pyac::{PyacPackView, decode_pack_view};
 use sha2::{Digest, Sha256};

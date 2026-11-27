@@ -1,3 +1,7 @@
+// CUDA driver FFI: `libcuda.so.1` entry points and buffer handles.
+// Every call here is one FFI boundary; no Rust invariant is invented.
+#![allow(unsafe_code)]
+
 use libloading::Library;
 use std::ffi::{c_char, c_int, c_uint, c_void};
 

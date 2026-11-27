@@ -80,7 +80,7 @@ Executable sentences precede storage descriptors, and consumers must recognize
 the full section signature and skip the declared payload extent rather than
 interpreting payload words as instructions. The current syntax, exact length
 encoding, validation, and runtime support boundary are normative in
-[`the VLIW ISA specification`](../specifications/27-pyash-vliw-isa.md#inline-immutable-storage-sections).
+[`the VLIW ISA specification`](27-pyash-vliw-isa.md#inline-immutable-storage-sections).
 
 The hosted programlet interpreter also allocates narrow invocation-local
 numeric slots at execution time; that separate runtime behavior does not alter
@@ -91,7 +91,7 @@ as ordinary codelets in this stream; they do not alter the v1 container. Their
 source ordinal and HNUC name identify each result, while parallel executors
 return result records in completion order rather than sorting them back into
 source order. See the independent-section contract in the
-[`VLIW ISA specification`](../specifications/27-pyash-vliw-isa.md#independent-named-sections).
+[`VLIW ISA specification`](27-pyash-vliw-isa.md#independent-named-sections).
 
 ### Future indexed program image
 

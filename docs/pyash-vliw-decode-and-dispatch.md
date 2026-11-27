@@ -3,8 +3,8 @@
 Status: reference/design note. Records the working model behind the VLIW
 encoding and dispatch, and the gaps between that model, the specification, and
 the current Rust core. It is not normative; the contracts remain
-[`27-pyash-vliw-isa.md`](../specifications/27-pyash-vliw-isa.md) and
-[`28-pyash-vliw-targets.md`](../specifications/28-pyash-vliw-targets.md).
+[`27-pyash-vliw-isa.md`](27-pyash-vliw-isa.md) and
+[`28-pyash-vliw-targets.md`](28-pyash-vliw-targets.md).
 
 ## 1. Three representations
 

@@ -13,8 +13,16 @@ edition = "2024"
 rust-version = "1.85"
 publish = false
 
+# `undefined_behavior` lints are workspace-wide; `unsafe_code` is not, because
+# the answer differs per crate and a workspace lint nobody opts into is a
+# guarantee nothing enforces. Each crate states its own:
+#
+#   pyac, pyac-vliw-worker   #![forbid(unsafe_code)]  — no unsafe at all
+#   pyac-vliw-core           #![deny(unsafe_code)] with per-site allowances,
+#                            because the GPU path needs unchecked indexing to
+#                            avoid bounds checks in the inner loop
 [workspace.lints.rust]
-unsafe_code = "forbid"
+unexpected_cfgs = "warn"
 
 [profile.release]
 panic = "abort"

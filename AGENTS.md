@@ -72,6 +72,12 @@ That command is **byte-identical** to the published volume, and
 being identical, that is a defect in the parser or encoder — not a reason to relax
 the test.
 
+That gate needs the published volume, so out of the box it skips. What runs
+everywhere is `crates/pyac/tests/dictionary_selfhost.rs`: the source parses at
+full scale, `compile` is deterministic, and the result survives decode→encode
+unchanged. It is weaker than byte-identity against the shipped artifact, and it is
+the reason "it self-hosts" is checkable on a fresh clone.
+
 The dictionary tests skip with a message when no volume is present, so a clean
 checkout is green. Do not turn those skips into failures; a clone has to build.
 

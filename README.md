@@ -25,8 +25,15 @@ dictionary/             the vocabulary: authored source, and how to build it
 docs/                   the normative specifications this code implements
 ```
 
-Five external dependencies: `serde`, `serde_json`, `unicode-normalization`, and
-`spirv-std` (SPIR-V target only).
+External dependencies, by crate:
+
+- `pyac-vliw-core` — `spirv-std` (SPIR-V target only). Nothing else.
+- `pyac` — `serde`, `serde_json`, `unicode-normalization`.
+- `crates/gpu/worker` — `axum`, `base64`, `bytemuck`, `libloading`, `pollster`,
+  `serde`, `serde_json`, `sha2`, `tokio`, `wgpu`.
+
+Twelve distinct crates across the workspace. The core, which is the part that
+matters for the ISA, has exactly one.
 
 ## Build and test
 

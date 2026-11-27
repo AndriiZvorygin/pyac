@@ -48,7 +48,7 @@ program link is a separate record and is never followed by a dictionary lookup
 as an invocation.
 
 The profile uses existing sentence, typed-value, quote, and codelet rules from
-the [VLIW ISA](../specifications/27-pyash-vliw-isa.md). Its TOC groups are
+the [VLIW ISA](27-pyash-vliw-isa.md). Its TOC groups are
 logical ranges, not executable programlets.
 
 ## 2. In-band book layout
@@ -423,7 +423,7 @@ reader handles it, and the volume itself is correct.
 
 ## 9. Vocabulary-agent workflow
 
-Use the [dictionary vocabulary workbook](../workbook/pyac-vliw-dictionary.md)
+Use the the dictionary vocabulary workbook in the `pyash` checkout
 as a curation handoff. It records candidates and evidence; it is not the
 canonical vocabulary catalog or a compiled dictionary volume.
 
