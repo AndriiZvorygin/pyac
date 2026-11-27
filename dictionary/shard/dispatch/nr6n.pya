@@ -1,0 +1,4 @@
+su name tlat kwon ob text "nr6n" from ve 20 1 28102 1 10590 3 1 10366 2 8798 11123 1 12606 2 8798 11123 1 9278 2 8798 12926 at text "operation-signature" be text ya
+su name tlat kwon ob text "nr6n" as ve 5 1 10366 2 8798 11123 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
+su name tlat kwon ob text "nr6n" as ve 5 1 12606 2 8798 11123 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
+su name tlat kwon ob text "nr6n" as ve 5 1 9278 2 8798 12926 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya

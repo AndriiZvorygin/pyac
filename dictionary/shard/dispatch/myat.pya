@@ -1,0 +1,22 @@
+su name tlat kwon ob text "myat" from ve 9 1 43265 1 10590 1 1 9310 1 22615 at text "operation-signature" be text ya
+su name tlat kwon ob text "myat" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "myat" from ve 13 1 43265 1 10590 2 1 9310 1 22615 1 18447 1 12478 at text "operation-signature" be text ya
+su name tlat kwon ob text "myat" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "myat" as ve 4 1 18447 1 12478 from text "during" to text "value supplied in the during case" at text "operation-argument" be text ya
+su name tlat kwon ob text "myat" from ve 13 1 43265 1 10590 2 1 18447 1 12478 1 9310 1 22615 at text "operation-signature" be text ya
+su name tlat kwon ob text "myat" as ve 4 1 18447 1 12478 from text "during" to text "value supplied in the during case" at text "operation-argument" be text ya
+su name tlat kwon ob text "myat" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "myat" from ve 14 1 43265 1 10590 2 1 18447 2 12478 34888 1 9310 1 22615 at text "operation-signature" be text ya
+su name tlat kwon ob text "myat" as ve 5 1 18447 2 12478 34888 from text "during" to text "value supplied in the during case" at text "operation-argument" be text ya
+su name tlat kwon ob text "myat" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "myat" from ve 10 1 43265 1 10590 1 1 9310 2 8798 22615 at text "operation-signature" be text ya
+su name tlat kwon ob text "myat" as ve 5 1 9310 2 8798 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "myat" from ve 14 1 43265 1 10590 2 1 9310 2 8798 22615 1 18447 1 12478 at text "operation-signature" be text ya
+su name tlat kwon ob text "myat" as ve 5 1 9310 2 8798 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "myat" as ve 4 1 18447 1 12478 from text "during" to text "value supplied in the during case" at text "operation-argument" be text ya
+su name tlat kwon ob text "myat" from ve 14 1 43265 1 10590 2 1 18447 1 12478 1 9310 2 8798 22615 at text "operation-signature" be text ya
+su name tlat kwon ob text "myat" as ve 4 1 18447 1 12478 from text "during" to text "value supplied in the during case" at text "operation-argument" be text ya
+su name tlat kwon ob text "myat" as ve 5 1 9310 2 8798 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "myat" from ve 15 1 43265 1 10590 2 1 18447 2 12478 34888 1 9310 2 8798 22615 at text "operation-signature" be text ya
+su name tlat kwon ob text "myat" as ve 5 1 18447 2 12478 34888 from text "during" to text "value supplied in the during case" at text "operation-argument" be text ya
+su name tlat kwon ob text "myat" as ve 5 1 9310 2 8798 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya

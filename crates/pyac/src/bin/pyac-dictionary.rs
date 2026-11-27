@@ -509,7 +509,12 @@ fn execute(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
             fs::create_dir_all(out_dir)?;
             let mut written = Vec::new();
             for (name, body) in &set.shards {
+                // A shard name may carry a directory (`dispatch/<key>`), so its
+                // parent is created before the write.
                 let path = out_dir.join(format!("{name}.pya"));
+                if let Some(parent) = path.parent() {
+                    fs::create_dir_all(parent)?;
+                }
                 fs::write(&path, body)?;
                 written.push(json!({
                     "name": name, "file": path, "bytes": body.len()

@@ -1,0 +1,12 @@
+su name tlat kwon ob text "pcat" from ve 13 1 43428 1 10590 2 1 9310 1 8798 1 9278 1 8798 at text "operation-signature" be text ya
+su name tlat kwon ob text "pcat" as ve 4 1 9310 1 8798 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "pcat" as ve 4 1 9278 1 8798 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
+su name tlat kwon ob text "pcat" from ve 13 1 43428 1 10590 2 1 9310 1 8798 1 9278 1 2422 at text "operation-signature" be text ya
+su name tlat kwon ob text "pcat" as ve 4 1 9310 1 8798 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "pcat" as ve 4 1 9278 1 2422 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
+su name tlat kwon ob text "pcat" from ve 13 1 43428 1 10590 2 1 12606 1 2422 1 9278 1 2422 at text "operation-signature" be text ya
+su name tlat kwon ob text "pcat" as ve 4 1 12606 1 2422 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
+su name tlat kwon ob text "pcat" as ve 4 1 9278 1 2422 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
+su name tlat kwon ob text "pcat" from ve 13 1 43428 1 10590 2 1 9310 1 2422 1 9278 1 2422 at text "operation-signature" be text ya
+su name tlat kwon ob text "pcat" as ve 4 1 9310 1 2422 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "pcat" as ve 4 1 9278 1 2422 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya

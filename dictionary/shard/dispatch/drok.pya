@@ -1,0 +1,12 @@
+su name tlat kwon ob text "drok" from ve 26 1 11475 1 10590 5 1 16719 1 22615 1 18727 1 22615 1 12606 1 2422 1 9278 2 8798 59861 1 18703 1 2422 at text "operation-signature" be text ya
+su name tlat kwon ob text "drok" as ve 4 1 16719 1 22615 from text "as" to text "value supplied in the as case" at text "operation-argument" be text ya
+su name tlat kwon ob text "drok" as ve 4 1 18727 1 22615 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
+su name tlat kwon ob text "drok" as ve 4 1 12606 1 2422 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
+su name tlat kwon ob text "drok" as ve 5 1 9278 2 8798 59861 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
+su name tlat kwon ob text "drok" as ve 4 1 18703 1 2422 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
+su name tlat kwon ob text "drok" from ve 27 1 11475 1 10590 5 1 16719 1 22615 1 18727 2 8798 22615 1 12606 1 2422 1 9278 2 8798 59861 1 18703 1 2422 at text "operation-signature" be text ya
+su name tlat kwon ob text "drok" as ve 4 1 16719 1 22615 from text "as" to text "value supplied in the as case" at text "operation-argument" be text ya
+su name tlat kwon ob text "drok" as ve 5 1 18727 2 8798 22615 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
+su name tlat kwon ob text "drok" as ve 4 1 12606 1 2422 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
+su name tlat kwon ob text "drok" as ve 5 1 9278 2 8798 59861 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
+su name tlat kwon ob text "drok" as ve 4 1 18703 1 2422 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya

@@ -1,0 +1,42 @@
+su name tlat kwon ob text "hkup" from ve 13 1 18960 1 10590 2 1 9310 1 2422 1 9278 1 2422 at text "operation-signature" be text ya
+su name tlat kwon ob text "hkup" as ve 4 1 9310 1 2422 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" as ve 4 1 9278 1 2422 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" from ve 14 1 18960 1 10590 2 1 9310 2 8798 2422 1 9278 1 2422 at text "operation-signature" be text ya
+su name tlat kwon ob text "hkup" as ve 5 1 9310 2 8798 2422 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" as ve 4 1 9278 1 2422 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" from ve 14 1 18960 1 10590 2 1 9310 1 2422 1 9278 2 8798 2422 at text "operation-signature" be text ya
+su name tlat kwon ob text "hkup" as ve 4 1 9310 1 2422 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" as ve 5 1 9278 2 8798 2422 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" from ve 15 1 18960 1 10590 2 1 9310 2 8798 2422 1 9278 2 8798 2422 at text "operation-signature" be text ya
+su name tlat kwon ob text "hkup" as ve 5 1 9310 2 8798 2422 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" as ve 5 1 9278 2 8798 2422 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" from ve 13 1 18960 1 10590 2 1 9310 1 22615 1 9278 1 2422 at text "operation-signature" be text ya
+su name tlat kwon ob text "hkup" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" as ve 4 1 9278 1 2422 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" from ve 14 1 18960 1 10590 2 1 9310 1 22615 1 9278 2 8798 2422 at text "operation-signature" be text ya
+su name tlat kwon ob text "hkup" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" as ve 5 1 9278 2 8798 2422 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" from ve 18 1 18960 1 10590 3 1 16719 2 12478 55408 1 9310 1 2422 1 9278 1 2422 at text "operation-signature" be text ya
+su name tlat kwon ob text "hkup" as ve 5 1 16719 2 12478 55408 from text "as" to text "value supplied in the as case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" as ve 4 1 9310 1 2422 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" as ve 4 1 9278 1 2422 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" from ve 19 1 18960 1 10590 3 1 16719 2 12478 55408 1 9310 2 8798 2422 1 9278 1 2422 at text "operation-signature" be text ya
+su name tlat kwon ob text "hkup" as ve 5 1 16719 2 12478 55408 from text "as" to text "value supplied in the as case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" as ve 5 1 9310 2 8798 2422 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" as ve 4 1 9278 1 2422 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" from ve 19 1 18960 1 10590 3 1 16719 2 12478 55408 1 9310 1 2422 1 9278 2 8798 2422 at text "operation-signature" be text ya
+su name tlat kwon ob text "hkup" as ve 5 1 16719 2 12478 55408 from text "as" to text "value supplied in the as case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" as ve 4 1 9310 1 2422 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" as ve 5 1 9278 2 8798 2422 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" from ve 20 1 18960 1 10590 3 1 16719 2 12478 55408 1 9310 2 8798 2422 1 9278 2 8798 2422 at text "operation-signature" be text ya
+su name tlat kwon ob text "hkup" as ve 5 1 16719 2 12478 55408 from text "as" to text "value supplied in the as case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" as ve 5 1 9310 2 8798 2422 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" as ve 5 1 9278 2 8798 2422 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" from ve 18 1 18960 1 10590 3 1 16719 2 12478 55408 1 9310 1 22615 1 9278 1 2422 at text "operation-signature" be text ya
+su name tlat kwon ob text "hkup" as ve 5 1 16719 2 12478 55408 from text "as" to text "value supplied in the as case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" as ve 4 1 9278 1 2422 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" from ve 19 1 18960 1 10590 3 1 16719 2 12478 55408 1 9310 1 22615 1 9278 2 8798 2422 at text "operation-signature" be text ya
+su name tlat kwon ob text "hkup" as ve 5 1 16719 2 12478 55408 from text "as" to text "value supplied in the as case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hkup" as ve 5 1 9278 2 8798 2422 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya

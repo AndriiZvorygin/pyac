@@ -212,27 +212,29 @@ fn dispatch_is_its_own_shard_and_carries_no_vocabulary() {
         return;
     };
     let set = split_source_with_layers(&source, &layer_index()).expect("the source splits");
-    let dispatch = set
+    let dispatch: Vec<&String> = set
         .shards
         .iter()
-        .find(|(name, _)| name == "dispatch")
+        .filter(|(name, _)| name.starts_with("dispatch/"))
         .map(|(_, body)| body)
-        .expect("the dispatch shard exists");
-
-    assert!(
-        dispatch.contains(" at text \"operation-signature\" be text ya"),
-        "the dispatch shard carries signatures"
-    );
-    // No entry block may appear in the dispatch shard: it annotates entries, it
-    // does not declare them.
-    assert!(
-        !dispatch.contains(" at text \"entry\" be text ya"),
-        "the dispatch shard must not declare entries"
-    );
+        .collect();
+    assert!(!dispatch.is_empty(), "dispatch is split per entry");
+    for body in &dispatch {
+        assert!(
+            body.contains(" at text \"operation-signature\" be text ya"),
+            "a dispatch shard carries signatures"
+        );
+        // No entry block may appear in a dispatch shard: it annotates entries, it
+        // does not declare them.
+        assert!(
+            !body.contains(" at text \"entry\" be text ya"),
+            "a dispatch shard must not declare entries"
+        );
+    }
 
     // And the vocabulary shards must carry no dispatch records.
     for (name, body) in &set.shards {
-        if name == "dispatch" {
+        if name.starts_with("dispatch/") {
             continue;
         }
         assert!(

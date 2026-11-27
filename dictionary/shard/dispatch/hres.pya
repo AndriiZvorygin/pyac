@@ -1,0 +1,16 @@
+su name tlat kwon ob text "hres" from ve 9 1 35696 1 10590 1 1 12606 1 22615 at text "operation-signature" be text ya
+su name tlat kwon ob text "hres" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hres" from ve 13 1 35696 1 10590 2 1 12606 1 22615 1 9310 1 22615 at text "operation-signature" be text ya
+su name tlat kwon ob text "hres" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hres" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hres" from ve 14 1 35696 1 10590 2 1 12606 1 22615 1 9310 2 8798 22615 at text "operation-signature" be text ya
+su name tlat kwon ob text "hres" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hres" as ve 5 1 9310 2 8798 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hres" from ve 10 1 35696 1 10590 1 1 12606 2 8798 22615 at text "operation-signature" be text ya
+su name tlat kwon ob text "hres" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hres" from ve 14 1 35696 1 10590 2 1 12606 2 8798 22615 1 9310 1 22615 at text "operation-signature" be text ya
+su name tlat kwon ob text "hres" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hres" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hres" from ve 15 1 35696 1 10590 2 1 12606 2 8798 22615 1 9310 2 8798 22615 at text "operation-signature" be text ya
+su name tlat kwon ob text "hres" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
+su name tlat kwon ob text "hres" as ve 5 1 9310 2 8798 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya

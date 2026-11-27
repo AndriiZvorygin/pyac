@@ -176,7 +176,7 @@ pub fn assemble_shards(
     // it is exempt from the ascent — it annotates entries that already exist.
     let mut previous_layer = 0u16;
     for record in &records {
-        if record.name == "dispatch" {
+        if record.name.starts_with("dispatch/") {
             continue;
         }
         if record.max_layer < previous_layer {
@@ -218,7 +218,7 @@ pub fn assemble_shards(
         // A vocabulary shard declares its entry count; the dispatch shard
         // declares how many signatures it carries, because its records annotate
         // entries declared elsewhere.
-        let actual = if record.name == "dispatch" {
+        let actual = if record.name.starts_with("dispatch/") {
             body.matches(" at text \"operation-signature\" be text ya")
                 .count()
         } else {
@@ -231,7 +231,7 @@ pub fn assemble_shards(
                 actual,
             });
         }
-        if record.name == "dispatch" {
+        if record.name.starts_with("dispatch/") {
             // Dispatch names entries that must already exist, but nothing depends
             // on dispatch, so it needs no ordering beyond coming last.
             out.push_str(body);
@@ -377,6 +377,15 @@ fn shard_name_for(block: &EntryBlock) -> (String, u16) {
         .max()
         .unwrap_or(BEYOND_LAST_LAYER);
     (format!("compounds-{layer}"), layer)
+}
+
+/// A filesystem stem for an entry key.
+///
+/// Pyac spellings are lowercase letters, digits and spaces, so joining on `_` is
+/// lossless enough to read and needs no escaping. The manifest records the true
+/// key inside each row, so the stem is a convenience, not the identity.
+fn file_stem(key: &str) -> String {
+    key.split_whitespace().collect::<Vec<_>>().join("_")
 }
 
 /// One entry block: the `entry` sentence plus every record that follows it.
@@ -537,12 +546,16 @@ fn split_blocks(blocks: Vec<EntryBlock>, source: &str) -> Result<ShardSet, Shard
         .join("\n");
 
     let mut groups: BTreeMap<String, (Vec<EntryBlock>, u16)> = BTreeMap::new();
-    let mut dispatch = String::new();
+    // Dispatch is lifted out before grouping: it belongs to the API that changes
+    // on its own schedule, not to the vocabulary. Kept per entry so an API change
+    // touches one small file.
+    let mut dispatch: BTreeMap<String, String> = BTreeMap::new();
     for block in blocks {
-        // Dispatch is lifted out before grouping: it belongs to the API that
-        // changes on its own schedule, not to the vocabulary.
         if !block.dispatch.is_empty() {
-            dispatch.push_str(&block.dispatch);
+            dispatch
+                .entry(block.key.clone())
+                .or_default()
+                .push_str(&block.dispatch);
         }
         let (group, layer) = shard_name_for(&block);
         let slot = groups.entry(group).or_insert((Vec::new(), layer));
@@ -592,26 +605,25 @@ fn split_blocks(blocks: Vec<EntryBlock>, source: &str) -> Result<ShardSet, Shard
         manifest_lines.push(format!("su text {} ob text {} ya", json(name), json(&row)));
         shards.push((name.clone(), body));
     }
-    // Dispatch last: no vocabulary entry depends on a signature, and the shard
-    // assembles after every entry it annotates.
-    if !dispatch.is_empty() {
-        let number = dispatch
+    // Dispatch last, one file per entry. No vocabulary entry depends on a
+    // signature, and a signature set belongs to the entry it annotates. Grouped
+    // this way the median file is ~3 KB instead of one 1.16 MB blob, and an API
+    // change touches only the entries it actually changes.
+    for (key, body) in &dispatch {
+        let number = body
             .matches(" at text \"operation-signature\" be text ya")
             .count();
-        let digest = shard_digest(&dispatch);
+        let digest = shard_digest(body);
+        let name = format!("dispatch/{}", file_stem(key));
         let row = format!(
             "{{\"name\":{},\"sha256\":{},\"entries\":{},\"maxLayer\":{}}}",
-            json("dispatch"),
+            json(&name),
             json(&digest),
             number,
             0
         );
-        manifest_lines.push(format!(
-            "su text {} ob text {} ya",
-            json("dispatch"),
-            json(&row)
-        ));
-        shards.push(("dispatch".to_owned(), dispatch));
+        manifest_lines.push(format!("su text {} ob text {} ya", json(&name), json(&row)));
+        shards.push((name, body.clone()));
     }
     manifest_lines.push("prah".to_owned());
     Ok(ShardSet {
