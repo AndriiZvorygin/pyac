@@ -1,17 +1,17 @@
 //! Example corpus for the source round-trip, one case per record kind.
 //!
-//! `dictionary_render.rs` and `dictionary_glyph.rs` prove the *published* volume
+//! `dictionary_render.rs` and `dictionary_pyac.rs` prove the *published* volume
 //! round-trips, but that volume carries no definitions and exercises a narrow
 //! slice of each record kind. A small hand-built volume per case fails with a name
 //! that says which kind broke, instead of one 131 MB byte-difference.
 //!
-//! Each case goes both ways: English form (`.en.pya`, `text "…"`) and glyph form
-//! (`zi.kyit. … .kyit.zi`). Both must re-encode to the identical bytes.
+//! Each case renders to the English form (`.en.pya`, `text "…"`) and must re-encode
+//! to identical bytes.
 
 use pyac::dictionary::{
     ArgumentSlot, DictionaryMetadata, DictionaryVolume, DictionaryVolumeEntry, LexicalForm,
     OperationParameter, OperationResult, OperationSignature, SourceGloss, SourceLink,
-    encode_dictionary, encode_text_sentence, parse_source, render_glyph_source, render_source,
+    encode_dictionary, encode_text_sentence, parse_source, render_source,
 };
 
 const KEY: [u16; 2] = [0xa96a, 0x6c22]; // tlat kwon
@@ -75,13 +75,6 @@ fn round_trips(name: &str, volume: DictionaryVolume) {
     });
     let again = encode_dictionary(&to_volume(reparsed)).expect("English re-encodes");
     assert_eq!(again, bytes, "{name}: English round-trip differs");
-
-    // Glyph form.
-    let glyph = render_glyph_source(&volume).expect("renders glyph");
-    let reparsed = parse_source(&glyph)
-        .unwrap_or_else(|error| panic!("{name}: glyph source does not parse: {error}\n{glyph}"));
-    let again = encode_dictionary(&to_volume(reparsed)).expect("glyph re-encodes");
-    assert_eq!(again, bytes, "{name}: glyph round-trip differs");
 }
 
 #[test]

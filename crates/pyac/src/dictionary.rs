@@ -22,7 +22,7 @@ pub use operation::{
 };
 pub use pyac::render_pyac_source;
 pub use reader::{DictionaryFileReader, DictionaryReadError, DictionarySection};
-pub use render::{RenderError, render_glyph_source, render_source};
+pub use render::{RenderError, render_source};
 pub use shard::{
     BEYOND_LAST_LAYER, EN_SOURCE_EXT, LAYERS, LayerIndex, MANIFEST_FILE, PYAC_SOURCE_EXT,
     REFERENCE_SOURCE_FILE, ShardError, ShardRecord, ShardSet, assemble_shards, parse_manifest,
