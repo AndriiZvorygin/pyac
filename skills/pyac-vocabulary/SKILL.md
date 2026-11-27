@@ -58,10 +58,12 @@ cargo run --release --bin pyac-dictionary -- surface-entries dictionary/referenc
 cargo run --release --bin pyac-dictionary -- entry   dictionary/reference.pyac 0x253e
 cargo run --release --bin pyac-dictionary -- export  dictionary/reference.pyac
 
-# a JSON edit cycle (decode -> edit -> build), also byte-identical
-cargo run --release --bin pyac-dictionary -- decode dictionary/reference.pyac > v.json
-cargo run --release --bin pyac-dictionary -- build  dictionary/reference.pyac < v.json
+# the volume back to source, and back again: both byte-identical
+cargo run --release --bin pyac-dictionary -- render dictionary/reference.pyac /tmp/back.en.pya
+cargo run --release --bin pyac-dictionary -- compile /tmp/back.en.pya /tmp/back.pyac
 ```
+
+There is no JSON form of the dictionary: the source *is* the intermediate form.
 
 The dictionary gates **skip** when no volume is present, so a clean clone is
 green. Point them at the real volume to run the strong checks:

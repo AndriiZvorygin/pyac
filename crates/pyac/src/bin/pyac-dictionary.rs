@@ -1,6 +1,6 @@
 use std::env;
 use std::fs::{self, File};
-use std::io::{self, Read, Write};
+use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 
@@ -10,103 +10,10 @@ use pyac::dictionary::{
     OperationResult, OperationSignature, SourceGloss, SourceLink, assemble_shards,
     decode_dictionary, encode_dictionary, parse_manifest, parse_source, split_source_with_layers,
 };
-use serde::Deserialize;
 use serde_json::{Value, json};
 
-#[derive(Deserialize)]
-struct BuildInput {
-    metadata: DictionaryMetadataInput,
-    entries: Vec<DictionaryEntryInput>,
-}
-
-#[derive(Deserialize)]
-struct DictionaryMetadataInput {
-    kind: String,
-    title: String,
-    revision: u32,
-    languages: Vec<String>,
-    normalization_policy: String,
-}
-
-#[derive(Deserialize)]
-struct DictionaryEntryInput {
-    key: Vec<u16>,
-    lexical_forms: Vec<LexicalFormInput>,
-    source_links: Vec<SourceLinkInput>,
-    #[serde(default)]
-    source_glosses: Vec<SourceGlossInput>,
-    #[serde(default)]
-    component_keys: Vec<Vec<u16>>,
-    #[serde(default)]
-    task_keys: Vec<Vec<u16>>,
-    #[serde(default)]
-    references: Vec<Vec<u16>>,
-    #[serde(default)]
-    operation_signatures: Vec<OperationSignatureInput>,
-    #[serde(default)]
-    definition: Option<Vec<Vec<u16>>>,
-}
-
-#[derive(Deserialize)]
-struct LexicalFormInput {
-    language: String,
-    surface: String,
-    normalized: String,
-}
-
-#[derive(Deserialize)]
-struct SourceLinkInput {
-    dataset: String,
-    release: String,
-    identifier: String,
-    relation: String,
-}
-
-#[derive(Deserialize)]
-struct SourceGlossInput {
-    language: String,
-    text: String,
-    dataset: String,
-    release: String,
-    identifier: String,
-}
-
-#[derive(Deserialize)]
-struct OperationSignatureInput {
-    verb: Vec<u16>,
-    mood: Vec<u16>,
-    arguments: Vec<OperationArgumentInput>,
-    results: Vec<OperationResultInput>,
-}
-
-// Wire structs. The JSON keys are a published contract with the source
-// producer (`program/library/dictionary/source.mjs`), so the serde names keep
-// their old spellings while the Rust fields say what the values are:
-// `value_type` is a noun class, `name` is a tag label, `description` is a
-// descriptive specification.
-#[derive(Deserialize)]
-struct OperationArgumentInput {
-    grammatical_case: Vec<u16>,
-    #[serde(rename = "value_type")]
-    noun_class: Vec<u16>,
-    #[serde(rename = "name")]
-    tag_label: String,
-    #[serde(rename = "description")]
-    descriptive_specification: String,
-}
-
-#[derive(Deserialize)]
-struct OperationResultInput {
-    #[serde(rename = "value_type")]
-    noun_class: Vec<u16>,
-    #[serde(rename = "name")]
-    tag_label: String,
-    #[serde(rename = "description")]
-    descriptive_specification: String,
-}
-
 fn usage() -> &'static str {
-    "usage:\n  pyac-dictionary compile <source.en.pya|shard-dir> <volume.pyac>  # the bootstrap; no JSON, no JS.\n  pyac-dictionary build <volume.pyac>  # Build JSON request is read from stdin.\n  pyac-dictionary inspect <volume.pyac>\n  pyac-dictionary surface <volume.pyac> <language> <surface>\n  pyac-dictionary surface-entries <volume.pyac> <language> <surface>\n  pyac-dictionary source <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary source-entries <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary key <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary entry <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary decode <volume.pyac>  # edit -> build request on stdout.\n  pyac-dictionary render <volume.pyac> [out.pya] [--glyph]  # inverse of compile; stdout if no path.\n  pyac-dictionary verify <volume.pyac>  # every canonical key must read back.\n  pyac-dictionary export <volume.pyac>  # every key with its English forms.\n  pyac-dictionary benchmark <volume.pyac> <iterations> surface <language> <surface>"
+    "usage:\n  pyac-dictionary compile <source.en.pya|shard-dir> <volume.pyac>  # source in, volume out: the whole cycle.\n  pyac-dictionary inspect <volume.pyac>\n  pyac-dictionary surface <volume.pyac> <language> <surface>\n  pyac-dictionary surface-entries <volume.pyac> <language> <surface>\n  pyac-dictionary source <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary source-entries <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary key <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary entry <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary render <volume.pyac> [out.pya] [--glyph]  # the inverse of compile; stdout if no path.\n  pyac-dictionary verify <volume.pyac>  # every canonical key must read back.\n  pyac-dictionary export <volume.pyac>  # every key with its English forms.\n  pyac-dictionary benchmark <volume.pyac> <iterations> surface <language> <surface>"
 }
 
 fn binary_bytes() -> io::Result<u64> {
@@ -126,105 +33,6 @@ fn parse_key(value: &str) -> Result<Vec<u16>, String> {
     }
     Ok(key)
 }
-
-fn convert_input(input: BuildInput) -> Result<DictionaryVolume, String> {
-    let entries = input
-        .entries
-        .into_iter()
-        .map(|entry| {
-            let definition = entry
-                .definition
-                .map(|codelets| {
-                    codelets
-                        .into_iter()
-                        .map(|codelet| {
-                            codelet.try_into().map_err(
-                                |_| "definition codelet must contain exactly 16 uint16 words",
-                            )
-                        })
-                        .collect::<Result<Vec<[u16; 16]>, _>>()
-                })
-                .transpose()?;
-            Ok(DictionaryVolumeEntry {
-                key: entry.key,
-                lexical_forms: entry
-                    .lexical_forms
-                    .into_iter()
-                    .map(|form| LexicalForm {
-                        language: form.language,
-                        surface: form.surface,
-                        normalized: form.normalized,
-                    })
-                    .collect(),
-                source_links: entry
-                    .source_links
-                    .into_iter()
-                    .map(|link| SourceLink {
-                        dataset: link.dataset,
-                        release: link.release,
-                        identifier: link.identifier,
-                        relation: link.relation,
-                    })
-                    .collect(),
-                source_glosses: entry
-                    .source_glosses
-                    .into_iter()
-                    .map(|gloss| SourceGloss {
-                        language: gloss.language,
-                        text: gloss.text,
-                        dataset: gloss.dataset,
-                        release: gloss.release,
-                        identifier: gloss.identifier,
-                    })
-                    .collect(),
-                component_keys: entry.component_keys,
-                task_keys: entry.task_keys,
-                references: entry.references,
-                operation_signatures: entry
-                    .operation_signatures
-                    .into_iter()
-                    .map(|signature| OperationSignature {
-                        verb: signature.verb,
-                        mood: signature.mood,
-                        arguments: signature
-                            .arguments
-                            .into_iter()
-                            .map(|argument| OperationParameter {
-                                case_type: ArgumentSlot {
-                                    grammatical_case: argument.grammatical_case,
-                                    noun_class: argument.noun_class,
-                                },
-                                tag_label: argument.tag_label,
-                                descriptive_specification: argument.descriptive_specification,
-                            })
-                            .collect(),
-                        results: signature
-                            .results
-                            .into_iter()
-                            .map(|result| OperationResult {
-                                noun_class: result.noun_class,
-                                tag_label: result.tag_label,
-                                descriptive_specification: result.descriptive_specification,
-                            })
-                            .collect(),
-                    })
-                    .collect(),
-                definition,
-            })
-        })
-        .collect::<Result<Vec<_>, String>>()?;
-    Ok(DictionaryVolume {
-        metadata: DictionaryMetadata {
-            kind: input.metadata.kind,
-            title: input.metadata.title,
-            revision: input.metadata.revision,
-            languages: input.metadata.languages,
-            normalization_policy: input.metadata.normalization_policy,
-        },
-        entries,
-    })
-}
-
 /// Read a shard directory: manifest plus every shard it names, assembled.
 fn assemble_shard_directory(directory: &Path) -> io::Result<String> {
     let manifest_path = directory.join(MANIFEST_FILE);
@@ -281,11 +89,10 @@ fn load_layer_index() -> io::Result<LayerIndex> {
     Ok(LayerIndex::from_lists(lists))
 }
 
-/// Turn a parsed source directly into a volume, without the JSON round trip.
+/// Turn a parsed source directly into a volume.
 ///
-/// `build` takes a request over stdin so scripts can edit it; `compile` reads the
-/// `.en.pya` source and calls this. Both end at the same encoder, so the two paths
-/// cannot drift.
+/// `compile` reads the `.en.pya` source, parses it, and calls this. There is no
+/// intermediate JSON: the source is the intermediate form, and it round-trips.
 fn source_to_volume(source: DictionarySource) -> DictionaryVolume {
     DictionaryVolume {
         metadata: DictionaryMetadata {
@@ -375,67 +182,6 @@ fn source_to_volume(source: DictionarySource) -> DictionaryVolume {
             .collect(),
     }
 }
-
-/// Turn a decoded volume back into the `build` request shape.
-///
-/// The two differ only in packaging: `build` takes plain JSON with `definition`
-/// as flat codelet arrays, and the model holds the same data with typed fields.
-/// Keeping the conversion here — rather than making the library serde-aware —
-/// keeps the on-disk format the only thing the library has to be exact about.
-fn volume_to_build_input(volume: &DictionaryVolume) -> Value {
-    json!({
-        "metadata": {
-            "kind": volume.metadata.kind,
-            "title": volume.metadata.title,
-            "revision": volume.metadata.revision,
-            "languages": volume.metadata.languages,
-            "normalization_policy": volume.metadata.normalization_policy,
-        },
-        "entries": volume.entries.iter().map(|entry| json!({
-            "key": entry.key,
-            "lexical_forms": entry.lexical_forms.iter().map(|form| json!({
-                "language": form.language,
-                "surface": form.surface,
-                "normalized": form.normalized,
-            })).collect::<Vec<_>>(),
-            "source_links": entry.source_links.iter().map(|link| json!({
-                "dataset": link.dataset,
-                "release": link.release,
-                "identifier": link.identifier,
-                "relation": link.relation,
-            })).collect::<Vec<_>>(),
-            "source_glosses": entry.source_glosses.iter().map(|gloss| json!({
-                "language": gloss.language,
-                "text": gloss.text,
-                "dataset": gloss.dataset,
-                "release": gloss.release,
-                "identifier": gloss.identifier,
-            })).collect::<Vec<_>>(),
-            "component_keys": entry.component_keys,
-            "task_keys": entry.task_keys,
-            "references": entry.references,
-            "operation_signatures": entry.operation_signatures.iter().map(|signature| json!({
-                "verb": signature.verb,
-                "mood": signature.mood,
-                "arguments": signature.arguments.iter().map(|argument| json!({
-                    "grammatical_case": argument.case_type.grammatical_case,
-                    "value_type": argument.case_type.noun_class,
-                    "name": argument.tag_label,
-                    "description": argument.descriptive_specification,
-                })).collect::<Vec<_>>(),
-                "results": signature.results.iter().map(|result| json!({
-                    "value_type": result.noun_class,
-                    "name": result.tag_label,
-                    "description": result.descriptive_specification,
-                })).collect::<Vec<_>>(),
-            })).collect::<Vec<_>>(),
-            "definition": entry.definition.as_ref().map(|codelets| {
-                codelets.iter().map(|codelet| codelet.to_vec()).collect::<Vec<_>>()
-            }),
-        })).collect::<Vec<_>>(),
-    })
-}
-
 fn atomic_write(path: &Path, bytes: &[u8]) -> io::Result<()> {
     let mut temporary = PathBuf::from(path);
     let extension = path
@@ -538,26 +284,6 @@ fn execute(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
                 "command": "shard", "source": args[1], "directory": args[2],
                 "shards": written, "manifest": manifest_path,
                 "manifestBytes": set.manifest.len()
-            })
-        }
-        "build" if args.len() == 2 => {
-            let input_started = Instant::now();
-            let mut input_bytes = Vec::new();
-            io::stdin().read_to_end(&mut input_bytes)?;
-            let input_ms = input_started.elapsed().as_secs_f64() * 1000.0;
-            let request: BuildInput = serde_json::from_slice(&input_bytes)?;
-            let volume = convert_input(request)?;
-            let encode_started = Instant::now();
-            let encoded = encode_dictionary(&volume)?;
-            let encode_ms = encode_started.elapsed().as_secs_f64() * 1000.0;
-            let write_started = Instant::now();
-            atomic_write(Path::new(&args[1]), &encoded)?;
-            let write_ms = write_started.elapsed().as_secs_f64() * 1000.0;
-            json!({
-                "command": "build", "path": args[1], "entries": volume.entries.len(),
-                "volumeBytes": encoded.len(), "codeletCount": encoded.len().saturating_sub(32) / 32,
-                "inputBytes": input_bytes.len(), "inputMs": input_ms,
-                "encodeMs": encode_ms, "writeMs": write_ms
             })
         }
         "inspect" if args.len() == 2 => {
@@ -703,17 +429,6 @@ fn execute(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
                 "count": entries.len(),
                 "atoms": atoms,
                 "volumeBytes": size, "openMs": open_ms, "scanNs": scan_ns
-            })
-        }
-        "decode" if args.len() == 2 => {
-            // Emit the same JSON shape `build` consumes, so the cycle is
-            // decode -> edit -> build with no intermediate format to invent.
-            let path = Path::new(&args[1]);
-            let volume = decode_dictionary(File::open(path)?)?;
-            json!({
-                "command": "decode", "path": args[1],
-                "entries": volume.entries.len(),
-                "request": volume_to_build_input(&volume)
             })
         }
         "render" => {

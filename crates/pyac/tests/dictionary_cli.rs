@@ -1,9 +1,12 @@
 use std::fs;
-use std::io::Write;
 use std::process::{Command, Stdio};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use pyac::dictionary::{DictionaryField, DictionaryValue, encode_text_sentence};
+use pyac::dictionary::{
+    ArgumentSlot, DictionaryField, DictionaryMetadata, DictionaryValue, DictionaryVolume,
+    DictionaryVolumeEntry, LexicalForm, OperationParameter, OperationSignature, SourceGloss,
+    SourceLink, encode_dictionary, encode_text_sentence,
+};
 use serde_json::Value;
 
 fn temporary_directory() -> std::path::PathBuf {
@@ -17,62 +20,78 @@ fn temporary_directory() -> std::path::PathBuf {
     ))
 }
 
-fn request() -> Value {
-    let key = [0xa96a, 0x6c22];
+/// The fixture volume, built through the library.
+///
+/// The CLI test is about the CLI: `inspect`, `surface`, `entry`, `benchmark`.
+/// Building its fixture by hand in English Pyash would be inventing source the
+/// repository does not otherwise contain, and `dictionary_compile.rs` is already
+/// the gate on source-to-volume. So the fixture is constructed as a model and
+/// encoded, and the test reads it back through the command line.
+fn fixture() -> DictionaryVolume {
     let definition = encode_text_sentence(
-        &key,
+        &[0xa96a, 0x6c22],
         &[DictionaryField {
             grammatical_case: 0x245e,
             value: DictionaryValue::Text("A dictionary entry used by the CLI test."),
         }],
     )
     .expect("encode definition");
-    let codelets = definition
-        .iter()
-        .map(|codelet| codelet.to_vec())
-        .collect::<Vec<_>>();
-    serde_json::json!({
-        "metadata": {
-            "kind": "English Pyash dictionary", "title": "CLI test volume",
-            "revision": 1, "languages": ["en"], "normalization_policy": "NFC"
+    DictionaryVolume {
+        metadata: DictionaryMetadata {
+            kind: "English Pyash dictionary".to_owned(),
+            title: "CLI test volume".to_owned(),
+            revision: 1,
+            languages: vec!["en".to_owned()],
+            normalization_policy: "NFC".to_owned(),
         },
-        "entries": [{
-            "key": key,
-            "lexical_forms": [{
-                "language": "en", "surface": "dictionary", "normalized": "dictionary"
+        entries: vec![DictionaryVolumeEntry {
+            key: vec![0xa96a, 0x6c22],
+            lexical_forms: vec![LexicalForm {
+                language: "en".to_owned(),
+                surface: "dictionary".to_owned(),
+                normalized: "dictionary".to_owned(),
             }],
-            "source_links": [{
-                "dataset": "wordnet", "release": "OEWN 2025",
-                "identifier": "n:06311813-n", "relation": "exact-sense"
+            source_links: vec![SourceLink {
+                dataset: "wordnet".to_owned(),
+                release: "OEWN 2025".to_owned(),
+                identifier: "n:06311813-n".to_owned(),
+                relation: "exact-sense".to_owned(),
             }],
-            "source_glosses": [{
-                "language": "en", "dataset": "wordnet", "release": "OEWN 2025",
-                "identifier": "n:06311813-n", "text": "A dictionary entry used by the CLI test."
+            source_glosses: vec![SourceGloss {
+                language: "en".to_owned(),
+                text: "A dictionary entry used by the CLI test.".to_owned(),
+                dataset: "wordnet".to_owned(),
+                release: "OEWN 2025".to_owned(),
+                identifier: "n:06311813-n".to_owned(),
             }],
-            "definition": codelets
-        }]
-    })
+            component_keys: Vec::new(),
+            task_keys: Vec::new(),
+            references: Vec::new(),
+            operation_signatures: vec![OperationSignature {
+                verb: vec![0xa96a],
+                mood: vec![0x245e],
+                arguments: vec![OperationParameter {
+                    case_type: ArgumentSlot {
+                        grammatical_case: vec![0x229e],
+                        noun_class: vec![0x225e],
+                    },
+                    tag_label: "subject".to_owned(),
+                    descriptive_specification: "what the entry is about".to_owned(),
+                }],
+                results: Vec::new(),
+            }],
+            definition: Some(definition),
+        }],
+    }
 }
 
-fn run(args: &[&str], input: Option<&[u8]>) -> Value {
-    let mut child = Command::new(env!("CARGO_BIN_EXE_pyac-dictionary"))
+fn run(args: &[&str]) -> Value {
+    let output = Command::new(env!("CARGO_BIN_EXE_pyac-dictionary"))
         .args(args)
-        .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .spawn()
-        .expect("start dictionary executable");
-    if let Some(input) = input {
-        child
-            .stdin
-            .take()
-            .expect("child stdin")
-            .write_all(input)
-            .expect("write request");
-    }
-    let output = child
-        .wait_with_output()
-        .expect("wait for dictionary executable");
+        .output()
+        .expect("run dictionary executable");
     assert!(
         output.status.success(),
         "command failed: {}",
@@ -82,28 +101,24 @@ fn run(args: &[&str], input: Option<&[u8]>) -> Value {
 }
 
 #[test]
-fn compiled_cli_builds_inspects_looks_up_and_benchmarks_a_volume() {
+fn compiled_cli_inspects_looks_up_and_benchmarks_a_volume() {
     let directory = temporary_directory();
     fs::create_dir_all(&directory).expect("create temp directory");
     let volume = directory.join("dictionary.pyac");
     let volume_arg = volume.to_str().expect("UTF-8 temp path");
-    let input = request().to_string();
+    fs::write(
+        &volume,
+        encode_dictionary(&fixture()).expect("encode volume"),
+    )
+    .expect("write volume");
 
-    let built = run(&["build", volume_arg], Some(input.as_bytes()));
-    assert_eq!(built["command"], "build");
-    assert_eq!(built["entries"], 1);
-    assert!(built["executableBytes"].as_u64().unwrap() > 0);
-    assert!(built["encodeMs"].as_f64().is_some());
-    assert!(volume.exists());
-
-    let inspected = run(&["inspect", volume_arg], None);
+    let inspected = run(&["inspect", volume_arg]);
     assert_eq!(inspected["metadata"]["title"], "CLI test volume");
-    assert_eq!(inspected["codeletCount"], built["codeletCount"]);
     assert_eq!(inspected["entryCount"], 1);
     assert!(inspected["openMs"].as_f64().is_some());
 
-    let surface = run(&["surface", volume_arg, "en", "dictionary"], None);
-    let surface_entries = run(&["surface-entries", volume_arg, "en", "dictionary"], None);
+    let surface = run(&["surface", volume_arg, "en", "dictionary"]);
+    let surface_entries = run(&["surface-entries", volume_arg, "en", "dictionary"]);
     let offset = surface_entries["matches"][0]["offset"].clone();
     assert_eq!(surface["matches"], serde_json::json!([offset]));
     assert!(
@@ -114,16 +129,13 @@ fn compiled_cli_builds_inspects_looks_up_and_benchmarks_a_volume() {
     );
     assert!(surface["lookupNs"].as_u64().is_some());
 
-    let source = run(
-        &[
-            "source-entries",
-            volume_arg,
-            "wordnet",
-            "OEWN 2025",
-            "n:06311813-n",
-        ],
-        None,
-    );
+    let source = run(&[
+        "source-entries",
+        volume_arg,
+        "wordnet",
+        "OEWN 2025",
+        "n:06311813-n",
+    ]);
     assert_eq!(source["matches"].as_array().unwrap().len(), 1);
     assert!(
         !source["matches"][0]["codelets"]
@@ -132,28 +144,25 @@ fn compiled_cli_builds_inspects_looks_up_and_benchmarks_a_volume() {
             .is_empty()
     );
 
-    let entry = run(&["key", volume_arg, "a96a,6c22"], None);
+    let entry = run(&["key", volume_arg, "a96a,6c22"]);
     assert_eq!(entry["key"], serde_json::json!([0xa96a, 0x6c22]));
     assert!(!entry["codelets"].as_array().unwrap().is_empty());
 
-    let full_entry = run(&["entry", volume_arg, "a96a,6c22"], None);
+    let full_entry = run(&["entry", volume_arg, "a96a,6c22"]);
     assert_eq!(full_entry["hasDefinition"], true);
     assert!(
         full_entry["codelets"].as_array().unwrap().len()
             > entry["codelets"].as_array().unwrap().len()
     );
 
-    let benchmark = run(
-        &[
-            "benchmark",
-            volume_arg,
-            "1000",
-            "surface",
-            "en",
-            "dictionary",
-        ],
-        None,
-    );
+    let benchmark = run(&[
+        "benchmark",
+        volume_arg,
+        "1000",
+        "surface",
+        "en",
+        "dictionary",
+    ]);
     assert_eq!(benchmark["iterations"], 1000);
     assert_eq!(benchmark["warmupIterations"], 5);
     assert_eq!(benchmark["entryCount"], 1);

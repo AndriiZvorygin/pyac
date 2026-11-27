@@ -113,15 +113,11 @@ cargo test --release --test dictionary_roundtrip
 
 # every canonical key must read back — the guard for the `na` defect
 cargo test --release --test dictionary_volume
-
-# edit the volume without touching the source
-cargo run --release --bin pyac-dictionary -- decode  dictionary/reference.pyac > v.json
-cargo run --release --bin pyac-dictionary -- build   dictionary/reference.pyac < v.json
 ```
 
-`decode` emits the same JSON shape `build` consumes, so the edit cycle has no
-intermediate format to keep in sync. It is byte-identical on the published
-volume.
+To edit the volume, edit its source: `render` it, change the text, `compile` it
+back. The next section is that loop. There is no JSON form of the dictionary and
+no command that produces one.
 
 ## The source round-trip: `render`
 

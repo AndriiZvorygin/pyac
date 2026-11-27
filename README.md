@@ -56,16 +56,16 @@ cargo run --release --bin pyac-dictionary -- \
 cargo run --release --bin pyac-dictionary -- surface-entries \
   dictionary/reference.pyac en "noun class"
 
-# edit a volume without touching the source
-cargo run --release --bin pyac-dictionary -- decode dictionary/reference.pyac > v.json
-cargo run --release --bin pyac-dictionary -- build  dictionary/reference.pyac < v.json
+# the volume back to source, and back again
+cargo run --release --bin pyac-dictionary -- render dictionary/reference.pyac /tmp/back.en.pya
+cargo run --release --bin pyac-dictionary -- compile /tmp/back.en.pya /tmp/back.pyac
 ```
 
 `compile` takes 5.7 s for 64,598 entries. Its output is **byte-identical** to the
 published volume, and `cargo test --test dictionary_compile` is the gate on that.
 
-`decode` then `build` is also byte-identical, so the two cycles — regenerate from
-source, or edit a volume in place — both round-trip exactly.
+`render` then `compile` is also byte-identical, so the volume is fully reversible
+through its own source. There is no JSON form of the dictionary.
 
 ## The instruction set in one paragraph
 

@@ -120,16 +120,16 @@ cargo test --release                       # green with no volume present
 # the dictionary cycle
 cargo run --release --bin pyac-dictionary -- compile dictionary/shard /tmp/v.pyac
 cargo run --release --bin pyac-dictionary -- verify  /tmp/v.pyac
-cargo run --release --bin pyac-dictionary -- decode  /tmp/v.pyac > v.json
-cargo run --release --bin pyac-dictionary -- build   /tmp/v.pyac < v.json
+cargo run --release --bin pyac-dictionary -- render  /tmp/v.pyac /tmp/v.en.pya
 cargo run --release --bin pyac-dictionary -- surface-entries /tmp/v.pyac en "signature"
 
 # with the real volume, run the full-strength gates
 PYAC_REFERENCE_VOLUME=dictionary/reference.pyac cargo test --release
 ```
 
-`compile` and `decode`→`build` are **both** byte-identical to the input. Two
-independent round trips; a change that breaks either is a real defect.
+`compile` (source → volume) and `render` → `compile` (volume → source → volume)
+are **both** byte-identical to the input. Two independent round trips; a change
+that breaks either is a real defect. There is no JSON form of the dictionary.
 
 ## The device path
 
