@@ -48,6 +48,10 @@ const NUMBER_QUOTE: u32 = 0x881d;
 const TEXT_QUOTE: u32 = 0x0e1d;
 const NUMBER_WORD: u32 = 0x327e;
 const REFERENTIAL_WORD: u32 = 0xc8c4;
+/// The vector grammar word (`ve`). It is a directive: `ve <count> <lanes…>`
+/// emits a uint16 vector quote header, the count when the header form needs it,
+/// then the lanes — the same layout `vector_quote_word` writes.
+const VECTOR_WORD: u32 = 0x2ede;
 
 /// Bit-width words that type a numeric literal: `po` 8, `do` 16, `pu` 32, `tl6h`
 /// 64. `do` is the same word the literal already opened with, so it is not listed
@@ -439,6 +443,85 @@ fn encode_zi_text(builder: &mut Builder<'_>, payload: &[u8]) -> Result<(), Parse
     Ok(())
 }
 
+/// The header word for a vector of `count` lanes, and whether the count must
+/// follow it. `sort` is 4 (uint) or 5 (int); `scalar_bytes` is 1, 2, 4 or 8.
+/// Mirrors `vector_quote_word` in the dictionary writer, generalized to width and
+/// sign so `pu ve` (uint32) and `tc6h pu ve` (int32) type the same way.
+fn vector_header(count: usize, scalar_bytes: u32, sort: u32) -> (u32, bool) {
+    let (thickness, explicit) = match count {
+        2 => (1u32, false),
+        4 => (2, false),
+        8 => (3, false),
+        16 => (4, false),
+        3 => (7, false),
+        _ => (6, true),
+    };
+    let scalar_thickness = match scalar_bytes {
+        1 => 0u32,
+        2 => 1,
+        4 => 2,
+        8 => 3,
+        _ => 1,
+    };
+    (
+        (sort << 13) | (scalar_thickness << 11) | (thickness << 8) | 0x001d,
+        explicit,
+    )
+}
+
+/// Scalar width, in bytes, named by a width word. `do`/`ve` are 16-bit.
+fn vector_width(word: u32) -> Option<u32> {
+    match word {
+        0x309e => Some(1), // po   — 8-bit
+        0x327e => Some(2), // do   — 16-bit
+        0x289e => Some(4), // pu   — 32-bit
+        0x6b57 => Some(8), // tl6h — 64-bit
+        _ => None,
+    }
+}
+
+/// The signed marker, `tc6h`.
+const SIGN_WORD: u32 = 0x6d57;
+/// The float marker, `fyih`. Before a vector (or inline in a value) it selects
+/// the float sort.
+const FLOAT_WORD: u32 = 0x4067;
+
+/// Peek the next glyph word without consuming the main scan: its HNUC and the
+/// index just past it.
+fn peek_word(letters: &[u8], mut index: usize) -> Option<(u32, usize)> {
+    while index < letters.len() && !is_letter(letters[index]) {
+        index += 1;
+    }
+    let rest = &letters[index..];
+    let length = first_word_length(rest)?;
+    if length == 0 {
+        return None;
+    }
+    let word = core::str::from_utf8(&rest[..length]).ok()?;
+    let honuc = u32::from(word_code::encode(word).ok()?);
+    Some((honuc, index + length))
+}
+
+/// Read a whitespace-delimited decimal integer at `*index`, advancing past it.
+fn read_decimal(letters: &[u8], index: &mut usize) -> Result<u32, ParseError> {
+    while *index < letters.len() && letters[*index].is_ascii_whitespace() {
+        *index += 1;
+    }
+    let start = *index;
+    let mut value = 0u32;
+    while *index < letters.len() && letters[*index].is_ascii_digit() {
+        value = value
+            .checked_mul(10)
+            .and_then(|acc| acc.checked_add(u32::from(letters[*index] - b'0')))
+            .ok_or(ParseError::Unencodable)?;
+        *index += 1;
+    }
+    if *index == start {
+        return Err(ParseError::BadGlyph);
+    }
+    Ok(value)
+}
+
 /// Encode one PyAC sentence into `codelets`, returning how many were filled.
 ///
 /// The leading-word conventions keep the scan forward-only: `do` introduces a
@@ -505,6 +588,80 @@ pub fn encode_sentence_with(
         let word = core::str::from_utf8(&rest[..length]).map_err(|_| ParseError::BadGlyph)?;
         let honuc = u32::from(word_code::encode(word).map_err(|_| ParseError::Unencodable)?);
         index += length;
+
+        // A vector literal opens with `ve`, optionally typed: `ve` is uint16,
+        // `pu ve` uint32, `tc6h pu ve` int32, and so on with `po`/`tl6h`. Detect
+        // the optional sign/width prefix and `ve`, then emit the vector header,
+        // the count when the header form needs it, and the lanes. If it is not a
+        // vector opener, fall through so a bare width word still opens a number.
+        if honuc == VECTOR_WORD
+            || honuc == SIGN_WORD
+            || honuc == FLOAT_WORD
+            || vector_width(honuc).is_some()
+        {
+            let mut cursor = index;
+            // sort: 4 uint, 5 int, 6 float.
+            let mut sort = 4u32;
+            let mut scalar_bytes = 2u32;
+            let mut current = honuc;
+            let mut is_vector = false;
+            loop {
+                if current == SIGN_WORD && sort == 4 {
+                    sort = 5;
+                    match peek_word(letters, cursor) {
+                        Some((next, after)) => {
+                            current = next;
+                            cursor = after;
+                        }
+                        None => break,
+                    }
+                } else if current == FLOAT_WORD && sort == 4 {
+                    sort = 6;
+                    match peek_word(letters, cursor) {
+                        Some((next, after)) => {
+                            current = next;
+                            cursor = after;
+                        }
+                        None => break,
+                    }
+                } else if current == VECTOR_WORD {
+                    is_vector = true;
+                    break;
+                } else if let Some(bytes) = vector_width(current) {
+                    scalar_bytes = bytes;
+                    match peek_word(letters, cursor) {
+                        Some((next, after)) if next == VECTOR_WORD => {
+                            cursor = after;
+                            is_vector = true;
+                            break;
+                        }
+                        _ => break,
+                    }
+                } else {
+                    break;
+                }
+            }
+            if is_vector {
+                let count = read_decimal(letters, &mut cursor)? as usize;
+                let (header, explicit) = vector_header(count, scalar_bytes, sort);
+                builder.push(header, false)?;
+                if explicit {
+                    builder.push(count as u32, false)?;
+                }
+                for _ in 0..count {
+                    let lane = read_decimal(letters, &mut cursor)?;
+                    // A wide lane is little-endian, low word first, matching
+                    // `encode_value` in the dictionary writer.
+                    let lane_words = (scalar_bytes / 2) as usize;
+                    for word in 0..lane_words.max(1) {
+                        let shift = (word as u32) * 16;
+                        builder.push((lane >> shift) & 0xffff, false)?;
+                    }
+                }
+                index = cursor;
+                continue;
+            }
+        }
 
         // `do` (16-bit) opens a numeric literal, and `po`/`pu`/`tl6h` type it at
         // another width. Everything numeric after the opener belongs to that

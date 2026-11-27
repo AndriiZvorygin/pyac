@@ -116,6 +116,23 @@ eight. The digit vocabulary is `zron`, `hyik`, `tyut`, `tyin`, `ksas`, `hfak`,
 `hlis`, `hsip`, `hwap`, `twun` for 0–9, with `htip` through `hpet` for 10–15 in a
 hexadecimal or base-sixteen profile.
 
+A vector literal is introduced by `ve` and emits a vector quote header, the count
+when the header form needs it, and the lanes (a wide lane is little-endian, low
+word first):
+
+```text
+ve 2 27403 27682        uint16 vector, 16-bit lanes
+pu ve 2 27403 27682     uint32 vector
+tc6h pu ve ...          int32 vector     `tc6h` marks it signed
+fyih pu ve ...          float32 vector   `fyih` marks it float
+```
+
+The sort is 4 for unsigned, 5 for signed and 6 for float; the scalar width comes
+from the same `po`/`do`/`pu`/`tl6h` words as scalars, defaulting to `do` (16-bit).
+A vector of two, three, four, eight or sixteen lanes uses a fixed-thickness header
+with no count; any other length uses the explicit-count header. This is the same
+layout the dictionary writer's `vector_quote_word` produces.
+
 The source form `quoted.<kind> ... .<kind>.quoted` delimits a payload and
 annotates its kind. Preserve that kind as metadata outside the payload. A
 non-default kind uses this paired `zi` frame:

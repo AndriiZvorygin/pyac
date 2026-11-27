@@ -56,113 +56,150 @@ impl std::error::Error for RenderError {}
 /// The profile marker kind the source opens with.
 const SOURCE_MARKER: &str = "pyac-vliw-dictionary/3";
 
+/// How a text value is written.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum TextStyle {
+    /// English form: a JSON string after the literal word `text`.
+    English,
+    /// Glyph form: a `zi.kyit. … .kyit.zi` frame, no `text` keyword.
+    Glyph,
+}
+
+/// Render a whole volume to `.pya` source text.
+///
+/// The glyph form spells keys as glyphs and carries every text value in a
+/// `zi.kyit. … .kyit.zi` frame, so the source is the language and not a JSON
+/// rendering of it. Numbers stay as `num N`; that is a typed decimal literal, not
+/// a `zi` frame, which is reserved for strings and binary.
+pub fn render_glyph_source(volume: &DictionaryVolume) -> Result<String, RenderError> {
+    render(volume, TextStyle::Glyph)
+}
+
 /// Render a whole volume to `.en.pya` source text.
 pub fn render_source(volume: &DictionaryVolume) -> Result<String, RenderError> {
+    render(volume, TextStyle::English)
+}
+
+fn render(volume: &DictionaryVolume, style: TextStyle) -> Result<String, RenderError> {
     let mut out = String::new();
     let _ = writeln!(
         out,
-        "su name lyin kwon ob text {} be text ya",
-        quote(&volume.metadata.kind)
+        "su name lyin kwon ob {} be text ya",
+        text(&volume.metadata.kind, style)
     );
     let _ = writeln!(
         out,
-        "su name lyin kwon ob text {} as num {} from text {} to text {} with text {} be text ya",
-        quote(&volume.metadata.title),
+        "su name lyin kwon ob {} as num {} from {} to {} with {} be text ya",
+        text(&volume.metadata.title, style),
         volume.metadata.revision,
-        quote(&volume.metadata.languages.join(",")),
-        quote(&volume.metadata.normalization_policy),
-        quote(SOURCE_MARKER)
+        text(&volume.metadata.languages.join(","), style),
+        text(&volume.metadata.normalization_policy, style),
+        text(SOURCE_MARKER, style)
     );
     for entry in &volume.entries {
-        render_entry(entry, &mut out)?;
+        render_entry(entry, style, &mut out)?;
     }
     out.push_str("prah\n");
     Ok(out)
 }
 
-fn render_entry(entry: &DictionaryVolumeEntry, out: &mut String) -> Result<(), RenderError> {
-    let key = quote(&spell_key(&entry.key)?);
+fn render_entry(
+    entry: &DictionaryVolumeEntry,
+    style: TextStyle,
+    out: &mut String,
+) -> Result<(), RenderError> {
+    let key = text(&spell_key(&entry.key)?, style);
     let _ = writeln!(
         out,
-        "su name tlat kwon ob text {key} at text \"entry\" be text ya"
+        "su name tlat kwon ob {key} at {} be text ya",
+        text("entry", style)
     );
     for form in &entry.lexical_forms {
         let _ = writeln!(
             out,
-            "su name tlat kwon ob text {key} as text {} from text {} to text {} at text \"lexical-form\" be text ya",
-            quote(&form.language),
-            quote(&form.surface),
-            quote(&form.normalized)
+            "su name tlat kwon ob {key} as {} from {} to {} at {} be text ya",
+            text(&form.language, style),
+            text(&form.surface, style),
+            text(&form.normalized, style),
+            text("lexical-form", style)
         );
     }
     for link in &entry.source_links {
         let _ = writeln!(
             out,
-            "su name tlat kwon ob text {key} as text {} from text {} to text {} by text {} at text \"source-link\" be text ya",
-            quote(&link.dataset),
-            quote(&link.release),
-            quote(&link.identifier),
-            quote(&link.relation)
+            "su name tlat kwon ob {key} as {} from {} to {} by {} at {} be text ya",
+            text(&link.dataset, style),
+            text(&link.release, style),
+            text(&link.identifier, style),
+            text(&link.relation, style),
+            text("source-link", style)
         );
     }
     for gloss in &entry.source_glosses {
         let _ = writeln!(
             out,
-            "su name tlat kwon ob text {key} as text {} from text {} to text {} by text {} with text {} at text \"source-gloss\" be text ya",
-            quote(&gloss.language),
-            quote(&gloss.dataset),
-            quote(&gloss.release),
-            quote(&gloss.identifier),
-            quote(&gloss.text)
+            "su name tlat kwon ob {key} as {} from {} to {} by {} with {} at {} be text ya",
+            text(&gloss.language, style),
+            text(&gloss.dataset, style),
+            text(&gloss.release, style),
+            text(&gloss.identifier, style),
+            text(&gloss.text, style),
+            text("source-gloss", style)
         );
     }
     for component in &entry.component_keys {
         let _ = writeln!(
             out,
-            "su name tlat kwon ob text {key} from text {} at text \"component\" be text ya",
-            quote(&spell_key(component)?)
+            "su name tlat kwon ob {key} from {} at {} be text ya",
+            text(&spell_key(component)?, style),
+            text("component", style)
         );
     }
     for task in &entry.task_keys {
         let _ = writeln!(
             out,
-            "su name tlat kwon ob text {key} with text {} at text \"task\" be text ya",
-            quote(&spell_key(task)?)
+            "su name tlat kwon ob {key} with {} at {} be text ya",
+            text(&spell_key(task)?, style),
+            text("task", style)
         );
     }
     for reference in &entry.references {
         let _ = writeln!(
             out,
-            "su name tlat kwon ob text {key} to text {} at text \"reference\" be text ya",
-            quote(&spell_key(reference)?)
+            "su name tlat kwon ob {key} to {} at {} be text ya",
+            text(&spell_key(reference)?, style),
+            text("reference", style)
         );
     }
     for signature in &entry.operation_signatures {
         let _ = writeln!(
             out,
-            "su name tlat kwon ob text {key} from ve {} {} at text \"operation-signature\" be text ya",
+            "su name tlat kwon ob {key} from ve {} {} at {} be text ya",
             signature_words(signature).len(),
-            word_list(&signature_words(signature))
+            word_list(&signature_words(signature)),
+            text("operation-signature", style)
         );
         for argument in &signature.arguments {
             let slot = slot_words(argument);
             let _ = writeln!(
                 out,
-                "su name tlat kwon ob text {key} as ve {} {} from text {} to text {} at text \"operation-argument\" be text ya",
+                "su name tlat kwon ob {key} as ve {} {} from {} to {} at {} be text ya",
                 slot.len(),
                 word_list(&slot),
-                quote(&argument.tag_label),
-                quote(&argument.descriptive_specification)
+                text(&argument.tag_label, style),
+                text(&argument.descriptive_specification, style),
+                text("operation-argument", style)
             );
         }
         for result in &signature.results {
             let _ = writeln!(
                 out,
-                "su name tlat kwon ob text {key} as ve {} {} from text {} to text {} at text \"operation-result\" be text ya",
+                "su name tlat kwon ob {key} as ve {} {} from {} to {} at {} be text ya",
                 result.noun_class.len(),
                 word_list(&result.noun_class),
-                quote(&result.tag_label),
-                quote(&result.descriptive_specification)
+                text(&result.tag_label, style),
+                text(&result.descriptive_specification, style),
+                text("operation-result", style)
             );
         }
     }
@@ -170,9 +207,10 @@ fn render_entry(entry: &DictionaryVolumeEntry, out: &mut String) -> Result<(), R
         let words: Vec<u16> = definition.iter().flatten().copied().collect();
         let _ = writeln!(
             out,
-            "su name tlat kwon ob text {key} from ve {} {} at text \"definition\" be text ya",
+            "su name tlat kwon ob {key} from ve {} {} at {} be text ya",
             words.len(),
-            word_list(&words)
+            word_list(&words),
+            text("definition", style)
         );
     }
     Ok(())
@@ -233,4 +271,44 @@ fn spell_key(key: &[u16]) -> Result<String, RenderError> {
 
 fn quote(value: &str) -> String {
     serde_json::to_string(value).expect("a string always serializes")
+}
+
+/// Write a text value in the selected form.
+///
+/// English is `text "<json>"`. Glyph is a `zi` frame whose kind root is `kyit`
+/// and whose payload is the raw text between two dots:
+///
+/// ```text
+/// zi.kyit.<raw text>.kyit.zi
+/// ```
+///
+/// Only two characters need escaping: a backslash becomes `\\`, and a literal
+/// closing marker `.kyit.zi` inside the payload gets a backslash before its dot.
+/// Everything else — spaces, punctuation, periods — stays as written, so the
+/// payload reads as the text it is. The parser reverses both.
+fn text(value: &str, style: TextStyle) -> String {
+    match style {
+        TextStyle::English => format!("text {}", quote(value)),
+        TextStyle::Glyph => format!("zi.{KIND}.{}.{KIND}.zi", escape_frame(value)),
+    }
+}
+
+/// The kind root of a text frame, glyph `kyit`.
+const KIND: &str = "kyit";
+
+/// The closing marker a payload must not contain unescaped.
+const CLOSE: &str = ".kyit.zi";
+
+fn escape_frame(value: &str) -> String {
+    let mut out = String::with_capacity(value.len());
+    let mut rest = value;
+    while let Some(position) = rest.find(CLOSE) {
+        // Escape the backslash and the leading dot of any embedded close marker.
+        let head = &rest[..position];
+        out.push_str(&head.replace('\\', "\\\\"));
+        out.push_str("\\.kyit.zi");
+        rest = &rest[position + CLOSE.len()..];
+    }
+    out.push_str(&rest.replace('\\', "\\\\"));
+    out
 }

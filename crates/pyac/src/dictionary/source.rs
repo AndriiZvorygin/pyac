@@ -440,6 +440,29 @@ fn apply_record(
                 descriptive_specification: text("to", "operation result description")?,
             });
         }
+        "definition" => {
+            // The body is pre-lowered codelets, written flat as `from ve <n> <words…>`
+            // and chunked back into sixteen-word codelets here.
+            let Some(words) = vector("from") else {
+                return Err(SourceError::Unsupported {
+                    line,
+                    text: "definition requires a from vector".to_owned(),
+                });
+            };
+            if words.is_empty() || words.len() % 16 != 0 {
+                return Err(SourceError::Unsupported {
+                    line,
+                    text: "definition must be a whole number of sixteen-word codelets".to_owned(),
+                });
+            }
+            if entry.definition.is_some() {
+                return Err(SourceError::Unsupported {
+                    line,
+                    text: "an entry may carry only one definition".to_owned(),
+                });
+            }
+            entry.definition = Some(words.chunks(16).map(<[u16]>::to_vec).collect::<Vec<_>>());
+        }
         other => {
             return Err(SourceError::Unsupported {
                 line,
@@ -498,6 +521,73 @@ const CASES: [&str; 10] = [
     "su", "ob", "as", "from", "to", "by", "with", "at", "be", "name",
 ];
 
+fn char_at(chars: &[char], position: usize) -> Option<char> {
+    chars.get(position).copied()
+}
+
+/// Take a whole `zi.<kind>. <payload> .<kind>.zi` frame starting at `position`.
+///
+/// Returns the frame text and the index just past it. `None` when the run does
+/// not form a frame, so a plain word beginning with `z` still tokenises normally.
+fn take_zi_frame(chars: &[char], position: usize) -> Option<(String, usize)> {
+    let literal = ['z', 'i', '.'];
+    if !chars[position..].iter().zip(literal).all(|(a, b)| *a == b) {
+        return None;
+    }
+    let mut index = position + literal.len();
+    // The kind root runs to the next dot.
+    let kind_start = index;
+    while char_at(chars, index).is_some_and(|c| c != '.') {
+        index += 1;
+    }
+    if char_at(chars, index) != Some('.') || index == kind_start {
+        return None;
+    }
+    let kind: String = chars[kind_start..index].iter().collect();
+    index += 1; // past the dot opening the payload
+    // Scan for the unescaped close marker `.<kind>.zi`.
+    let close: Vec<char> = format!(".{kind}.zi").chars().collect();
+    let payload_start = index;
+    while index < chars.len() {
+        if chars[index] == '\\' {
+            index += 2; // skip the escaped character
+            continue;
+        }
+        if chars[index..].starts_with(&close) {
+            let payload: String = chars[payload_start..index].iter().collect();
+            return Some((
+                format!("zi.{kind}.{payload}.{kind}.zi"),
+                index + close.len(),
+            ));
+        }
+        index += 1;
+    }
+    None
+}
+
+/// Reverse `escape_frame`: a `zi.<kind>. <payload> .<kind>.zi` frame back to text.
+fn unescape_frame(frame: &str, line: usize) -> Result<String, SourceError> {
+    let unsupported = || SourceError::Unsupported {
+        line,
+        text: frame.to_owned(),
+    };
+    let rest = frame.strip_prefix("zi.").ok_or_else(unsupported)?;
+    let (kind, after) = rest.split_once('.').ok_or_else(unsupported)?;
+    let payload = after
+        .strip_suffix(&format!(".{kind}.zi"))
+        .ok_or_else(unsupported)?;
+    let mut out = String::with_capacity(payload.len());
+    let mut chars = payload.chars();
+    while let Some(character) = chars.next() {
+        if character == '\\' {
+            out.push(chars.next().ok_or_else(unsupported)?);
+        } else {
+            out.push(character);
+        }
+    }
+    Ok(out)
+}
+
 /// Split one sentence into `su` plus its case clauses.
 ///
 /// The source writes each case word immediately before its value, so a clause
@@ -512,12 +602,16 @@ fn parse_line(
         text: line.to_owned(),
     };
 
-    // Tokenise into (case word | bare token) while respecting quotes.
+    // Tokenise into (case word | bare token) while respecting quotes and `zi`
+    // frames. A glyph text frame contains spaces, so it is captured whole.
     let mut tokens: Vec<String> = Vec::new();
     let mut current = String::new();
     let mut in_text = false;
     let mut escaped = false;
-    for character in line.chars() {
+    let chars: Vec<char> = line.chars().collect();
+    let mut position = 0usize;
+    while position < chars.len() {
+        let character = chars[position];
         if in_text {
             current.push(character);
             if escaped {
@@ -527,20 +621,32 @@ fn parse_line(
             } else if character == '"' {
                 in_text = false;
             }
+            position += 1;
             continue;
         }
         if character == '"' {
             in_text = true;
             current.push(character);
+            position += 1;
             continue;
         }
         if character.is_whitespace() {
             if !current.is_empty() {
                 tokens.push(std::mem::take(&mut current));
             }
+            position += 1;
             continue;
         }
+        // A `zi.<kind>.` frame runs to `.<kind>.zi`, spaces included.
+        if current.is_empty() && char_at(&chars, position) == Some('z') {
+            if let Some((frame, end)) = take_zi_frame(&chars, position) {
+                tokens.push(frame);
+                position = end;
+                continue;
+            }
+        }
         current.push(character);
+        position += 1;
     }
     if !current.is_empty() {
         tokens.push(current);
@@ -599,6 +705,7 @@ fn parse_value(
                 })?;
             (ClauseValue::Text(parsed), 2)
         }
+        _ if token.starts_with("zi.") => (ClauseValue::Text(unescape_frame(token, line)?), 1),
         "num" => {
             let raw = tokens.get(index + 1).ok_or(SourceError::Unsupported {
                 line,
