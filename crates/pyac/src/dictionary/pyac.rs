@@ -46,6 +46,9 @@ fn is_structural(word: u16) -> bool {
         word,
         NAME_MARKER
             | NOMINATIVE
+            // The word quote itself: a key `wo` is written `wo wo` (`giwowo`), which
+            // is the phrase for quoting the word quote.
+            | WORD_QUOTE
             | super::words::ACCUSATIVE
             | ESSIVE
             | SOURCE

@@ -644,6 +644,10 @@ pub fn encode_sentence_with(
     // run is just that word, not a name opener. The boundary words themselves set
     // this true; every other word clears it.
     let mut at_value = true;
+    // Set by a `wo` just consumed: the next name word is data, so it must not be read
+    // as the closing `na`, though it keeps its class boundary bit. That is the whole
+    // point of `wo` — `giwona na` is key `na` then the closer, not two closers.
+    let mut quoted_next = false;
 
     while index < letters.len() {
         while index < letters.len() && !is_letter(letters[index]) {
@@ -676,23 +680,18 @@ pub fn encode_sentence_with(
         let honuc = u32::from(word_code::encode(word).map_err(|_| ParseError::Unencodable)?);
         index += length;
 
-        // `wo` word-quotes the roots after it: it emits **no word itself**, it only
-        // suppresses the case-boundary marking on the roots that follow. That is what
-        // lets a key that spells `na` stay data: `giwona na` encodes to gi, na, na —
-        // the first `na` is not a case ending, the second closes the name. Quoting is
-        // the point, so any word may follow, including a case or mood word; the run
-        // ends at the closing `na` or the next directive.
-        if honuc == WORD_QUOTE {
-            loop {
-                let Some((next, after)) = peek_word(letters, index) else {
-                    break;
-                };
-                if next == NOMINATIVE_WORD {
-                    break;
-                }
-                builder.push(next, false)?;
-                index = after;
-            }
+        // `wo` word-quotes the root after it: it emits **no word itself**. Outside a
+        // name it suppresses the case reading of the following root; inside a name it
+        // flags that root as data so a key `na` is not taken for the closer. A `wo`
+        // used *as a key* is not a directive — inside a name every word is data, so
+        // this check must come after the name handling below.
+        if honuc == WORD_QUOTE && !in_name {
+            let Some((next, after)) = peek_word(letters, index) else {
+                return Err(ParseError::BadGlyph);
+            };
+            let boundary = matches!(classify(next), WordClass::Case | WordClass::Perspective);
+            builder.push(next, boundary)?;
+            index = after;
             continue;
         }
 
@@ -705,9 +704,22 @@ pub fn encode_sentence_with(
         // exactly that: the first word whose boundary flag is set. The closing `na`
         // is that word, so it alone takes the boundary here; a key word that happens
         // to be a case or mood word stays data.
+        // A `wo` inside a name flags the next word as quoted data and emits nothing —
+        // unless the key *is* `wo`, in which case the renderer writes `wo wo` and the
+        // second is the data word. `quoted_next` already distinguishes that.
+        if in_name && honuc == WORD_QUOTE && !quoted_next {
+            quoted_next = true;
+            continue;
+        }
+
         if in_name {
-            let closes = honuc == NOMINATIVE_WORD;
+            // A key word is *data*: it never carries a boundary, whatever its class.
+            // Only the closing `na` closes the name. `wo` does not change this — it
+            // exists so a key that spells a case word is not mistaken for one, which
+            // the `quoted_next` flag records for the closer check.
+            let closes = honuc == NOMINATIVE_WORD && !quoted_next;
             builder.push(honuc, closes)?;
+            quoted_next = false;
             if closes {
                 in_name = false;
                 at_value = true;
