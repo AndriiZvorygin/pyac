@@ -5,9 +5,10 @@ use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 use pyac::dictionary::{
-    DictionaryFileReader, DictionaryMetadata, DictionaryVolume, DictionaryVolumeEntry, LexicalForm,
-    OperationParameter, ArgumentSlot, OperationResult, OperationSignature, SourceGloss,
-    SourceLink, decode_dictionary, encode_dictionary,
+    DictionaryFileReader, DictionaryMetadata, DictionarySource, DictionaryVolume,
+    DictionaryVolumeEntry, LexicalForm, OperationParameter, ArgumentSlot, OperationResult,
+    OperationSignature, SourceGloss, SourceLink, decode_dictionary, encode_dictionary,
+    parse_source,
 };
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -105,7 +106,7 @@ struct OperationResultInput {
 }
 
 fn usage() -> &'static str {
-    "usage:\n  pyac-dictionary build <volume.pyac>  # Build JSON request is read from stdin.\n  pyac-dictionary inspect <volume.pyac>\n  pyac-dictionary surface <volume.pyac> <language> <surface>\n  pyac-dictionary surface-entries <volume.pyac> <language> <surface>\n  pyac-dictionary source <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary source-entries <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary key <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary entry <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary decode <volume.pyac>  # edit -> build request on stdout.\n  pyac-dictionary verify <volume.pyac>  # every canonical key must read back.\n  pyac-dictionary export <volume.pyac>  # every key with its English forms.\n  pyac-dictionary benchmark <volume.pyac> <iterations> surface <language> <surface>"
+    "usage:\n  pyac-dictionary compile <source.pya> <volume.pyac>  # the bootstrap; no JSON, no JS.\n  pyac-dictionary build <volume.pyac>  # Build JSON request is read from stdin.\n  pyac-dictionary inspect <volume.pyac>\n  pyac-dictionary surface <volume.pyac> <language> <surface>\n  pyac-dictionary surface-entries <volume.pyac> <language> <surface>\n  pyac-dictionary source <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary source-entries <volume.pyac> <dataset> <release> <identifier>\n  pyac-dictionary key <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary entry <volume.pyac> <hnuc[,hnuc...]>\n  pyac-dictionary decode <volume.pyac>  # edit -> build request on stdout.\n  pyac-dictionary verify <volume.pyac>  # every canonical key must read back.\n  pyac-dictionary export <volume.pyac>  # every key with its English forms.\n  pyac-dictionary benchmark <volume.pyac> <iterations> surface <language> <surface>"
 }
 
 fn binary_bytes() -> io::Result<u64> {
@@ -224,6 +225,103 @@ fn convert_input(input: BuildInput) -> Result<DictionaryVolume, String> {
     })
 }
 
+/// Turn a parsed source directly into a volume, without the JSON round trip.
+///
+/// `build` takes a request over stdin so scripts can edit it; `compile` reads the
+/// `.pya` source and calls this. Both end at the same encoder, so the two paths
+/// cannot drift.
+fn source_to_volume(source: DictionarySource) -> DictionaryVolume {
+    DictionaryVolume {
+        metadata: DictionaryMetadata {
+            kind: source.metadata.kind,
+            title: source.metadata.title,
+            revision: source.metadata.revision,
+            languages: source.metadata.languages,
+            normalization_policy: source.metadata.normalization_policy,
+        },
+        entries: source
+            .entries
+            .into_iter()
+            .map(|entry| DictionaryVolumeEntry {
+                key: entry.key,
+                lexical_forms: entry
+                    .lexical_forms
+                    .into_iter()
+                    .map(|form| LexicalForm {
+                        language: form.language,
+                        surface: form.surface,
+                        normalized: form.normalized,
+                    })
+                    .collect(),
+                source_links: entry
+                    .source_links
+                    .into_iter()
+                    .map(|link| SourceLink {
+                        dataset: link.dataset,
+                        release: link.release,
+                        identifier: link.identifier,
+                        relation: link.relation,
+                    })
+                    .collect(),
+                source_glosses: entry
+                    .source_glosses
+                    .into_iter()
+                    .map(|gloss| SourceGloss {
+                        language: gloss.language,
+                        text: gloss.text,
+                        dataset: gloss.dataset,
+                        release: gloss.release,
+                        identifier: gloss.identifier,
+                    })
+                    .collect(),
+                component_keys: entry.component_keys,
+                task_keys: entry.task_keys,
+                references: entry.references,
+                operation_signatures: entry
+                    .operation_signatures
+                    .into_iter()
+                    .map(|signature| OperationSignature {
+                        verb: signature.verb,
+                        mood: signature.mood,
+                        arguments: signature
+                            .arguments
+                            .into_iter()
+                            .map(|argument| OperationParameter {
+                                case_type: ArgumentSlot {
+                                    grammatical_case: argument.grammatical_case,
+                                    noun_class: argument.noun_class,
+                                },
+                                tag_label: argument.tag_label,
+                                descriptive_specification: argument
+                                    .descriptive_specification,
+                            })
+                            .collect(),
+                        results: signature
+                            .results
+                            .into_iter()
+                            .map(|result| OperationResult {
+                                noun_class: result.noun_class,
+                                tag_label: result.tag_label,
+                                descriptive_specification: result
+                                    .descriptive_specification,
+                            })
+                            .collect(),
+                    })
+                    .collect(),
+                // Definitions arrive already lowered. There is no lowering step
+                // here, so a source that carried one would have been rejected by
+                // the parser rather than silently dropped.
+                definition: entry.definition.map(|codelets| {
+                    codelets
+                        .into_iter()
+                        .filter_map(|codelet| <[u16; 16]>::try_from(codelet).ok())
+                        .collect()
+                }),
+            })
+            .collect(),
+    }
+}
+
 /// Turn a decoded volume back into the `build` request shape.
 ///
 /// The two differ only in packaging: `build` takes plain JSON with `definition`
@@ -322,6 +420,32 @@ fn execute(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
     let whole_start = Instant::now();
     let command = args.first().map(String::as_str).unwrap_or("");
     let output = match command {
+        "compile" if args.len() == 3 => {
+            // The bootstrap: source in, volume out, no intermediate JSON and no
+            // JavaScript. `build` remains for scripts that want to edit a request.
+            let source_path = Path::new(&args[1]);
+            let text = fs::read_to_string(source_path)?;
+            let parse_started = Instant::now();
+            let source = parse_source(&text).map_err(|error| {
+                io::Error::other(format!("{}: {error}", error.code()))
+            })?;
+            let parse_ms = parse_started.elapsed().as_secs_f64() * 1000.0;
+            let entry_count = source.entries.len();
+            let volume = source_to_volume(source);
+            let encode_started = Instant::now();
+            let encoded = encode_dictionary(&volume)?;
+            let encode_ms = encode_started.elapsed().as_secs_f64() * 1000.0;
+            let write_started = Instant::now();
+            atomic_write(Path::new(&args[2]), &encoded)?;
+            let write_ms = write_started.elapsed().as_secs_f64() * 1000.0;
+            json!({
+                "command": "compile", "source": args[1], "path": args[2],
+                "entries": entry_count, "volumeBytes": encoded.len(),
+                "codeletCount": encoded.len().saturating_sub(32) / 32,
+                "sourceBytes": text.len(),
+                "parseMs": parse_ms, "encodeMs": encode_ms, "writeMs": write_ms
+            })
+        }
         "build" if args.len() == 2 => {
             let input_started = Instant::now();
             let mut input_bytes = Vec::new();

@@ -5,6 +5,7 @@ mod operation;
 mod reader;
 mod reader_codec;
 mod reader_index;
+mod source;
 mod volume;
 mod volume_records;
 mod wire;
@@ -18,6 +19,11 @@ pub use operation::{
     OperationSignatureKey,
 };
 pub use reader::{DictionaryFileReader, DictionaryReadError, DictionarySection};
+pub use source::{
+    parse_source, ArgumentRecord, DictionarySource, EntryRecord, LexicalFormRecord,
+    ResultRecord, SignatureRecord, SourceError, SourceGlossRecord, SourceLinkRecord,
+    VolumeMetadataRecord,
+};
 pub use volume::{
     DictionaryMetadata, DictionaryVolume, DictionaryVolumeEntry, DictionaryVolumeError,
     encode_dictionary,
