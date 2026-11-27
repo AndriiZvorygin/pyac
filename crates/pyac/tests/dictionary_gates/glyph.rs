@@ -1,29 +1,26 @@
-//! The Pyac renderer gate: `render_pyac_source` output re-encodes to the volume.
+//! The Pyac renderer gate: `render_pyac_source` re-encodes to the published codelets.
 //!
-//! Each line is a record (`gi <key> na <value><case> … hwus li`). The check walks
-//! the entries in order, encodes each line with the ported tablet parser, and
-//! compares the flattened codelets to the entry's published codelets.
+//! Each rendered line is a record (`gi <key> na <value><case> … hwus li`). This
+//! encodes every line with the ported tablet parser and compares the flattened
+//! codelets to the entry's published codelets, entry by entry.
 //!
-//! Skips when no volume is present; see `tests/common/mod.rs`.
+//! It is the gate that distinguishes the glyph form from English-with-`zi`-frames:
+//! the glyph form starts with `gi`, never `su name`.
 
-mod common;
-
-use std::fs::File;
+use super::fixtures;
 
 use pyac_vliw_core::text_encode::{CODELET_WIDTH, encode_sentence};
 
 #[test]
 fn rendering_as_pyac_and_re_encoding_reproduces_the_published_codelets() {
-    let Some(path) = common::reference_volume_or_skip() else {
+    let (Some(model), Some(path)) = (fixtures::volume(), fixtures::reference_volume()) else {
         return;
     };
-    let model = pyac::dictionary::decode_dictionary(File::open(&path).expect("open volume"))
-        .expect("decode volume");
-    let mut reader = pyac::dictionary::DictionaryFileReader::open(File::open(&path).expect("open"))
-        .expect("read volume");
+    let mut reader =
+        pyac::dictionary::DictionaryFileReader::open(std::fs::File::open(path).expect("open"))
+            .expect("read volume");
     // Read the entry bodies forward, in index order. `read_entry(key)` searches the
-    // index for every key, which costs 9.4 s on this volume against 0.04 s for the
-    // sequential walk, and the walk is already ordered.
+    // index for every key, and the walk is already ordered.
     let rows = reader
         .canonical_keys_with_offsets()
         .expect("canonical index with offsets");
@@ -32,10 +29,10 @@ fn rendering_as_pyac_and_re_encoding_reproduces_the_published_codelets() {
         .expect("entries section")
         .end;
 
-    let text = pyac::dictionary::render_pyac_source(&model).expect("render pyac");
+    let text = pyac::dictionary::render_pyac_source(model).expect("render pyac");
 
-    // A glyph render must not *begin* a line with the English subject form. Checking
-    // the line start, not a substring, because a surface value may contain "su ".
+    // A glyph render must not *begin* a line with the English subject form. The
+    // line start, not a substring: a surface value may contain "su ".
     for line in text.lines().take(1000) {
         assert!(
             !line.starts_with("su "),
@@ -44,7 +41,7 @@ fn rendering_as_pyac_and_re_encoding_reproduces_the_published_codelets() {
     }
     assert!(text.contains("zi.kyit."), "text values must be zi frames");
 
-    // Every line belongs to an entry in order; walk entries and their line counts.
+    // Every line belongs to an entry, in order; walk entries and their line counts.
     let mut lines = text.lines();
     let (mut checked, mut matched) = (0usize, 0usize);
     for (position, entry) in model.entries.iter().enumerate() {

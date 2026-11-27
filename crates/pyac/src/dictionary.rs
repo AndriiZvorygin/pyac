@@ -1,3 +1,4 @@
+mod compile;
 mod decode;
 mod index;
 mod model;
@@ -15,6 +16,7 @@ mod window;
 mod wire;
 mod words;
 
+pub use compile::source_to_volume;
 pub use decode::decode_dictionary;
 pub use index::DictionaryIndex;
 pub use model::{DictionaryEntry, DictionaryIndexError, LexicalForm, SourceGloss, SourceLink};

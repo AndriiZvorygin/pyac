@@ -5,10 +5,8 @@ use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 use pyac::dictionary::{
-    ArgumentSlot, DictionaryFileReader, DictionaryMetadata, DictionarySource, DictionaryVolume,
-    DictionaryVolumeEntry, LAYERS, LayerIndex, LexicalForm, MANIFEST_FILE, OperationParameter,
-    OperationResult, OperationSignature, SourceGloss, SourceLink, assemble_shards,
-    decode_dictionary, encode_dictionary, parse_manifest, parse_source, split_source_with_layers,
+    DictionaryFileReader, LAYERS, LayerIndex, MANIFEST_FILE, assemble_shards, decode_dictionary,
+    encode_dictionary, parse_manifest, parse_source, split_source_with_layers,
 };
 use serde_json::{Value, json};
 
@@ -93,95 +91,6 @@ fn load_layer_index() -> io::Result<LayerIndex> {
 ///
 /// `compile` reads the `.en.pya` source, parses it, and calls this. There is no
 /// intermediate JSON: the source is the intermediate form, and it round-trips.
-fn source_to_volume(source: DictionarySource) -> DictionaryVolume {
-    DictionaryVolume {
-        metadata: DictionaryMetadata {
-            kind: source.metadata.kind,
-            title: source.metadata.title,
-            revision: source.metadata.revision,
-            languages: source.metadata.languages,
-            normalization_policy: source.metadata.normalization_policy,
-        },
-        entries: source
-            .entries
-            .into_iter()
-            .map(|entry| DictionaryVolumeEntry {
-                key: entry.key,
-                lexical_forms: entry
-                    .lexical_forms
-                    .into_iter()
-                    .map(|form| LexicalForm {
-                        language: form.language,
-                        surface: form.surface,
-                        normalized: form.normalized,
-                    })
-                    .collect(),
-                source_links: entry
-                    .source_links
-                    .into_iter()
-                    .map(|link| SourceLink {
-                        dataset: link.dataset,
-                        release: link.release,
-                        identifier: link.identifier,
-                        relation: link.relation,
-                    })
-                    .collect(),
-                source_glosses: entry
-                    .source_glosses
-                    .into_iter()
-                    .map(|gloss| SourceGloss {
-                        language: gloss.language,
-                        text: gloss.text,
-                        dataset: gloss.dataset,
-                        release: gloss.release,
-                        identifier: gloss.identifier,
-                    })
-                    .collect(),
-                component_keys: entry.component_keys,
-                task_keys: entry.task_keys,
-                references: entry.references,
-                operation_signatures: entry
-                    .operation_signatures
-                    .into_iter()
-                    .map(|signature| OperationSignature {
-                        verb: signature.verb,
-                        mood: signature.mood,
-                        arguments: signature
-                            .arguments
-                            .into_iter()
-                            .map(|argument| OperationParameter {
-                                case_type: ArgumentSlot {
-                                    grammatical_case: argument.grammatical_case,
-                                    noun_class: argument.noun_class,
-                                },
-                                tag_label: argument.tag_label,
-                                descriptive_specification: argument.descriptive_specification,
-                            })
-                            .collect(),
-                        results: signature
-                            .results
-                            .into_iter()
-                            .map(|result| OperationResult {
-                                noun_class: result.noun_class,
-                                tag_label: result.tag_label,
-                                descriptive_specification: result.descriptive_specification,
-                            })
-                            .collect(),
-                    })
-                    .collect(),
-                // Definitions arrive already lowered. There is no lowering step
-                // here, so a source that carried one would have been rejected by
-                // the parser rather than silently dropped.
-                definition: entry.definition.map(|codelets| {
-                    codelets
-                        .into_iter()
-                        .filter_map(|codelet| <[u16; 16]>::try_from(codelet).ok())
-                        .collect()
-                }),
-            })
-            .collect(),
-    }
-}
 fn atomic_write(path: &Path, bytes: &[u8]) -> io::Result<()> {
     let mut temporary = PathBuf::from(path);
     let extension = path
@@ -240,7 +149,7 @@ fn execute(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
                 .map_err(|error| io::Error::other(format!("{}: {error}", error.code())))?;
             let parse_ms = parse_started.elapsed().as_secs_f64() * 1000.0;
             let entry_count = source.entries.len();
-            let volume = source_to_volume(source);
+            let volume = pyac::dictionary::source_to_volume(source)?;
             let encode_started = Instant::now();
             let encoded = encode_dictionary(&volume)?;
             let encode_ms = encode_started.elapsed().as_secs_f64() * 1000.0;

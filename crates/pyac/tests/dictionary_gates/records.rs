@@ -12,12 +12,10 @@
 //! - entries carrying operation signatures or an authored definition, which this
 //!   renderer does not yet emit.
 
-mod common;
-
-use std::fs::File;
-
 use pyac::dictionary::DictionaryVolumeEntry;
 use pyac_vliw_core::text_encode::{CODELET_WIDTH, encode_sentence};
+
+use super::fixtures;
 
 fn spell(word: u16) -> String {
     let mut buffer = [0u8; 8];
@@ -114,13 +112,12 @@ fn lines(entry: &DictionaryVolumeEntry) -> Vec<String> {
 
 #[test]
 fn the_pyac_record_surface_reproduces_the_published_codelets() {
-    let Some(path) = common::reference_volume_or_skip() else {
+    let (Some(model), Some(path)) = (fixtures::volume(), fixtures::reference_volume()) else {
         return;
     };
-    let model = pyac::dictionary::decode_dictionary(File::open(&path).expect("open volume"))
-        .expect("decode volume");
-    let mut reader = pyac::dictionary::DictionaryFileReader::open(File::open(&path).expect("open"))
-        .expect("read volume");
+    let mut reader =
+        pyac::dictionary::DictionaryFileReader::open(std::fs::File::open(path).expect("open"))
+            .expect("read volume");
     // Read forward in index order: `read_entry(key)` searches the index per key,
     // 9.4 s on this volume against 0.04 s for the sequential walk.
     let rows = reader
