@@ -23822,8 +23822,6 @@ su name tlat kwon ob text "hmac ksac" as text "en" from text "wordnet" to text "
 su name tlat kwon ob text "hmac ksac" as text "en" from text "wordnet" to text "Open English WordNet 2025" by text "s:01736131-s" with text "of the present time and place" at text "source-gloss" be text ya
 su name tlat kwon ob text "hmac ksac" from text "hmac" at text "component" be text ya
 su name tlat kwon ob text "hmac ksac" from text "ksac" at text "component" be text ya
-su name tlat kwon ob text "hmac ksac" from ve 11 2 59656 59714 1 10590 1 1 16719 2 12478 2224 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmac ksac" as ve 5 1 16719 2 12478 2224 from text "as" to text "value supplied in the as case" at text "operation-argument" be text ya
 su name tlat kwon ob text "hmac ksic" at text "entry" be text ya
 su name tlat kwon ob text "hmac ksic" as text "en" from text "crisis" to text "crisis" at text "lexical-form" be text ya
 su name tlat kwon ob text "hmac ksic" as text "sumo" from text "WordNet 3.0 mapping snapshot f0c126842d098a312e390479b38ecfbac018f8ed" to text "SubjectiveAssessmentAttribute" by text "subsumed-by" at text "source-link" be text ya
@@ -25918,140 +25916,6 @@ su name tlat kwon ob text "hmis cluc" from text "cluc" at text "component" be te
 su name tlat kwon ob text "hmis cwip" at text "entry" be text ya
 su name tlat kwon ob text "hmis cwip" from text "hmis" at text "component" be text ya
 su name tlat kwon ob text "hmis cwip" from text "cwip" at text "component" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 21 2 34824 18477 1 10590 3 1 12606 2 8798 22615 1 18703 2 8798 59861 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 18703 2 8798 59861 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 20 2 34824 18477 1 10590 3 1 12606 1 22615 1 18703 2 8798 59861 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 18703 2 8798 59861 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 16 2 34824 18477 1 10590 2 1 12606 2 8798 22615 1 18703 2 8798 59861 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 18703 2 8798 59861 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 15 2 34824 18477 1 10590 2 1 12606 1 22615 1 18703 2 8798 59861 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 18703 2 8798 59861 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 26 2 34824 18477 1 10590 4 1 12606 2 8798 22615 1 10366 2 8798 34921 1 18703 2 8798 59861 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 34921 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 18703 2 8798 59861 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 25 2 34824 18477 1 10590 4 1 12606 1 22615 1 10366 2 8798 34921 1 18703 2 8798 59861 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 34921 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 18703 2 8798 59861 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 21 2 34824 18477 1 10590 3 1 12606 2 8798 22615 1 10366 2 8798 34921 1 18703 2 8798 59861 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 34921 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 18703 2 8798 59861 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 20 2 34824 18477 1 10590 3 1 12606 1 22615 1 10366 2 8798 34921 1 18703 2 8798 59861 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 34921 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 18703 2 8798 59861 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 26 2 34824 18477 1 10590 4 1 12606 2 8798 22615 1 10366 2 8798 22615 1 18703 2 8798 59861 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 22615 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 18703 2 8798 59861 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 25 2 34824 18477 1 10590 4 1 12606 1 22615 1 10366 2 8798 22615 1 18703 2 8798 59861 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 22615 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 18703 2 8798 59861 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 21 2 34824 18477 1 10590 3 1 12606 2 8798 22615 1 10366 2 8798 22615 1 18703 2 8798 59861 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 22615 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 18703 2 8798 59861 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 20 2 34824 18477 1 10590 3 1 12606 1 22615 1 10366 2 8798 22615 1 18703 2 8798 59861 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 22615 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 18703 2 8798 59861 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 21 2 34824 18477 1 10590 3 1 12606 2 8798 22615 1 9278 2 8798 22615 1 18703 2 8798 59861 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 18703 2 8798 59861 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 20 2 34824 18477 1 10590 3 1 12606 1 22615 1 9278 2 8798 22615 1 18703 2 8798 59861 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 18703 2 8798 59861 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 26 2 34824 18477 1 10590 4 1 10366 2 8798 34921 1 12606 2 8798 22615 1 9278 2 8798 22615 1 18703 2 8798 59861 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 34921 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 18703 2 8798 59861 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 25 2 34824 18477 1 10590 4 1 10366 2 8798 34921 1 12606 1 22615 1 9278 2 8798 22615 1 18703 2 8798 59861 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 34921 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 18703 2 8798 59861 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 26 2 34824 18477 1 10590 4 1 10366 2 8798 22615 1 12606 2 8798 22615 1 9278 2 8798 22615 1 18703 2 8798 59861 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 22615 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 18703 2 8798 59861 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 25 2 34824 18477 1 10590 4 1 10366 2 8798 22615 1 12606 1 22615 1 9278 2 8798 22615 1 18703 2 8798 59861 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 22615 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 18703 2 8798 59861 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 21 2 34824 18477 1 10590 3 1 12606 2 8798 22615 1 10366 2 8798 34921 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 34921 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 20 2 34824 18477 1 10590 3 1 12606 1 22615 1 10366 2 8798 34921 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 34921 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 16 2 34824 18477 1 10590 2 1 12606 2 8798 22615 1 10366 2 8798 34921 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 34921 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 15 2 34824 18477 1 10590 2 1 12606 1 22615 1 10366 2 8798 34921 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 34921 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 21 2 34824 18477 1 10590 3 1 10366 2 8798 34921 1 12606 2 8798 22615 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 34921 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 20 2 34824 18477 1 10590 3 1 10366 2 8798 34921 1 12606 1 22615 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 34921 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 16 2 34824 18477 1 10590 2 1 10366 2 8798 34921 1 12606 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 34921 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 15 2 34824 18477 1 10590 2 1 10366 2 8798 34921 1 12606 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 34921 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 21 2 34824 18477 1 10590 3 1 12606 2 8798 22615 1 10366 2 8798 22615 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 22615 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 20 2 34824 18477 1 10590 3 1 12606 1 22615 1 10366 2 8798 22615 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 22615 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 16 2 34824 18477 1 10590 2 1 12606 2 8798 22615 1 10366 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 22615 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 15 2 34824 18477 1 10590 2 1 12606 1 22615 1 10366 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 22615 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 21 2 34824 18477 1 10590 3 1 10366 2 8798 22615 1 12606 2 8798 22615 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 22615 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 20 2 34824 18477 1 10590 3 1 10366 2 8798 22615 1 12606 1 22615 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 22615 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 16 2 34824 18477 1 10590 2 1 10366 2 8798 22615 1 12606 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 22615 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 12606 2 8798 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" from ve 15 2 34824 18477 1 10590 2 1 10366 2 8798 22615 1 12606 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 5 1 10366 2 8798 22615 from text "by" to text "value supplied in the by case" at text "operation-argument" be text ya
-su name tlat kwon ob text "hmis cwip" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
 su name tlat kwon ob text "hmis fwak" at text "entry" be text ya
 su name tlat kwon ob text "hmis fwak" as text "en" from text "discernment" to text "discernment" at text "lexical-form" be text ya
 su name tlat kwon ob text "hmis fwak" as text "en" from text "discretion" to text "discretion" at text "lexical-form" be text ya
@@ -56241,145 +56105,6 @@ su name tlat kwon ob text "ksap pfis" as text "wordnet" from text "Open English 
 su name tlat kwon ob text "ksap pfis" as text "en" from text "wordnet" to text "Open English WordNet 2025" by text "v:02470289-v" with text "approve and express assent, responsibility, or obligation" at text "source-gloss" be text ya
 su name tlat kwon ob text "ksap pfis" from text "ksap" at text "component" be text ya
 su name tlat kwon ob text "ksap pfis" from text "pfis" at text "component" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 24 2 18754 34948 1 10590 4 1 18727 2 8798 12926 1 9310 1 22615 1 9278 2 8798 12926 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18727 2 8798 12926 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 9278 2 8798 12926 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 24 2 18754 34948 1 10590 4 1 18727 2 8798 12926 1 9310 1 22615 1 9278 2 8798 59861 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18727 2 8798 12926 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 9278 2 8798 59861 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 19 2 18754 34948 1 10590 3 1 18727 2 8798 12926 1 9310 1 22615 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18727 2 8798 12926 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 25 2 18754 34948 1 10590 4 1 18727 2 8798 12926 1 9310 1 22615 1 9278 2 8798 12926 1 18703 2 8798 12926 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18727 2 8798 12926 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 9278 2 8798 12926 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18703 2 8798 12926 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 23 2 18754 34948 1 10590 4 1 18727 1 22615 1 9310 1 22615 1 9278 2 8798 12926 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18727 1 22615 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 9278 2 8798 12926 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 18 2 18754 34948 1 10590 3 1 18727 1 22615 1 9310 1 22615 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18727 1 22615 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 23 2 18754 34948 1 10590 4 1 18743 1 22615 1 18727 2 8798 12926 1 9310 1 22615 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18743 1 22615 from text "accordingto" to text "value supplied in the accordingto case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18727 2 8798 12926 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 27 2 18754 34948 1 10590 5 1 18743 1 22615 1 16719 1 22615 1 18727 2 8798 12926 1 9310 1 22615 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18743 1 22615 from text "accordingto" to text "value supplied in the accordingto case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 16719 1 22615 from text "as" to text "value supplied in the as case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18727 2 8798 12926 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 28 2 18754 34948 1 10590 5 1 18743 1 22615 1 18727 2 8798 12926 1 9310 1 22615 1 9278 2 8798 12926 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18743 1 22615 from text "accordingto" to text "value supplied in the accordingto case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18727 2 8798 12926 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 9278 2 8798 12926 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 32 2 18754 34948 1 10590 6 1 18743 1 22615 1 16719 1 22615 1 18727 2 8798 12926 1 9310 1 22615 1 9278 2 8798 12926 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18743 1 22615 from text "accordingto" to text "value supplied in the accordingto case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 16719 1 22615 from text "as" to text "value supplied in the as case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18727 2 8798 12926 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 9278 2 8798 12926 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 28 2 18754 34948 1 10590 5 1 18743 1 22615 1 18727 2 8798 12926 1 9310 1 22615 1 9278 2 8798 59861 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18743 1 22615 from text "accordingto" to text "value supplied in the accordingto case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18727 2 8798 12926 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 9278 2 8798 59861 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 32 2 18754 34948 1 10590 6 1 18743 1 22615 1 16719 1 22615 1 18727 2 8798 12926 1 9310 1 22615 1 9278 2 8798 59861 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18743 1 22615 from text "accordingto" to text "value supplied in the accordingto case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 16719 1 22615 from text "as" to text "value supplied in the as case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18727 2 8798 12926 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 9278 2 8798 59861 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 24 2 18754 34948 1 10590 4 1 18743 2 8798 12926 1 18727 2 8798 12926 1 9310 1 22615 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18743 2 8798 12926 from text "accordingto" to text "value supplied in the accordingto case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18727 2 8798 12926 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 28 2 18754 34948 1 10590 5 1 18743 2 8798 12926 1 16719 1 22615 1 18727 2 8798 12926 1 9310 1 22615 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18743 2 8798 12926 from text "accordingto" to text "value supplied in the accordingto case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 16719 1 22615 from text "as" to text "value supplied in the as case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18727 2 8798 12926 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 29 2 18754 34948 1 10590 5 1 18743 2 8798 12926 1 18727 2 8798 12926 1 9310 1 22615 1 9278 2 8798 12926 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18743 2 8798 12926 from text "accordingto" to text "value supplied in the accordingto case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18727 2 8798 12926 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 9278 2 8798 12926 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 33 2 18754 34948 1 10590 6 1 18743 2 8798 12926 1 16719 1 22615 1 18727 2 8798 12926 1 9310 1 22615 1 9278 2 8798 12926 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18743 2 8798 12926 from text "accordingto" to text "value supplied in the accordingto case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 16719 1 22615 from text "as" to text "value supplied in the as case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18727 2 8798 12926 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 9278 2 8798 12926 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 29 2 18754 34948 1 10590 5 1 18743 2 8798 12926 1 18727 2 8798 12926 1 9310 1 22615 1 9278 2 8798 59861 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18743 2 8798 12926 from text "accordingto" to text "value supplied in the accordingto case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18727 2 8798 12926 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 9278 2 8798 59861 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 33 2 18754 34948 1 10590 6 1 18743 2 8798 12926 1 16719 1 22615 1 18727 2 8798 12926 1 9310 1 22615 1 9278 2 8798 59861 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18743 2 8798 12926 from text "accordingto" to text "value supplied in the accordingto case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 16719 1 22615 from text "as" to text "value supplied in the as case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 18727 2 8798 12926 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 9278 2 8798 59861 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 22 2 18754 34948 1 10590 4 1 18743 1 22615 1 18727 1 22615 1 9310 1 22615 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18743 1 22615 from text "accordingto" to text "value supplied in the accordingto case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18727 1 22615 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 26 2 18754 34948 1 10590 5 1 18743 1 22615 1 16719 1 22615 1 18727 1 22615 1 9310 1 22615 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18743 1 22615 from text "accordingto" to text "value supplied in the accordingto case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 16719 1 22615 from text "as" to text "value supplied in the as case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18727 1 22615 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 27 2 18754 34948 1 10590 5 1 18743 1 22615 1 18727 1 22615 1 9310 1 22615 1 9278 2 8798 12926 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18743 1 22615 from text "accordingto" to text "value supplied in the accordingto case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18727 1 22615 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 9278 2 8798 12926 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 31 2 18754 34948 1 10590 6 1 18743 1 22615 1 16719 1 22615 1 18727 1 22615 1 9310 1 22615 1 9278 2 8798 12926 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18743 1 22615 from text "accordingto" to text "value supplied in the accordingto case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 16719 1 22615 from text "as" to text "value supplied in the as case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18727 1 22615 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 9278 2 8798 12926 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 27 2 18754 34948 1 10590 5 1 18743 1 22615 1 18727 1 22615 1 9310 1 22615 1 9278 2 8798 59861 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18743 1 22615 from text "accordingto" to text "value supplied in the accordingto case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18727 1 22615 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 9278 2 8798 59861 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" from ve 31 2 18754 34948 1 10590 6 1 18743 1 22615 1 16719 1 22615 1 18727 1 22615 1 9310 1 22615 1 9278 2 8798 59861 1 18703 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18743 1 22615 from text "accordingto" to text "value supplied in the accordingto case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 16719 1 22615 from text "as" to text "value supplied in the as case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18727 1 22615 from text "for" to text "value supplied in the for case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 5 1 9278 2 8798 59861 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "ksap pfis" as ve 4 1 18703 1 22615 from text "with" to text "value supplied in the with case" at text "operation-argument" be text ya
 su name tlat kwon ob text "ksap pwas" at text "entry" be text ya
 su name tlat kwon ob text "ksap pwas" as text "en" from text "take a bow" to text "take a bow" at text "lexical-form" be text ya
 su name tlat kwon ob text "ksap pwas" as text "sumo" from text "WordNet 3.0 mapping snapshot f0c126842d098a312e390479b38ecfbac018f8ed" to text "BodyMotion" by text "subsumed-by" at text "source-link" be text ya
@@ -85075,14 +84800,6 @@ su name tlat kwon ob text "psit hlaf" as text "en" from text "wordnet" to text "
 su name tlat kwon ob text "psit hlaf" as text "en" from text "wordnet" to text "Open English WordNet 2025" by text "v:02609706-v" with text "have an existence, be extant" at text "source-gloss" be text ya
 su name tlat kwon ob text "psit hlaf" from text "psit" at text "component" be text ya
 su name tlat kwon ob text "psit hlaf" from text "hlaf" at text "component" be text ya
-su name tlat kwon ob text "psit hlaf" from ve 10 2 43076 51544 1 10590 1 1 9310 1 2422 at text "operation-signature" be text ya
-su name tlat kwon ob text "psit hlaf" as ve 4 1 9310 1 2422 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "psit hlaf" from ve 11 2 43076 51544 1 10590 1 1 9310 2 8798 2422 at text "operation-signature" be text ya
-su name tlat kwon ob text "psit hlaf" as ve 5 1 9310 2 8798 2422 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "psit hlaf" from ve 10 2 43076 51544 1 10590 1 1 9310 1 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "psit hlaf" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "psit hlaf" from ve 11 2 43076 51544 1 10590 1 1 9310 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "psit hlaf" as ve 5 1 9310 2 8798 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
 su name tlat kwon ob text "psit hlam" at text "entry" be text ya
 su name tlat kwon ob text "psit hlam" as text "en" from text "arrival" to text "arrival" at text "lexical-form" be text ya
 su name tlat kwon ob text "psit hlam" as text "sumo" from text "WordNet 3.0 mapping snapshot f0c126842d098a312e390479b38ecfbac018f8ed" to text "Arriving" by text "subsumed-by" at text "source-link" be text ya
@@ -91191,44 +90908,6 @@ su name tlat kwon ob text "slak plas" from text "plas" at text "component" be te
 su name tlat kwon ob text "slak slif" at text "entry" be text ya
 su name tlat kwon ob text "slak slif" from text "slak" at text "component" be text ya
 su name tlat kwon ob text "slak slif" from text "slif" at text "component" be text ya
-su name tlat kwon ob text "slak slif" from ve 15 2 10601 51305 1 10590 2 1 9310 1 22615 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "slak slif" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" from ve 16 2 10601 51305 1 10590 2 1 9310 2 8798 22615 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "slak slif" as ve 5 1 9310 2 8798 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" from ve 19 2 10601 51305 1 10590 3 1 9310 1 22615 1 12606 1 8798 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "slak slif" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" as ve 4 1 12606 1 8798 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" from ve 20 2 10601 51305 1 10590 3 1 9310 2 8798 22615 1 12606 1 8798 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "slak slif" as ve 5 1 9310 2 8798 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" as ve 4 1 12606 1 8798 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" from ve 19 2 10601 51305 1 10590 3 1 9310 1 22615 1 12606 1 22615 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "slak slif" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" from ve 20 2 10601 51305 1 10590 3 1 9310 2 8798 22615 1 12606 1 22615 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "slak slif" as ve 5 1 9310 2 8798 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" from ve 19 2 10601 51305 1 10590 3 1 12606 1 22615 1 9310 1 22615 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "slak slif" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" from ve 20 2 10601 51305 1 10590 3 1 12606 1 22615 1 9310 2 8798 22615 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "slak slif" as ve 4 1 12606 1 22615 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" as ve 5 1 9310 2 8798 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" from ve 19 2 10601 51305 1 10590 3 1 12606 1 8798 1 9310 1 22615 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "slak slif" as ve 4 1 12606 1 8798 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" as ve 4 1 9310 1 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" from ve 20 2 10601 51305 1 10590 3 1 12606 1 8798 1 9310 2 8798 22615 1 9278 2 8798 22615 at text "operation-signature" be text ya
-su name tlat kwon ob text "slak slif" as ve 4 1 12606 1 8798 from text "from" to text "value supplied in the from case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" as ve 5 1 9310 2 8798 22615 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
-su name tlat kwon ob text "slak slif" as ve 5 1 9278 2 8798 22615 from text "to" to text "value supplied in the to case" at text "operation-argument" be text ya
 su name tlat kwon ob text "slak swas" at text "entry" be text ya
 su name tlat kwon ob text "slak swas" as text "en" from text "service break" to text "service break" at text "lexical-form" be text ya
 su name tlat kwon ob text "slak swas" as text "sumo" from text "WordNet 3.0 mapping snapshot f0c126842d098a312e390479b38ecfbac018f8ed" to text "Tennis" by text "subsumed-by" at text "source-link" be text ya
@@ -109141,9 +108820,6 @@ su name tlat kwon ob text "twam hyis" from text "hyis" at text "component" be te
 su name tlat kwon ob text "twam kcut" at text "entry" be text ya
 su name tlat kwon ob text "twam kcut" from text "twam" at text "component" be text ya
 su name tlat kwon ob text "twam kcut" from text "kcut" at text "component" be text ya
-su name tlat kwon ob text "twam kcut" from ve 6 2 2346 43682 1 10590 0 at text "operation-signature" be text ya
-su name tlat kwon ob text "twam kcut" from ve 10 2 2346 43682 1 10590 1 1 9310 1 9598 at text "operation-signature" be text ya
-su name tlat kwon ob text "twam kcut" as ve 4 1 9310 1 9598 from text "ob" to text "value supplied in the ob case" at text "operation-argument" be text ya
 su name tlat kwon ob text "twam kfan" at text "entry" be text ya
 su name tlat kwon ob text "twam kfan" as text "en" from text "pretentious" to text "pretentious" at text "lexical-form" be text ya
 su name tlat kwon ob text "twam kfan" as text "sumo" from text "WordNet 3.0 mapping snapshot f0c126842d098a312e390479b38ecfbac018f8ed" to text "SubjectiveAssessmentAttribute" by text "subsumed-by" at text "source-link" be text ya

@@ -16,6 +16,7 @@ dictionary/
     atoms.pya               7,840 atoms, 17.9 MB
     compounds-16.pya        compounds whose deepest word needs 16 glyphs
     compounds-19.pya        …then 19, 24, 28, 32
+    dispatch.pya            ceremony signatures — the API, not the vocabulary
   reference.pya             optional whole-source convenience file (git-ignored)
   reference.pyac            the compiled volume (git-ignored)
 ```
@@ -31,8 +32,16 @@ offsets:
   lowest one that can spell it. A compound's layer is the maximum over its key
   and components, which means a shard never depends on a later one.
 
-Measured shard sizes: atoms 17.9 MB, compounds-16 16.0 MB, -19 23.9 MB,
--24 20.5 MB, -28 8.9 MB, -32 14.3 MB. **All are under half git's 50 MB warning.**
+- **dispatch is its own shard.** A ceremony signature says what an operation
+  accepts. It changes when the dispatch API changes, not when the vocabulary
+  does, so keeping it beside the entries would make every vocabulary edit reflow
+  the signature text and every signature change reflow a vocabulary shard. 96
+  entries carry signatures; the shard is 1.16 MB across 1,832 records.
+  Assembly places it last, and nothing in the vocabulary depends on it.
+
+Measured shard sizes: atoms 17.4 MB, compounds-16 15.9 MB, -19 23.9 MB,
+-24 19.9 MB, -28 8.9 MB, -32 14.3 MB, dispatch 1.2 MB. **All are under half
+git's 50 MB warning.**
 
 ## Regenerating the volume
 

@@ -4145,7 +4145,6 @@ su name tlat kwon ob text "cwas bxan" as text "wordnet" from text "Open English 
 su name tlat kwon ob text "cwas bxan" as text "en" from text "wordnet" to text "Open English WordNet 2025" by text "v:02018017-v" with text "depart for someplace" at text "source-gloss" be text ya
 su name tlat kwon ob text "cwas bxan" from text "cwas" at text "component" be text ya
 su name tlat kwon ob text "cwas bxan" from text "bxan" at text "component" be text ya
-su name tlat kwon ob text "cwas bxan" from ve 6 2 35117 27121 1 10590 0 at text "operation-signature" be text ya
 su name tlat kwon ob text "cwas hl6n" at text "entry" be text ya
 su name tlat kwon ob text "cwas hl6n" as text "en" from text "approach" to text "approach" at text "lexical-form" be text ya
 su name tlat kwon ob text "cwas hl6n" as text "en" from text "go about" to text "go about" at text "lexical-form" be text ya
@@ -41409,7 +41408,6 @@ su name tlat kwon ob text "pwic hxac" as text "wordnet" from text "Open English 
 su name tlat kwon ob text "pwic hxac" as text "en" from text "wordnet" to text "Open English WordNet 2025" by text "v:02753584-v" with text "continue after an interruption" at text "source-gloss" be text ya
 su name tlat kwon ob text "pwic hxac" from text "pwic" at text "component" be text ya
 su name tlat kwon ob text "pwic hxac" from text "hxac" at text "component" be text ya
-su name tlat kwon ob text "pwic hxac" from ve 6 2 59428 59856 1 10590 0 at text "operation-signature" be text ya
 su name tlat kwon ob text "pwic kxan" at text "entry" be text ya
 su name tlat kwon ob text "pwic kxan" as text "en" from text "cardholder" to text "cardholder" at text "lexical-form" be text ya
 su name tlat kwon ob text "pwic kxan" as text "sumo" from text "WordNet 3.0 mapping snapshot f0c126842d098a312e390479b38ecfbac018f8ed" to text "Human" by text "subsumed-by" at text "source-link" be text ya

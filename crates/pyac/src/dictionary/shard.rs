@@ -171,9 +171,14 @@ pub fn assemble_shards(
         return Err(ShardError::MissingManifest);
     }
 
-    // Layers must ascend, so a compound's dependencies are already written.
+    // Layers must ascend, so a compound's dependencies are already written. The
+    // dispatch shard carries no vocabulary and declares layer 0 by convention, so
+    // it is exempt from the ascent — it annotates entries that already exist.
     let mut previous_layer = 0u16;
     for record in &records {
+        if record.name == "dispatch" {
+            continue;
+        }
         if record.max_layer < previous_layer {
             return Err(ShardError::LayerOrder {
                 previous: previous_layer,
@@ -210,14 +215,29 @@ pub fn assemble_shards(
                 actual: digest,
             });
         }
-        let blocks = entry_blocks(body);
-        if blocks.len() != record.entries {
+        // A vocabulary shard declares its entry count; the dispatch shard
+        // declares how many signatures it carries, because its records annotate
+        // entries declared elsewhere.
+        let actual = if record.name == "dispatch" {
+            body.matches(" at text \"operation-signature\" be text ya")
+                .count()
+        } else {
+            entry_blocks(body).len()
+        };
+        if actual != record.entries {
             return Err(ShardError::CountMismatch {
                 name: record.name.clone(),
                 expected: record.entries,
-                actual: blocks.len(),
+                actual,
             });
         }
+        if record.name == "dispatch" {
+            // Dispatch names entries that must already exist, but nothing depends
+            // on dispatch, so it needs no ordering beyond coming last.
+            out.push_str(body);
+            continue;
+        }
+        let blocks = entry_blocks(body);
         // Every component must already be present. This is the same rule the
         // volume writer enforces; catching it here names the shard at fault.
         for block in &blocks {
@@ -366,6 +386,37 @@ struct EntryBlock {
     components: Vec<String>,
     key_layers: Vec<u16>,
     component_layers: Vec<u16>,
+    /// The block's dispatch records, lifted out when the split separates them.
+    ///
+    /// A ceremony signature says what an operation accepts; it changes when the
+    /// API changes, not when the vocabulary does. Keeping it beside the entry
+    /// means every vocabulary edit reflows the dispatch text too, and every
+    /// signature change reflows a vocabulary shard.
+    dispatch: String,
+}
+
+impl EntryBlock {
+    /// The half of this block that is vocabulary: the entry sentence plus its
+    /// forms, components and citations, with dispatch records removed.
+    fn vocabulary_text(&self) -> String {
+        let mut out = String::new();
+        for line in self.text.lines() {
+            if is_dispatch_record(line) {
+                continue;
+            }
+            out.push_str(line);
+            out.push('\n');
+        }
+        out
+    }
+}
+
+/// Whether a record line belongs to the ceremony dispatch API rather than the
+/// vocabulary.
+fn is_dispatch_record(line: &str) -> bool {
+    line.contains(" at text \"operation-signature\" be text ya")
+        || line.contains(" at text \"operation-argument\" be text ya")
+        || line.contains(" at text \"operation-result\" be text ya")
 }
 
 impl EntryBlock {
@@ -390,12 +441,16 @@ fn entry_blocks(source: &str) -> Vec<EntryBlock> {
                 components: Vec::new(),
                 key_layers: Vec::new(),
                 component_layers: Vec::new(),
+                dispatch: String::new(),
             });
             continue;
         }
         let Some(current) = blocks.last_mut() else {
             continue;
         };
+        if is_dispatch_record(line.trim()) {
+            current.dispatch.push_str(&line);
+        }
         current.text.push_str(&line);
         if let Some(component) = component_reference(line.trim()) {
             current.components.push(component);
@@ -482,7 +537,13 @@ fn split_blocks(blocks: Vec<EntryBlock>, source: &str) -> Result<ShardSet, Shard
         .join("\n");
 
     let mut groups: BTreeMap<String, (Vec<EntryBlock>, u16)> = BTreeMap::new();
+    let mut dispatch = String::new();
     for block in blocks {
+        // Dispatch is lifted out before grouping: it belongs to the API that
+        // changes on its own schedule, not to the vocabulary.
+        if !block.dispatch.is_empty() {
+            dispatch.push_str(&block.dispatch);
+        }
         let (group, layer) = shard_name_for(&block);
         let slot = groups.entry(group).or_insert((Vec::new(), layer));
         slot.1 = slot.1.max(layer);
@@ -515,7 +576,11 @@ fn split_blocks(blocks: Vec<EntryBlock>, source: &str) -> Result<ShardSet, Shard
     }
     let mut shards = Vec::new();
     for (name, blocks, layer) in &ordered {
-        let body = blocks.iter().map(|b| b.text.as_str()).collect::<String>();
+        // Vocabulary shards carry the entry and its records, minus dispatch.
+        let body = blocks
+            .iter()
+            .map(|block| block.vocabulary_text())
+            .collect::<String>();
         let digest = shard_digest(&body);
         let row = format!(
             "{{\"name\":{},\"sha256\":{},\"entries\":{},\"maxLayer\":{}}}",
@@ -526,6 +591,27 @@ fn split_blocks(blocks: Vec<EntryBlock>, source: &str) -> Result<ShardSet, Shard
         );
         manifest_lines.push(format!("su text {} ob text {} ya", json(name), json(&row)));
         shards.push((name.clone(), body));
+    }
+    // Dispatch last: no vocabulary entry depends on a signature, and the shard
+    // assembles after every entry it annotates.
+    if !dispatch.is_empty() {
+        let number = dispatch
+            .matches(" at text \"operation-signature\" be text ya")
+            .count();
+        let digest = shard_digest(&dispatch);
+        let row = format!(
+            "{{\"name\":{},\"sha256\":{},\"entries\":{},\"maxLayer\":{}}}",
+            json("dispatch"),
+            json(&digest),
+            number,
+            0
+        );
+        manifest_lines.push(format!(
+            "su text {} ob text {} ya",
+            json("dispatch"),
+            json(&row)
+        ));
+        shards.push(("dispatch".to_owned(), dispatch));
     }
     manifest_lines.push("prah".to_owned());
     Ok(ShardSet {

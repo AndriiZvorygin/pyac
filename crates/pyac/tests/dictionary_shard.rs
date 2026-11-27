@@ -200,3 +200,75 @@ fn the_manifest_records_every_shard_with_its_digest_and_count() {
         .expect("atoms shard declared");
     assert_eq!(atoms.max_layer, 0);
 }
+
+#[test]
+fn dispatch_is_its_own_shard_and_carries_no_vocabulary() {
+    // A ceremony signature says what an operation accepts. It changes when the
+    // dispatch API changes, not when the vocabulary does, so it is separated:
+    // otherwise every vocabulary edit reflows the signature text and every
+    // signature change reflows a vocabulary shard.
+    let Some(source) = source_text() else {
+        eprintln!("skipping: dictionary/reference.pya is absent");
+        return;
+    };
+    let set = split_source_with_layers(&source, &layer_index()).expect("the source splits");
+    let dispatch = set
+        .shards
+        .iter()
+        .find(|(name, _)| name == "dispatch")
+        .map(|(_, body)| body)
+        .expect("the dispatch shard exists");
+
+    assert!(
+        dispatch.contains(" at text \"operation-signature\" be text ya"),
+        "the dispatch shard carries signatures"
+    );
+    // No entry block may appear in the dispatch shard: it annotates entries, it
+    // does not declare them.
+    assert!(
+        !dispatch.contains(" at text \"entry\" be text ya"),
+        "the dispatch shard must not declare entries"
+    );
+
+    // And the vocabulary shards must carry no dispatch records.
+    for (name, body) in &set.shards {
+        if name == "dispatch" {
+            continue;
+        }
+        assert!(
+            !body.contains(" at text \"operation-signature\" be text ya"),
+            "shard {name:?} still carries a signature record"
+        );
+        assert!(
+            !body.contains(" at text \"operation-argument\" be text ya"),
+            "shard {name:?} still carries an argument record"
+        );
+    }
+}
+
+#[test]
+fn dispatch_assembles_to_the_same_volume_as_the_whole_source() {
+    // The strongest check that the separation is real: split, assemble, and the
+    // result must be the same document the whole source was.
+    let Some(source) = source_text() else {
+        eprintln!("skipping: dictionary/reference.pya is absent");
+        return;
+    };
+    let set = split_source_with_layers(&source, &layer_index()).expect("the source splits");
+    let contents: BTreeMap<String, String> = set.shards.iter().cloned().collect();
+    let assembled = assemble_shards(&set.manifest, &contents).expect("the shards assemble");
+
+    let count = |text: &str, needle: &str| text.matches(needle).count();
+    let records = " at text \"operation-signature\" be text ya";
+    assert_eq!(
+        count(&assembled, records),
+        count(&source, records),
+        "assembly lost or duplicated signature records"
+    );
+    let entries = " at text \"entry\" be text ya";
+    assert_eq!(
+        count(&assembled, entries),
+        count(&source, entries),
+        "assembly lost or duplicated entry records"
+    );
+}
