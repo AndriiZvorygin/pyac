@@ -103326,12 +103326,18 @@ su name tlat kwon ob text "tlat hfaf" as text "en" from text "wordnet" to text "
 su name tlat kwon ob text "tlat hfaf" from text "tlat" at text "component" be text ya
 su name tlat kwon ob text "tlat hfaf" from text "hfaf" at text "component" be text ya
 su name tlat kwon ob text "tlat hfam" at text "entry" be text ya
-su name tlat kwon ob text "tlat hfam" as text "en" from text "compound morphology" to text "compound morphology" at text "lexical-form" be text ya
-su name tlat kwon ob text "tlat hfam" as text "sumo" from text "WordNet 3.0 mapping snapshot f0c126842d098a312e390479b38ecfbac018f8ed" to text "FieldOfStudy" by text "instance-of" at text "source-link" be text ya
-su name tlat kwon ob text "tlat hfam" as text "wordnet" from text "Open English WordNet 2025" to text "n:06188226-n" by text "exact-sense" at text "source-link" be text ya
-su name tlat kwon ob text "tlat hfam" as text "en" from text "wordnet" to text "Open English WordNet 2025" by text "n:06188226-n" with text "the part of grammar that deals with combinations of simple words into compound words" at text "source-gloss" be text ya
+su name tlat kwon ob text "tlat hfam" as text "en" from text "word form" to text "word form" at text "lexical-form" be text ya
+su name tlat kwon ob text "tlat hfam" as text "wordnet" from text "Open English WordNet 2025" to text "n:06301417-n" by text "exact-sense" at text "source-link" be text ya
+su name tlat kwon ob text "tlat hfam" as text "en" from text "wordnet" to text "Open English WordNet 2025" by text "n:06301417-n" with text "the phonological or orthographic sound or appearance of a word that can be used to describe or identify something" at text "source-gloss" be text ya
 su name tlat kwon ob text "tlat hfam" from text "tlat" at text "component" be text ya
 su name tlat kwon ob text "tlat hfam" from text "hfam" at text "component" be text ya
+su name tlat kwon ob text "hgaf tlat" at text "entry" be text ya
+su name tlat kwon ob text "hgaf tlat" as text "en" from text "compound morphology" to text "compound morphology" at text "lexical-form" be text ya
+su name tlat kwon ob text "hgaf tlat" as text "sumo" from text "WordNet 3.0 mapping snapshot f0c126842d098a312e390479b38ecfbac018f8ed" to text "FieldOfStudy" by text "instance-of" at text "source-link" be text ya
+su name tlat kwon ob text "hgaf tlat" as text "wordnet" from text "Open English WordNet 2025" to text "n:06188226-n" by text "exact-sense" at text "source-link" be text ya
+su name tlat kwon ob text "hgaf tlat" as text "en" from text "wordnet" to text "Open English WordNet 2025" by text "n:06188226-n" with text "the part of grammar that deals with combinations of simple words into compound words" at text "source-gloss" be text ya
+su name tlat kwon ob text "hgaf tlat" from text "hgaf" at text "component" be text ya
+su name tlat kwon ob text "hgaf tlat" from text "tlat" at text "component" be text ya
 su name tlat kwon ob text "tlat hkup" at text "entry" be text ya
 su name tlat kwon ob text "tlat hkup" as text "en" from text "copy out" to text "copy out" at text "lexical-form" be text ya
 su name tlat kwon ob text "tlat hkup" as text "sumo" from text "WordNet 3.0 mapping snapshot f0c126842d098a312e390479b38ecfbac018f8ed" to text "Writing" by text "subsumed-by" at text "source-link" be text ya

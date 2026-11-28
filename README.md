@@ -60,7 +60,7 @@ cargo run --release --bin pyac-dictionary -- decode dictionary/reference.pyac /t
 cargo run --release --bin pyac-dictionary -- compile /tmp/back.en.pya /tmp/back.pyac
 ```
 
-`compile` takes 5.7 s for 64,598 entries. Its output is **byte-identical** to the
+`compile` takes 5.7 s for 64,599 entries. Its output is **byte-identical** to the
 published volume, and `cargo test --test dictionary_compile` is the gate on that.
 
 `decode` then `compile` is also byte-identical, so the volume is fully reversible

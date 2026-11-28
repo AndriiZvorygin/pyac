@@ -360,7 +360,7 @@ pub fn encode_dictionary(volume: &DictionaryVolume) -> Result<Vec<u8>, Dictionar
     let (marker, metadata) = profile_records_v4(&metadata_copy, input_entries.len())?;
     // Encode each entry once. The sizes are needed before the offsets are known,
     // so the obvious shape is a sizing pass followed by a building pass — but
-    // that encodes all 64,598 entries twice, which is most of the encoder's cost.
+    // that encodes all 64,599 entries twice, which is most of the encoder's cost.
     // The group is cheap to hold, so encode first and read the size off it.
     let mut encoded_entries = input_entries
         .iter()

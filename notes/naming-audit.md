@@ -233,3 +233,96 @@ they wait for the re-publish; `surface` has no applicable meaning at all.
 **Gated.** `vocabulary_naming::vocabulary_words_cite_their_compound` pins the
 twelve citations above, so a lost comment fails a test rather than silently
 letting a name drift back to being chosen by eye.
+
+---
+
+# Record kinds
+
+The `at text "<kind>"` labels are wire format — they are written into the volume.
+Renaming one that the reference source uses changes the artifact; renaming one
+that appears nowhere changes only code.
+
+| current kind | uses in `dictionary/shard/` | proposed | Pyac key | gloss |
+|---|---|---|---|---|
+| `entry` | 64,598 | entry (keep) | `nyit lwat` | an item inserted in a written record |
+| `lexical-form` | 346,903 | word form | `hfam` | the phonological or orthographic sound or appearance of a word |
+| `source-link` | 133,878 | link | `rwoc hl6n` | the means of connection between things linked in series |
+| `source-gloss` | 64,331 | sense | `kfen pcat` | the meaning of a word or expression |
+| `component` | 113,530 | piece | `drec pfun` | a separate part of a whole |
+| `operation-argument` | 5,304 | parameter | `tlas hrut` | (already documented in `operation.rs`) |
+| `operation-signature` | 1,832 | — | unresolved | "signature" only resolves to the biometric sense (`srim hdif`) |
+| `task` | 0 | mission | `htup tra2k` | a special assignment given to a person or group |
+| `reference` | 0 | citation | `hrec` | a short note recognizing a source of information |
+| `definition` | 0 | explicit definition | `dlut nyif` | a definition that gives an exact equivalent of the term defined |
+| `operation-result` | 0 | — | unresolved | |
+
+## `surface` is solved
+
+`hfam` is active with exactly the right sense: WordNet `n:06301417-n`
+*[descriptor, form, signifier, **word form**]* — *"the phonological or
+orthographic sound or appearance of a word that can be used to describe or
+identify something"*. No new compound is needed.
+
+Outside sources agree: Apertium — *"the surface form of a word is the form of a
+word as it appears in the text"*; Wikipedia (*Morphological dictionary*) — *"a
+linguistic resource that contains correspondences between surface form and
+lexical forms of words"*. Cite `hfam`/`n:06301417-n` and either of those.
+
+## Cost of publishing the rename
+
+The five used kinds total **663,946 occurrences** across `dictionary/shard/`, and
+the volume is LFS-tracked (131 MB; quota 1 GB, ~7 objects). So publishing is a
+664k-line shard diff plus a new LFS object. The six unused/zero-use kinds are
+code-only and cost nothing.
+
+## Corrected compounds, and three collisions
+
+Atoms verified by `encodePyacWord`; each candidate checked against the volume by
+HNUC, since a compound is its atoms' HNUCs, not its spelling.
+
+| concept | proposed | atoms | status |
+|---|---|---|---|
+| word form | `tlat hfam` | `a96a 0960` | **collides** — already exists as *"compound morphology"* |
+| concept sense | `kfen pcat` | `6b82 a9a4` | **collides** — already exists, forms `["sense","signified"]` |
+| operation signature | `nyak srim` | `2906 08c9` | **collides** — already exists as *"a distinguishing style"*, forms `["signature","touch"]` |
+| operation result | `tlik ksik` | `286a 2842` | **free** |
+| automatic sense | `txok pluk` | `2cea 2a64` | exists as *"detect some circumstance or entity automatically"* |
+
+So the literal instructions do not land:
+
+- **`tlat hfam` is taken.** It already means *"compound morphology"* — word +
+  form, in the sense of the grammar of forming compounds. A second meaning cannot
+  share a key.
+- **`nyak srim` is taken.** It already means *"a distinguishing style"* — which,
+  read carefully, *is* the trademark-signature sense, just narrower than we need.
+  It also already carries the English form `signature` at atom level.
+- **`txok pluk` is taken** by "detect automatically".
+
+Only `tlik ksik` is free.
+
+## The distinction that matters, separate from the collisions
+
+Pyac key ≠ Pyac concept ≠ English mapping. In `tlat hfam` the first atom is
+`tlat` = *word*, so by composition the concept is "word form". But that
+compound's existing English form is "compound morphology" — a naming of the
+*discipline*, not of a word's form. The thing a record's `lexical-form` holds is
+the **language, surface, and normalised spelling of a word** — several forms per
+word (`kfen pcat` carries `sense`, `signified` for the same reason).
+
+## Open decision
+
+`lexical-form` could be renamed, but not to the keys above:
+
+- **`tlat hfam`, keeping its form**, if `lexical-form` really means the *form of a
+  word* as written; the record has language + surface + normalized, which is three
+  forms, not one.
+- **`nyak srim`** actually fits `operation-signature` better than the current
+  proposal: an operation's signature is precisely its *distinguishing style*, and
+  the entry already carries `signature` as an English form.
+- `kfen pcat` fits `source-gloss` exactly and needs no change; it is the English
+  *name* `concept-sense` that should be added, not the compound.
+
+Which means the "English compound mirrors Pyac compound" requirement may be
+satisfiable without re-coining: add `word-form` and `concept-sense` as English
+forms on entries that already exist. That is a dictionary source edit, not a
+format change.

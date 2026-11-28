@@ -74855,6 +74855,7 @@ su name tlat kwon ob text "kfen kcan" as text "en" from text "wordnet" to text "
 su name tlat kwon ob text "kfen kcan" from text "kfen" at text "component" be text ya
 su name tlat kwon ob text "kfen kcan" from text "kcan" at text "component" be text ya
 su name tlat kwon ob text "kfen pcat" at text "entry" be text ya
+su name tlat kwon ob text "kfen pcat" as text "en" from text "concept-sense" to text "concept-sense" at text "lexical-form" be text ya
 su name tlat kwon ob text "kfen pcat" as text "en" from text "sense" to text "sense" at text "lexical-form" be text ya
 su name tlat kwon ob text "kfen pcat" as text "en" from text "signified" to text "signified" at text "lexical-form" be text ya
 su name tlat kwon ob text "kfen pcat" as text "sumo" from text "WordNet 3.0 mapping snapshot f0c126842d098a312e390479b38ecfbac018f8ed" to text "Proposition" by text "equivalent-to" at text "source-link" be text ya
@@ -107486,6 +107487,7 @@ su name tlat kwon ob text "nyak pcom" as text "en" from text "wordnet" to text "
 su name tlat kwon ob text "nyak pcom" from text "nyak" at text "component" be text ya
 su name tlat kwon ob text "nyak pcom" from text "pcom" at text "component" be text ya
 su name tlat kwon ob text "nyak srim" at text "entry" be text ya
+su name tlat kwon ob text "nyak srim" as text "en" from text "operation-signature" to text "operation-signature" at text "lexical-form" be text ya
 su name tlat kwon ob text "nyak srim" as text "en" from text "signature" to text "signature" at text "lexical-form" be text ya
 su name tlat kwon ob text "nyak srim" as text "en" from text "touch" to text "touch" at text "lexical-form" be text ya
 su name tlat kwon ob text "nyak srim" as text "sumo" from text "WordNet 3.0 mapping snapshot f0c126842d098a312e390479b38ecfbac018f8ed" to text "Attribute" by text "subsumed-by" at text "source-link" be text ya
