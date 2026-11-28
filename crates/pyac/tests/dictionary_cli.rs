@@ -22,7 +22,7 @@ fn temporary_directory() -> std::path::PathBuf {
 
 /// The fixture volume, built through the library.
 ///
-/// The CLI test is about the CLI: `inspect`, `surface`, `entry`, `benchmark`.
+/// The CLI test is about the CLI: `examine`, `surface`, `entry`, `criterion`.
 /// Building its fixture by hand in English Pyash would be inventing source the
 /// repository does not otherwise contain, and `dictionary_compile.rs` is already
 /// the gate on source-to-volume. So the fixture is constructed as a model and
@@ -101,7 +101,7 @@ fn run(args: &[&str]) -> Value {
 }
 
 #[test]
-fn compiled_cli_inspects_looks_up_and_benchmarks_a_volume() {
+fn compiled_cli_examines_looks_up_and_measures_a_volume() {
     let directory = temporary_directory();
     fs::create_dir_all(&directory).expect("create temp directory");
     let volume = directory.join("dictionary.pyac");
@@ -112,7 +112,7 @@ fn compiled_cli_inspects_looks_up_and_benchmarks_a_volume() {
     )
     .expect("write volume");
 
-    let inspected = run(&["inspect", volume_arg]);
+    let inspected = run(&["examine", volume_arg]);
     assert_eq!(inspected["metadata"]["title"], "CLI test volume");
     assert_eq!(inspected["entryCount"], 1);
     assert!(inspected["openMs"].as_f64().is_some());
@@ -156,7 +156,7 @@ fn compiled_cli_inspects_looks_up_and_benchmarks_a_volume() {
     );
 
     let benchmark = run(&[
-        "benchmark",
+        "criterion",
         volume_arg,
         "1000",
         "surface",

@@ -252,6 +252,10 @@ fn wordnet_part_of_speech(identifier: &str) -> &str {
     }
 }
 
+/// Encode the model back into volume bytes.
+///
+/// **encode**, Pyac key `kfon` (`pyash dict from pyac kfon`): *"convert
+/// information into code"*.
 pub fn encode_dictionary(volume: &DictionaryVolume) -> Result<Vec<u8>, DictionaryVolumeError> {
     validate_metadata(&volume.metadata)?;
     let mut metadata_copy = volume.metadata.clone();

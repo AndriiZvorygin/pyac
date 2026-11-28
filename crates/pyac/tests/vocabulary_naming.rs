@@ -221,3 +221,43 @@ fn the_dispatch_discriminator_is_called_noun_class() {
         "operation.rs should name the discriminator `noun_class`"
     );
 }
+
+/// Every English word that names a vocabulary concept carries its Pyac compound
+/// at first use in the file that introduces it.
+///
+/// The table is the set of names that have been resolved against the published
+/// volume. A name missing from here is not yet a name; a key that stops appearing
+/// beside its word means the citation was lost and the word is drifting back to
+/// being chosen by eye.
+///
+/// Paths are relative to the crate root, as `read` expects.
+#[test]
+fn vocabulary_words_cite_their_compound() {
+    // (file, english word, Pyac compound)
+    let expected = [
+        ("src/dictionary/decode.rs", "read", "tyac"),
+        ("src/dictionary/render.rs", "decode", "hkom tyac"),
+        ("src/dictionary/pyac.rs", "decode", "hkom tyac"),
+        ("src/dictionary/source/document.rs", "parse", "flis"),
+        ("src/dictionary/volume.rs", "encode", "kfon"),
+        ("src/bin/pyac_dictionary/source.rs", "compile", "hk6n"),
+        (
+            "src/bin/pyac_dictionary/source.rs",
+            "apportion",
+            "syap plon",
+        ),
+        ("src/bin/pyac_dictionary/checks.rs", "verify", "pfen"),
+        ("src/bin/pyac_dictionary/checks.rs", "criterion", "rwun"),
+        ("src/bin/pyac_dictionary/query.rs", "examine", "hzi7n"),
+        ("src/bin/pyac_dictionary/query.rs", "export", "hfat sroc"),
+        ("src/bin/pyac_dictionary/query.rs", "entry", "nyit lwat"),
+    ];
+    for (file, word, key) in expected {
+        let source = read(file);
+        assert!(
+            source.contains(key),
+            "{file} uses `{word}` but does not cite its Pyac compound `{key}`; \
+             put the compound in the comment at first use (see AGENTS.md)"
+        );
+    }
+}

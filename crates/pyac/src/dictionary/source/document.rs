@@ -11,6 +11,9 @@ use super::signatures::{parse_signature, parse_slot};
 use std::collections::HashMap;
 
 /// Parse the whole source into a build request.
+///
+/// **parse**, Pyac key `flis` (`pyash dict from pyac flis`): *"analyze
+/// syntactically by assigning a constituent structure to (a sentence)"*.
 pub fn parse_source(source: &str) -> Result<DictionarySource, SourceError> {
     let mut kind: Option<String> = None;
     let mut title: Option<String> = None;

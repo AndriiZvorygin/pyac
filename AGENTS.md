@@ -202,6 +202,20 @@ transcript with half a vocabulary.
 - **Name identifiers in English.** Pyac spelling belongs in a doc comment. A
   field called `name` invites putting the noun class (`gi`) into a documentation
   slot; the field is `tag_label`.
+- **Every English word that names a vocabulary concept carries its Pyac compound
+  at first use in the file.** One comment, next to where the word first appears:
+
+  ```rust
+  /// **examine**, Pyac key `hzi7n` (`pyash dict from pyac hzi7n`): *"consider in
+  /// detail and subject to analysis"*.
+  pub fn examine(...)
+  ```
+
+  A word with no entry is not a name yet. `render` was chosen by eye; the volume
+  carries 11 senses of it and none is the operation, so it is now `decode`
+  (`hkom tyac`, *"convert code into ordinary language"*). Check a candidate with
+  `vocab_suggest` in the `pyash` checkout, and when you want the compound that
+  *means* a thing rather than the atom near it, search **glosses**, not surfaces.
 - **`cargo test` does not build benches or examples.** `cargo build --release
   --all-targets` and `cargo bench -p pyac --no-run` are separate checks, and a
   renamed field will sit broken in a bench for a long time otherwise.

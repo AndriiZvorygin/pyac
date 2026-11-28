@@ -2,6 +2,11 @@
 
 use super::*;
 
+/// Read every canonical key back out of the volume.
+///
+/// **verify**, Pyac key `pfen` (`pyash dict from pyac pfen`): *"confirm the truth
+/// of"*. The atom `xwon` also carries "verify" but means "affirm solemnly"; this
+/// is the confirmation sense.
 pub(super) fn verify(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
     if !(args.len() == 2) {
         return Err(usage().into());
@@ -31,7 +36,12 @@ pub(super) fn verify(args: &[String]) -> Result<Value, Box<dyn std::error::Error
     }))
 }
 
-pub(super) fn benchmark(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
+/// Measure surface-lookup throughput on a volume.
+///
+/// **criterion**, Pyac key `rwun` (`pyash dict from pyac rwun`): *"a basis for
+/// comparison; a reference point against which other things can be evaluated"*.
+/// This is the same atom the sibling's `program/verbs/criterion.mjs` uses.
+pub(super) fn criterion(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
     if !(args.len() == 6 && args[3] == "surface") {
         return Err(usage().into());
     }
@@ -57,7 +67,7 @@ pub(super) fn benchmark(args: &[String]) -> Result<Value, Box<dyn std::error::Er
     }
     let lookup_ns = lookup_start.elapsed().as_nanos();
     Ok(json!({
-        "command": "benchmark", "path": path, "language": args[4], "surface": args[5],
+        "command": "criterion", "path": path, "language": args[4], "surface": args[5],
         "iterations": iterations, "warmupIterations": 5,
         "matchesPerIteration": match_count / iterations as usize,
         "volumeBytes": size, "codeletCount": reader.codelet_count(),

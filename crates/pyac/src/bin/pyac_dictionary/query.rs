@@ -2,7 +2,11 @@
 
 use super::*;
 
-pub(super) fn inspect(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
+/// Show a volume's metadata and section layout.
+///
+/// **examine**, Pyac key `hzi7n` (`pyash dict from pyac hzi7n`): *"consider in
+/// detail and subject to analysis"*.
+pub(super) fn examine(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
     if !(args.len() == 2) {
         return Err(usage().into());
     }
@@ -13,7 +17,7 @@ pub(super) fn inspect(args: &[String]) -> Result<Value, Box<dyn std::error::Erro
     let open_ms = open_start.elapsed().as_secs_f64() * 1000.0;
     let metadata = reader.metadata();
     Ok(json!({
-        "command": "inspect", "path": path, "volumeBytes": size,
+        "command": "examine", "path": path, "volumeBytes": size,
         "codeletCount": reader.codelet_count(), "entryCount": reader.entry_count(),
         "metadata": {
             "kind": metadata.kind, "title": metadata.title,
@@ -126,6 +130,11 @@ pub(super) fn source_entries(args: &[String]) -> Result<Value, Box<dyn std::erro
     }))
 }
 
+/// List every key with its English forms.
+///
+/// **export**, Pyac key `hfat sroc` (`pyash dict from pyac "hfat sroc"`):
+/// *"transfer (electronic data) out of a database or document in a format that can
+/// be used by other programs"*.
 pub(super) fn export(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
     if !(args.len() == 2) {
         return Err(usage().into());
@@ -151,6 +160,10 @@ pub(super) fn export(args: &[String]) -> Result<Value, Box<dyn std::error::Error
     }))
 }
 
+/// Show one entry's codelets by canonical key.
+///
+/// **entry**, Pyac key `nyit lwat` (`pyash dict from pyac "nyit lwat"`): *"an item
+/// inserted in a written record"*. Not `hjac` ("submitted for judgment").
 pub(super) fn key(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
     let command = args[0].as_str();
     if !(args.len() == 3) {

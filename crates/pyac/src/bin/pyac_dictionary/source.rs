@@ -2,6 +2,11 @@
 
 use super::*;
 
+/// Compile the authored source into a volume.
+///
+/// **compile**, Pyac key `hk6n` (`pyash dict from pyac hk6n`): *"use a computer
+/// program to translate source code ... into computer-readable machine code that
+/// can be executed"*.
 pub(super) fn compile(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
     if !(args.len() == 3) {
         return Err(usage().into());
@@ -39,7 +44,11 @@ pub(super) fn compile(args: &[String]) -> Result<Value, Box<dyn std::error::Erro
     }))
 }
 
-pub(super) fn shard(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
+/// Split the source into structural shards, one file per layer.
+///
+/// **apportion**, Pyac key `syap plon` (`pyash dict from pyac "syap plon"`):
+/// *"the act of apportioning or distributing something"*.
+pub(super) fn apportion(args: &[String]) -> Result<Value, Box<dyn std::error::Error>> {
     if !(args.len() == 3) {
         return Err(usage().into());
     }
@@ -68,7 +77,7 @@ pub(super) fn shard(args: &[String]) -> Result<Value, Box<dyn std::error::Error>
     let manifest_path = out_dir.join(MANIFEST_FILE);
     fs::write(&manifest_path, &set.manifest)?;
     Ok(json!({
-        "command": "shard", "source": args[1], "directory": args[2],
+        "command": "apportion", "source": args[1], "directory": args[2],
         "shards": written, "manifest": manifest_path,
         "manifestBytes": set.manifest.len()
     }))
